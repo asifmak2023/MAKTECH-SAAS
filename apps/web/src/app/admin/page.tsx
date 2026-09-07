@@ -76,7 +76,7 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Platform operations</h1>
+          <h1 className="text-2xl font-semibold">Platform operations !</h1>
           <p className="text-sm text-slate-500">Sellers, subscriptions, payments, PRAL health, and support — not seller invoicing.</p>
         </div>
         <Link href="/admin/tenants/new" className="rounded-md bg-win-600 px-4 py-2 text-sm font-medium text-white">
