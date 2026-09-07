@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "PRAL Invoicing",
+    "slug": "pral-invoicing",
+    "scheme": "pral",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0f766e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.maktech.pral"
+    },
+    "android": {
+      "package": "com.maktech.pral",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f766e"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications"
+    ]
+  }
+}

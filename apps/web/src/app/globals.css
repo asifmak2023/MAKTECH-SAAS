@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f3f3f3;
+  --foreground: #1b1b1b;
+  --accent: #0067c0;
+  --accent-hover: #0059a6;
+  --accent-soft: #e9f1fd;
+  --surface: #ffffff;
+  --stroke: #e0e0e0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  color: var(--foreground);
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(0, 103, 192, 0.06), transparent 60%),
+    radial-gradient(1000px 500px at 110% 0%, rgba(0, 103, 192, 0.04), transparent 55%),
+    var(--background);
+  font-family:
+    "Segoe UI Variable",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv11";
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+input,
+select,
+textarea {
+  @apply w-full rounded-md border border-[#d6d6d6] bg-white px-3 py-2 text-sm text-[#1b1b1b] shadow-sm outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 hover:border-slate-300 focus:border-win-600 focus:ring-2 focus:ring-win-100;
+}
+
+label {
+  @apply mb-1.5 block text-[13px] font-medium text-slate-600;
+}
+
+button {
+  @apply inline-flex items-center justify-center rounded-[6px] px-4 py-2 text-sm font-semibold transition-all duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-win-200 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.dark {
+  --background: #1e1e1e;
+  --foreground: #f2f2f2;
+  color-scheme: dark;
+}
+
+.dark body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(0, 103, 192, 0.1), transparent 60%),
+    radial-gradient(1000px 500px at 110% 0%, rgba(0, 103, 192, 0.06), transparent 55%),
+    var(--background);
+}
+
+/* Windows 11 dark: surfaces */
+.dark .bg-white { background-color: #2b2b2b; }
+.dark .bg-white\/75 { background-color: rgba(33, 33, 33, 0.82); }
+.dark .bg-white\/70 { background-color: rgba(58, 58, 58, 0.72); }
+.dark .bg-black\/\[0\.035\] { background-color: rgba(255, 255, 255, 0.06); }
+.dark .bg-black\/\[0\.06\] { background-color: rgba(255, 255, 255, 0.08); }
+.dark .bg-black\/\[0\.1\] { background-color: rgba(255, 255, 255, 0.12); }
+.dark .bg-slate-100 { background-color: #3a3a3a; }
+.dark .bg-slate-200 { background-color: #464646; }
+.dark .bg-win-50 { background-color: rgba(0, 103, 192, 0.28); }
+.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.16); }
+.dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.24); }
+.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.15); }
+.dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.22); }
+.dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.15); }
+.dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.22); }
+
+/* Windows 11 dark: text */
+.dark .text-slate-400 { color: #8f8f8f; }
+.dark .text-slate-500 { color: #a6a6a6; }
+.dark .text-slate-600 { color: #bdbdbd; }
+.dark .text-slate-700 { color: #d1d1d1; }
+.dark .text-slate-800 { color: #e2e2e2; }
+.dark .text-slate-900 { color: #f4f4f4; }
+.dark .text-win-600 { color: #4c9aff; }
+.dark .text-win-700 { color: #6fb0ff; }
+.dark .text-win-800 { color: #8cc0ff; }
+.dark .text-emerald-700 { color: #34d399; }
+.dark .text-emerald-800 { color: #6ee7b7; }
+.dark .text-amber-700 { color: #fbbf24; }
+.dark .text-amber-800 { color: #fcd34d; }
+.dark .text-rose-600 { color: #fb7185; }
+.dark .text-rose-700 { color: #fda4af; }
+.dark .text-rose-800 { color: #fecdd3; }
+
+/* Windows 11 dark: borders & rings */
+.dark .border-slate-100 { border-color: rgba(255, 255, 255, 0.08); }
+.dark .border-slate-200 { border-color: rgba(255, 255, 255, 0.12); }
+.dark .border-slate-300 { border-color: rgba(255, 255, 255, 0.18); }
+.dark .border-black\/\[0\.06\] { border-color: rgba(255, 255, 255, 0.1); }
+.dark .border-win-600 { border-color: #4c9aff; }
+.dark .ring-win-100 { --tw-ring-color: rgba(0, 103, 192, 0.35); }
+.dark .ring-win-200 { --tw-ring-color: rgba(0, 103, 192, 0.5); }
+
+/* Windows 11 dark: form controls */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #2b2b2b;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f2f2f2;
+  box-shadow: none;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #7a7a7a; }
+.dark input:hover,
+.dark select:hover,
+.dark textarea:hover { border-color: rgba(255, 255, 255, 0.28); }
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus { border-color: #4c9aff; }
