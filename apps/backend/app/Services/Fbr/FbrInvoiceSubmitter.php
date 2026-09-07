@@ -131,6 +131,13 @@ class FbrInvoiceSubmitter
 
     protected function recordHistory(Invoice $invoice, string $action, int $attempt, array $request, array $response, string $status): void
     {
+        $vr = is_array($response) ? ($response['validationResponse'] ?? $response) : [];
+        $errorCode = $response['errorCode'] ?? $vr['errorCode'] ?? $vr['invoiceStatuses'][0]['errorCode'] ?? null;
+        $errorMessage = $response['error']
+            ?? $vr['error']
+            ?? $vr['invoiceStatuses'][0]['error']
+            ?? null;
+
         FbrSubmissionHistory::query()->create([
             'tenant_id' => $invoice->tenant_id,
             'invoice_id' => $invoice->id,
@@ -140,6 +147,8 @@ class FbrInvoiceSubmitter
             'request' => $request,
             'response' => $response,
             'status' => $status,
+            'error_code' => $errorCode ? (string) $errorCode : null,
+            'error_message' => $errorMessage ? mb_substr((string) $errorMessage, 0, 1000) : null,
             'created_at' => now(),
         ]);
     }

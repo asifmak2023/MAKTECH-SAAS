@@ -17,6 +17,13 @@ export const statusStyles: Record<string, string> = {
   grace_period: "bg-amber-100 text-amber-800",
   past_due: "bg-orange-100 text-orange-800",
   payment_processing: "bg-sky-100 text-sky-800",
+  // Tenant / support / general
+  suspended: "bg-rose-100 text-rose-800",
+  expired: "bg-slate-200 text-slate-600",
+  open: "bg-sky-100 text-sky-800",
+  in_progress: "bg-amber-100 text-amber-800",
+  resolved: "bg-emerald-100 text-emerald-800",
+  archived: "bg-slate-200 text-slate-500",
 };
 
 export function formatStatus(status: string) {

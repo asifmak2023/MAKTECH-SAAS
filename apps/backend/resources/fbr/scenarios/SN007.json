@@ -1,0 +1,36 @@
+{
+  "invoiceType": "Sale Invoice",
+  "invoiceDate": "2025-04-21",
+  "sellerBusinessName": "Company 7",
+  "sellerNTNCNIC": "8885801",
+  "sellerProvince": "Sindh",
+  "buyerNTNCNIC": "3710505701479",
+  "buyerBusinessName": "FERTILIZER MANUFAC IRS NEW",
+  "buyerProvince": "Sindh",
+  "buyerAddress": "Karachi",
+  "sellerAddress": "Karachi",
+  "scenarioId": "SN007",
+  "buyerRegistrationType": "Unregistered",
+  "invoiceRefNo": "0",
+  "items": [
+    {
+      "hsCode": "0101.2100",
+      "productDescription": "test",
+      "rate": "0%",
+      "uoM": "Numbers, pieces, units",
+      "quantity": 100,
+      "totalValues": 0,
+      "valueSalesExcludingST": 100,
+      "salesTaxApplicable": 0,
+      "salesTaxWithheldAtSource": 0,
+      "extraTax": 0,
+      "furtherTax": 0,
+      "sroScheduleNo": "327(I)/2008",
+      "fixedNotifiedValueOrRetailPrice": 0.0,
+      "fedPayable": 0,
+      "discount": 0,
+      "saleType": "Goods at zero-rate",
+      "sroItemSerialNo": "1"
+    }
+  ]
+}

@@ -13,7 +13,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ApprovalController extends Controller
 {
-    public function __construct(protected InvoicePdfService $pdf) {}
+    public function __construct(
+        protected InvoicePdfService $pdf,
+        protected \App\Services\AuditService $audit,
+    ) {}
 
     public function show(string $token): JsonResponse
     {
@@ -38,6 +41,8 @@ class ApprovalController extends Controller
             'approved_at' => now(),
             'rejection_note' => null,
         ]);
+
+        $this->audit->record('invoice.buyer_approved', 'invoice', $invoice->id, [], ['status' => Invoice::STATUS_APPROVED, 'invoice_ref_no' => $invoice->invoice_ref_no], $invoice->tenant_id);
 
         if ($invoice->tenant?->auto_submit_on_approval) {
             try {
@@ -73,6 +78,8 @@ class ApprovalController extends Controller
             'rejected_at' => now(),
             'rejection_note' => $data['note'] ?? 'Rejected by buyer',
         ]);
+
+        $this->audit->record('invoice.buyer_rejected', 'invoice', $invoice->id, [], ['status' => Invoice::STATUS_DRAFT, 'invoice_ref_no' => $invoice->invoice_ref_no], $invoice->tenant_id);
 
         return response()->json([
             'message' => 'Invoice rejected and returned to draft.',

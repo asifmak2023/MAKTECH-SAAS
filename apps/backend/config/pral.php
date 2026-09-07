@@ -30,6 +30,16 @@ return [
         'sale_type_to_rate' => '/pdi/v2/SaleTypeToRate',
     ],
 
+    /*
+    | Sandbox DI endpoints carry the "_sb" suffix. Production and sandbox routing
+    | is otherwise identical, so we keep two URL sets and select on the active
+    | environment so credentials can never silently cross environments.
+    */
+    'sandbox_endpoints' => [
+        'validate' => '/di_data/v1/di/validateinvoicedata_sb',
+        'submit' => '/di_data/v1/di/postinvoicedata_sb',
+    ],
+
     'error_codes' => [
         '0001' => 'Please provide a valid seller NTN or CNIC.',
         '0002' => 'Please provide a valid buyer NTN or CNIC.',
@@ -51,5 +61,15 @@ return [
         '0018' => 'Authentication failed. Check your PRAL token.',
         '0019' => 'Scenario ID is required for sandbox invoices.',
         '0020' => 'Provide rate.',
+        '0046' => 'Provided rate is not correct for the selected sale type.',
+        '0058' => 'Buyer and seller registration numbers are the same.',
+        '0071' => 'Provided buyer NTN/CNIC is invalid.',
+        '0077' => 'A valid SRO/Schedule number is mandatory where the rate is not 18%.',
+        '0078' => 'A valid item serial number is mandatory where an SRO/Schedule number is provided.',
+        '0082' => 'Provided seller registration number does not belong to a registered person.',
+        '0100' => 'Provided buyer is not registered for sales tax.',
+        '0108' => 'Seller registration number is not in a valid format.',
+        '0300' => 'Provided numeric values are invalid.',
+        '0401' => 'Unauthorized access: the token is not authorized for this seller registration number, or the registration number format is invalid.',
     ],
 ];

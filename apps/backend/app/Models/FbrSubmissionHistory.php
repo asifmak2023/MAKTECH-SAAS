@@ -38,4 +38,9 @@ class FbrSubmissionHistory extends Model
     {
         return $this->belongsTo(Invoice::class);
     }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 }

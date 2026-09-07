@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\ActivityAdminController;
 use App\Http\Controllers\Api\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\AuditAdminController;
 use App\Http\Controllers\Api\Admin\BillingAdminController;
 use App\Http\Controllers\Api\Admin\CatalogAdminController;
 use App\Http\Controllers\Api\Admin\GatewayAdminController;
 use App\Http\Controllers\Api\Admin\SettingsAdminController;
+use App\Http\Controllers\Api\Admin\SupportAdminController;
 use App\Http\Controllers\Api\Admin\TenantAdminController;
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingController;
@@ -18,6 +21,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReferenceDataController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\SupportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -68,6 +72,19 @@ Route::middleware(['auth:sanctum', 'tenant.required'])->group(function () {
     Route::put('settings', [SettingsController::class, 'update']);
     Route::get('settings/fbr', [FbrIntegrationController::class, 'show']);
     Route::put('settings/fbr', [FbrIntegrationController::class, 'update']);
+    Route::put('settings/fbr/{mode}', [FbrIntegrationController::class, 'updateEnvironment']);
+    Route::post('settings/fbr/activate', [FbrIntegrationController::class, 'activate']);
+    Route::post('settings/fbr/test', [FbrIntegrationController::class, 'test']);
+    Route::post('settings/fbr/run-tests', [FbrIntegrationController::class, 'runTests']);
+    Route::get('settings/fbr/scenarios', [FbrIntegrationController::class, 'scenarios']);
+
+    Route::get('activity', [ActivityController::class, 'index']);
+
+    Route::get('support/sessions', [SupportController::class, 'index']);
+    Route::post('support/sessions', [SupportController::class, 'store']);
+    Route::get('support/sessions/{session}', [SupportController::class, 'show']);
+    Route::post('support/sessions/{session}/messages', [SupportController::class, 'message']);
+    Route::post('support/sessions/{session}/resolve', [SupportController::class, 'resolve']);
 
     Route::get('customers', [CustomerController::class, 'index']);
     Route::get('customers/{customer}', [CustomerController::class, 'show']);
@@ -115,6 +132,13 @@ Route::middleware(['auth:sanctum', 'tenant.required'])->group(function () {
 */
 Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index']);
+    Route::get('activity', [ActivityAdminController::class, 'index']);
+
+    Route::get('support', [SupportAdminController::class, 'index']);
+    Route::get('support/summary', [SupportAdminController::class, 'summary']);
+    Route::get('support/{session}', [SupportAdminController::class, 'show']);
+    Route::post('support/{session}/messages', [SupportAdminController::class, 'reply']);
+    Route::post('support/{session}/status', [SupportAdminController::class, 'status']);
 
     Route::get('tenants', [TenantAdminController::class, 'index']);
     Route::post('tenants', [TenantAdminController::class, 'store']);

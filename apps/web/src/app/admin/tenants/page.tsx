@@ -1,0 +1,140 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
+import { api } from "@/lib/api";
+import { Paginated, TenantRow } from "@/lib/admin";
+import { statusStyles, formatStatus } from "@/lib/status";
+
+const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
+const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+
+const statuses = ["", "pending", "trial", "active", "past_due", "grace_period", "suspended", "cancelled"];
+
+export default function AdminTenantsPage() {
+  const [page, setPage] = useState<TenantRow[]>([]);
+  const [meta, setMeta] = useState<{ current_page: number; last_page: number; total: number }>({ current_page: 1, last_page: 1, total: 0 });
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [cur, setCur] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function load(p = cur, s = search, st = status) {
+    setLoading(true);
+    setError("");
+    const params = new URLSearchParams();
+    if (s) params.set("search", s);
+    if (st) params.set("status", st);
+    params.set("page", String(p));
+    try {
+      const res = await api<Paginated<TenantRow>>(`/api/admin/tenants?${params}`);
+      setPage(res.data);
+      setMeta({ current_page: res.current_page, last_page: res.last_page, total: res.total });
+      setCur(res.current_page);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load tenants");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    load(1, search, status);
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Tenants</h1>
+      </div>
+
+      <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
+        <div className="min-w-[220px] flex-1">
+          <label>Search</label>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Name, slug, NTN/CNIC, legal name"
+          />
+        </div>
+        <div>
+          <label>Status</label>
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            {statuses.map((s) => (
+              <option key={s} value={s}>{s === "" ? "All statuses" : formatStatus(s)}</option>
+            ))}
+          </select>
+        </div>
+        <button className="bg-win-600 text-white">Filter</button>
+      </form>
+
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+
+      <div className={card}>
+        {loading && <p className="text-sm text-slate-500">Loading...</p>}
+        {!loading && page.length === 0 && <p className="text-sm text-slate-400">No tenants found.</p>}
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400">
+              <th className="pb-2 font-medium">Tenant</th>
+              <th className="pb-2 font-medium">Seller</th>
+              <th className="pb-2 font-medium">FBR mode</th>
+              <th className="pb-2 font-medium">Invoices</th>
+              <th className="pb-2 font-medium">Users</th>
+              <th className="pb-2 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {page.map((t) => (
+              <tr key={t.id} className="group">
+                <td className="py-2.5 pr-3">
+                  <Link href={`/admin/tenants/${t.id}`} className="font-medium text-win-600 group-hover:underline">
+                    {t.name}
+                  </Link>
+                  <p className="text-xs text-slate-500">/{t.slug}{t.legal_name ? ` · ${t.legal_name}` : ""}</p>
+                </td>
+                <td className="py-2.5 pr-3">
+                  <p className="text-slate-700">{t.seller_business_name || "—"}</p>
+                  <p className="text-xs text-slate-500">{t.seller_ntn_cnic || t.seller_email || ""}</p>
+                </td>
+                <td className="py-2.5 pr-3 text-slate-600">{t.fbr_mode || "—"}</td>
+                <td className="py-2.5 pr-3 text-slate-600">{t.invoices_count ?? 0}</td>
+                <td className="py-2.5 pr-3 text-slate-600">{t.users_count ?? 0}</td>
+                <td className="py-2.5">
+                  <span className={pill(t.status)}>{formatStatus(t.status)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {meta.last_page > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <button
+            className="rounded-md bg-black/[0.06] px-3 py-1.5 text-slate-700 disabled:opacity-40"
+            disabled={meta.current_page <= 1 || loading}
+            onClick={() => load(meta.current_page - 1)}
+          >
+            Previous
+          </button>
+          <span className="text-slate-500">Page {meta.current_page} of {meta.last_page} · {meta.total} tenants</span>
+          <button
+            className="rounded-md bg-black/[0.06] px-3 py-1.5 text-slate-700 disabled:opacity-40"
+            disabled={meta.current_page >= meta.last_page || loading}
+            onClick={() => load(meta.current_page + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

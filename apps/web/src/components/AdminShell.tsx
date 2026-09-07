@@ -6,13 +6,10 @@ import { useEffect, useState } from "react";
 import { api, clearSession, getToken } from "@/lib/api";
 
 const nav = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/invoices", label: "Invoices" },
-  { href: "/clients", label: "Clients" },
-  { href: "/invoices/create", label: "New invoice" },
-  { href: "/billing", label: "Billing" },
-  { href: "/settings", label: "Settings" },
-  { href: "/support", label: "Support" },
+  { href: "/admin", label: "Overview", exact: true },
+  { href: "/admin/tenants", label: "Tenants" },
+  { href: "/admin/billing", label: "Billing" },
+  { href: "/admin/support", label: "Support" },
 ];
 
 function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
@@ -22,26 +19,20 @@ function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
     >
       <svg viewBox="0 0 24 24" fill="none" className="h-[55%] w-[55%]" aria-hidden>
         <path
-          d="M6 3.5h8.5L19 8v12.5H6a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z"
+          d="M4 5.5a1.5 1.5 0 0 1 1.5-1.5h7.2l3.8 3.8v10.7a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 18.5v-13Z"
           fill="rgba(255,255,255,0.18)"
         />
-        <path
-          d="M13.5 3.5V8H18M7.5 12.5h6m-6 3h3.5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <path d="M12.5 4v4h4M7.5 11h5.5m-5.5 3h3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
   );
 }
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [ready, setReady] = useState(false);
-  const [name, setName] = useState("");
+  const [who, setWho] = useState("");
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -51,13 +42,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
-    api<{ user: { name: string }; tenant: { name: string } | null; is_platform_admin?: boolean }>("/api/auth/me")
+    api<{ user: { name: string; email: string }; tenant: { name: string } | null; is_platform_admin?: boolean }>("/api/auth/me")
       .then((res) => {
-        if (res.is_platform_admin || !res.tenant) {
-          router.replace("/admin");
+        if (!res.is_platform_admin) {
+          router.replace("/dashboard");
           return;
         }
-        setName(`${res.user.name} · ${res.tenant.name}`);
+        setWho(res.user.name || res.user.email || "Platform admin");
         setReady(true);
       })
       .catch(() => {
@@ -74,17 +65,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (!ready) {
-    return <div className="p-10 text-sm text-slate-500">Loading workspace...</div>;
+    return <div className="p-10 text-sm text-slate-500">Loading platform console...</div>;
   }
 
-  const isActive = (href: string) =>
-    href === "/invoices/create"
-      ? pathname === "/invoices/create" || pathname.startsWith("/invoices/create/")
-      : pathname.startsWith("/invoices/")
-        ? href === "/invoices"
-        : pathname.startsWith("/clients/")
-          ? href === "/clients"
-          : pathname === href;
+  const isActive = (item: (typeof nav)[number]) =>
+    item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
   return (
     <div className="min-h-screen">
@@ -93,13 +78,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <LogoMark />
             <div className="leading-tight">
-              <p className="text-[15px] font-semibold tracking-tight text-win-700">PRAL Invoicing</p>
-              <p className="text-xs text-slate-500">Digital invoicing workspace</p>
+              <p className="text-[15px] font-semibold tracking-tight text-win-700">PRAL Platform</p>
+              <p className="text-xs text-slate-500">SaaS operations console</p>
             </div>
           </div>
           <nav className="flex items-center gap-1 rounded-[10px] bg-black/[0.035] p-1 text-sm">
             {nav.map((item) => {
-              const active = isActive(item.href);
+              const active = isActive(item);
               return (
                 <Link
                   key={item.href}
@@ -145,7 +130,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-6 pb-2 text-xs text-slate-500">{name}</div>
+        <div className="mx-auto max-w-6xl px-6 pb-2 text-xs text-slate-500">Signed in as {who}</div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
     </div>

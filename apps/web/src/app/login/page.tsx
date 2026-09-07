@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setSession } from "@/lib/api";
 
+type LoginRes = {
+  token: string;
+  tenant: { slug: string } | null;
+  is_platform_admin?: boolean;
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -16,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     const form = new FormData(e.currentTarget);
     try {
-      const res = await api<{ token: string; tenant: { slug: string } }>("/api/auth/login", {
+      const res = await api<LoginRes>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({
           email: form.get("email"),
@@ -24,8 +30,9 @@ export default function LoginPage() {
           tenant: form.get("tenant"),
         }),
       });
-      setSession(res.token, res.tenant.slug);
-      router.replace("/dashboard");
+      const isAdmin = Boolean(res.is_platform_admin || !res.tenant);
+      setSession(res.token, res.tenant?.slug ?? "");
+      router.replace(isAdmin ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

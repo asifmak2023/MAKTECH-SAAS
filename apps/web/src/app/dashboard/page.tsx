@@ -24,16 +24,32 @@ type InvoiceRow = {
   invoice_date: string;
 };
 
+type Onboarding = {
+  active_mode: string;
+  environments: Record<string, { status: string; configured: boolean; tested: boolean; failed: boolean }>;
+  onboarding: {
+    seller_profile_complete: boolean;
+    sandbox_configured: boolean;
+    sandbox_tested: boolean;
+    sandbox_suite_passed: boolean;
+    production_configured: boolean;
+    production_active: boolean;
+    can_activate_production: boolean;
+  };
+};
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<InvoiceRow[] | null>(null);
+  const [onb, setOnb] = useState<Onboarding | null>(null);
 
   const load = useCallback(() => {
     api<Stats>("/api/dashboard")
       .then(setStats)
       .catch((err) => setError(err.message));
+    api<Onboarding>("/api/settings/fbr").then(setOnb).catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -74,6 +90,43 @@ export default function DashboardPage() {
         </Link>
       </div>
       {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
+
+      {onb && !onb.onboarding.sandbox_tested && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-amber-900">Finish your FBR setup before sending invoices</p>
+            <p className="text-sm text-amber-800">
+              {!onb.onboarding.seller_profile_complete
+                ? "Add your seller NTN/CNIC and business name."
+                : !onb.onboarding.sandbox_configured
+                  ? "Add a sandbox token so invoices can be validated."
+                  : "Run the token test and scenario suite to confirm your token works."}
+            </p>
+          </div>
+          <Link href="/settings/fbr" className="rounded-md bg-win-600 px-4 py-2 text-sm font-medium text-white">
+            {!onb.onboarding.seller_profile_complete ? "Complete profile" : "Open FBR setup"}
+          </Link>
+        </div>
+      )}
+
+      {onb && onb.onboarding.sandbox_tested && !onb.onboarding.production_active && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-sky-900">
+              Sandbox is verified{onb.onboarding.production_configured ? " — ready to go live" : ""}
+            </p>
+            <p className="text-sm text-sky-800">
+              {onb.onboarding.can_activate_production
+                ? "Activate production to submit real invoices, or keep testing in sandbox."
+                : "Add your production token, then activate production when ready."}
+            </p>
+          </div>
+          <Link href="/settings/fbr" className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white">
+            Go live
+          </Link>
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-5">
         {cards.map(([label, value]) => (
           <div key={String(label)} className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">

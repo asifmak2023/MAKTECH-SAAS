@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
+import ErrorDialog, { DialogState } from "@/components/ErrorDialog";
 import { api, getToken, getTenantSlug } from "@/lib/api";
 import { Client, clientDisplayName } from "@/lib/clients";
 import { formatStatus, money, statusStyles } from "@/lib/status";
@@ -42,6 +43,7 @@ export default function InvoiceDetailPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [dialog, setDialog] = useState<DialogState | null>(null);
 
   const load = useCallback(() => {
     api<Invoice>(`/api/invoices/${params.id}`).then(setInvoice).catch((err) => setError(err.message));
@@ -53,12 +55,24 @@ export default function InvoiceDetailPage() {
 
   async function action(path: string, success: string) {
     setError("");
+    setMessage("");
     try {
       await api(`/api/invoices/${params.id}/${path}`, { method: "POST" });
       setMessage(success);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Action failed");
+      const msg = err instanceof Error ? err.message : "Action failed";
+      if (path === "submit") {
+        setDialog({
+          title: "PRAL submission failed",
+          message: msg,
+          detail: invoice?.last_error ?? undefined,
+          retryLabel: "Retry submission",
+          onRetry: () => action("submit", "Submitted to PRAL"),
+        });
+      } else {
+        setError(msg);
+      }
     }
   }
 
@@ -196,6 +210,11 @@ export default function InvoiceDetailPage() {
           <p className="font-semibold">Grand total: PKR {money(invoice.grand_total)}</p>
         </div>
       </div>
+
+      <ErrorDialog
+        state={dialog}
+        onClose={() => setDialog(null)}
+      />
     </AppShell>
   );
 }

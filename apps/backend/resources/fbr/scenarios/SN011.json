@@ -1,0 +1,36 @@
+{
+  "invoiceType": "Sale Invoice",
+  "invoiceDate": "2025-05-26",
+  "sellerNTNCNIC": "4130276175937",
+  "sellerBusinessName": "Company 8",
+  "sellerAddress": "Karachi",
+  "sellerProvince": "Sindh",
+  "buyerNTNCNIC": "3710505701479",
+  "buyerBusinessName": "FERTILIZER MANUFAC IRS NEW",
+  "buyerProvince": "Sindh",
+  "buyerAddress": "Karachi",
+  "invoiceRefNo": "",
+  "dataSource": "",
+  "scenarioId": "SN011",
+  "items": [
+    {
+      "hsCode": "7214.9990",
+      "productDescription": "",
+      "rate": "18%",
+      "uoM": "MT",
+      "quantity": 1,
+      "totalValues": 0,
+      "valueSalesExcludingST": "205000",
+      "salesTaxApplicable": "36900",
+      "fixedNotifiedValueOrRetailPrice": 0,
+      "salesTaxWithheldAtSource": 0,
+      "extraTax": 0,
+      "furtherTax": 0,
+      "sroScheduleNo": "",
+      "fedPayable": 0,
+      "discount": 0,
+      "saleType": "Toll Manufacturing",
+      "sroItemSerialNo": ""
+    }
+  ]
+}

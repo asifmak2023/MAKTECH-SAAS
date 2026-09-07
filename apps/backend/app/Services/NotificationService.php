@@ -64,6 +64,32 @@ class NotificationService
         }
     }
 
+    /**
+     * Notify every platform administrator (in-app only).
+     */
+    public function toPlatformAdmins(string $type, string $title, string $body, array $data = []): void
+    {
+        $roleIds = DB::table('roles')
+            ->whereNull('tenant_id')
+            ->where('code', 'like', 'platform_%')
+            ->pluck('id');
+
+        $ids = User::withoutGlobalScopes()
+            ->where('is_platform_admin', true)
+            ->orWhereIn('id', function ($q) use ($roleIds) {
+                $q->select('user_id')->from('user_roles')->whereIn('role_id', $roleIds);
+            })
+            ->pluck('id');
+
+        foreach ($ids as $id) {
+            $admin = User::withoutGlobalScopes()->find($id);
+
+            if ($admin) {
+                $this->toUser($admin, $type, $title, $body, $data, false);
+            }
+        }
+    }
+
     protected function email(string $to, string $title, string $body, ?string $name = null): void
     {
         try {

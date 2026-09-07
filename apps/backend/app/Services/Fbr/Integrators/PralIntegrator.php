@@ -58,7 +58,53 @@ class PralIntegrator extends AbstractIntegrator
 
     protected function endpoint(string $name): string
     {
-        return $this->config[$name.'_endpoint'] ?? config("pral.endpoints.{$name}");
+        if (! empty($this->config[$name.'_endpoint'])) {
+            return $this->config[$name.'_endpoint'];
+        }
+
+        // Sandbox DI endpoints carry the "_sb" suffix. Select on the active
+        // environment so a sandbox token can never be sent to production URLs.
+        if ($this->mode === 'sandbox') {
+            return config("pral.sandbox_endpoints.{$name}") ?? config("pral.endpoints.{$name}");
+        }
+
+        return config("pral.endpoints.{$name}");
+    }
+
+    /**
+     * Validate an arbitrary payload against the configured environment without
+     * throwing on FBR-level rejections. Used by the token test / sandbox
+     * scenario runner. Network and configuration failures are captured as well.
+     *
+     * @return array{http_status:int, ok:bool, error?:string, response:?array}
+     */
+    public function validateDiagnostic(array $payload): array
+    {
+        try {
+            $response = $this->client()->post($this->url($this->endpoint('validate')), $payload);
+
+            $data = $response->json();
+            $data = is_array($data) ? $data : ['raw' => $response->body()];
+
+            $this->logResult('pral_diag_validate', $payload, $data, $response->status());
+
+            return [
+                'http_status' => $response->status(),
+                'ok' => $response->successful(),
+                'response' => $data,
+            ];
+        } catch (Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('PRAL diagnostic validate failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'http_status' => 0,
+                'ok' => false,
+                'error' => $e->getMessage(),
+                'response' => null,
+            ];
+        }
     }
 
     protected function post(string $path, array $payload): array

@@ -1,0 +1,36 @@
+{
+  "invoiceType": "Sale Invoice",
+  "invoiceDate": "2025-04-21",
+  "sellerBusinessName": "Company 7",
+  "sellerNTNCNIC": "8885801",
+  "sellerProvince": "Sindh",
+  "buyerNTNCNIC": "3710505701479",
+  "buyerBusinessName": "FERTILIZER MANUFAC IRS NEW",
+  "buyerProvince": "Sindh",
+  "buyerAddress": "Karachi",
+  "sellerAddress": "Karachi",
+  "invoiceRefNo": "0",
+  "scenarioId": "SN003",
+  "buyerRegistrationType": "Unregistered",
+  "items": [
+    {
+      "hsCode": "7214.1010",
+      "productDescription": "",
+      "rate": "18%",
+      "uoM": "MT",
+      "quantity": 1,
+      "totalValues": 0,
+      "valueSalesExcludingST": "205000.00",
+      "fixedNotifiedValueOrRetailPrice": 0.0,
+      "salesTaxApplicable": "36900",
+      "salesTaxWithheldAtSource": 0,
+      "extraTax": 0,
+      "furtherTax": 0,
+      "sroScheduleNo": "",
+      "fedPayable": 0,
+      "discount": 0,
+      "saleType": "Steel melting and re-rolling",
+      "sroItemSerialNo": ""
+    }
+  ]
+}

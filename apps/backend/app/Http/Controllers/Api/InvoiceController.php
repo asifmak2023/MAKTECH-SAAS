@@ -22,6 +22,7 @@ class InvoiceController extends Controller
     public function __construct(
         protected InvoiceCalculator $calculator,
         protected InvoicePdfService $pdf,
+        protected \App\Services\AuditService $audit,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -64,6 +65,8 @@ class InvoiceController extends Controller
     {
         $invoice = $this->persist($request, new Invoice);
 
+        $this->audit->record('invoice.created', 'invoice', $invoice->id, [], $this->auditPayload($invoice), \App\Support\TenantContext::id(), $request->user());
+
         return response()->json($invoice->load('items'), 201);
     }
 
@@ -88,6 +91,8 @@ class InvoiceController extends Controller
         if (! $invoice->isEditable()) {
             return response()->json(['message' => 'Submitted invoices cannot be deleted.'], 422);
         }
+
+        $this->audit->record('invoice.deleted', 'invoice', $invoice->id, $this->auditPayload($invoice), [], \App\Support\TenantContext::id(), request()->user());
 
         $invoice->delete();
 
@@ -115,6 +120,8 @@ class InvoiceController extends Controller
             'sent_for_approval_at' => now(),
             'rejection_note' => null,
         ]);
+
+        $this->audit->record('invoice.sent_for_approval', 'invoice', $invoice->id, [], $this->auditPayload($invoice), \App\Support\TenantContext::id(), $request->user());
 
         return response()->json([
             'invoice' => $invoice->fresh('items'),
@@ -200,5 +207,15 @@ class InvoiceController extends Controller
         $data['buyer_address'] = ($data['buyer_address'] ?? null) ?: ($customer->address ?? '');
         $data['buyer_email'] = ($data['buyer_email'] ?? null) ?: $customer->email;
         $data['buyer_phone'] = ($data['buyer_phone'] ?? null) ?: $customer->phone;
+    }
+
+    protected function auditPayload(Invoice $invoice): array
+    {
+        // Monitoring feed only: reference + status, never amounts or items.
+        return [
+            'id' => $invoice->id,
+            'status' => $invoice->status,
+            'invoice_ref_no' => $invoice->invoice_ref_no,
+        ];
     }
 }

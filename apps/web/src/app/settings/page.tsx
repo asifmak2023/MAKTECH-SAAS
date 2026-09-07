@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { api } from "@/lib/api";
+import { fmtWhen } from "@/lib/admin";
 
 type Tenant = {
   name: string;
@@ -16,19 +18,30 @@ type Tenant = {
   auto_submit_on_approval: boolean;
 };
 
-type FbrIntegrator = { code: string; name: string; supports_sandbox: boolean; adapter?: string | null };
+type Environment = {
+  mode: string;
+  status: string;
+  configured: boolean;
+  tested: boolean;
+  failed: boolean;
+  has_token: boolean;
+  config: Record<string, string>;
+  last_tested_at?: string | null;
+};
 
 type FbrShow = {
+  active_mode: string;
   integrator: string;
-  mode: string;
-  configured: boolean;
-  row: {
-    status: string;
-    mode: string;
-    config: Record<string, string>;
-    last_tested_at?: string | null;
-  } | null;
-  available_integrators: FbrIntegrator[];
+  environments: Record<string, Environment>;
+  onboarding: {
+    seller_profile_complete: boolean;
+    sandbox_configured: boolean;
+    sandbox_tested: boolean;
+    sandbox_suite_passed: boolean;
+    production_configured: boolean;
+    production_active: boolean;
+    can_activate_production: boolean;
+  };
 };
 
 function TenantForm({ tenant, onSaved }: { tenant: Tenant; onSaved: (t: Tenant) => void }) {
@@ -105,46 +118,13 @@ function TenantForm({ tenant, onSaved }: { tenant: Tenant; onSaved: (t: Tenant) 
 
 function FbrSettingsCard() {
   const [data, setData] = useState<FbrShow | null>(null);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const load = () => {
+  useEffect(() => {
     api<FbrShow>("/api/settings/fbr")
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Load failed"));
-  };
-
-  useEffect(() => {
-    load();
   }, []);
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setMessage("");
-    setError("");
-    const form = new FormData(e.currentTarget);
-    const payload: Record<string, string> = {};
-    const pick = (name: string) => {
-      const v = String(form.get(name) ?? "").trim();
-      if (v) payload[name] = v;
-    };
-    pick("mode");
-    pick("integrator");
-    pick("base_url");
-    pick("token");
-    pick("validate_endpoint");
-    pick("submit_endpoint");
-    try {
-      const res = await api<{ message: string; status: string }>("/api/settings/fbr", {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-      setMessage(`${res.message} (${res.status === "configured" ? "ready for sandbox submission" : res.status})`);
-      load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
-    }
-  }
 
   if (!data) {
     return (
@@ -154,73 +134,62 @@ function FbrSettingsCard() {
     );
   }
 
-  const row = data.row;
-  const tokenPresent = Boolean(row?.config?.token);
-  const mode = data.mode || "sandbox";
+  const sandbox = data.environments.sandbox;
+  const production = data.environments.production;
+  const ob = data.onboarding;
+
+  const badge = (done: boolean) =>
+    done
+      ? "bg-emerald-100 text-emerald-800"
+      : "bg-amber-100 text-amber-800";
 
   return (
-    <form onSubmit={onSubmit} className="grid max-w-2xl gap-4 rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+    <div className="grid max-w-2xl gap-4 rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">FBR / PRAL integration</h2>
-        <span
-          className={`rounded-full px-3 py-1 text-xs ${data.configured ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
-        >
-          {data.configured ? "Configured" : "Not configured"}
-        </span>
+        <Link href="/settings/fbr" className="rounded-md bg-win-600 px-3 py-1.5 text-sm text-white">
+          Open FBR setup
+        </Link>
       </div>
-
       <p className="text-sm text-slate-500">
-        Sandbox/production submissions use this account&apos;s FBR Digital Invoicing credentials. Tokens are encrypted at
-        rest and never shown again after saving.
+        Configure a sandbox token, test it, then activate production from the guided setup. Tokens are encrypted at rest
+        and never shown again after saving.
       </p>
-      {!data.configured && (
-        <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
-          {mode === "sandbox"
-            ? "No sandbox token is set yet — submitting an invoice will fail until you add it here. Failed invoices can be re-submitted afterwards."
-            : "No production token is set — set one before submitting invoices in production."}
-        </p>
-      )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label>Mode</label>
-          <select name="mode" defaultValue={mode}>
-            <option value="sandbox">Sandbox (test)</option>
-            <option value="production">Production</option>
-          </select>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-slate-200 p-4">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-slate-800">Sandbox</p>
+            <span className={`rounded-full px-2 py-0.5 text-xs ${badge(sandbox?.configured)}`}>
+              {sandbox?.configured ? "Configured" : "Not configured"}
+            </span>
+          </div>
+          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+            <li>Token test: {sandbox?.tested ? "passed" : "not run"}</li>
+            <li>Scenario suite: {ob.sandbox_suite_passed ? "passed" : "not run"}</li>
+            {sandbox?.last_tested_at && <li className="text-xs text-slate-400">Last tested {fmtWhen(sandbox.last_tested_at)}</li>}
+          </ul>
         </div>
-        <div>
-          <label>Integrator</label>
-          <select name="integrator" defaultValue={data.integrator || "pral"}>
-            {data.available_integrators.map((i) => (
-              <option key={i.code} value={i.code}>
-                {i.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="md:col-span-2">
-          <label>Base URL</label>
-          <input name="base_url" placeholder="https://…" defaultValue={row?.config?.base_url || ""} />
-        </div>
-        <div className="md:col-span-2">
-          <label>API token</label>
-          <input name="token" type="password" placeholder={tokenPresent ? "•••••••• (leave blank to keep current)" : "Paste sandbox/production token"} autoComplete="new-password" />
-        </div>
-        <div>
-          <label>Validate endpoint</label>
-          <input name="validate_endpoint" placeholder="/pral/api/…/validate" defaultValue={row?.config?.validate_endpoint || ""} />
-        </div>
-        <div>
-          <label>Submit endpoint</label>
-          <input name="submit_endpoint" placeholder="/pral/api/…/submit" defaultValue={row?.config?.submit_endpoint || ""} />
+        <div className="rounded-lg border border-slate-200 p-4">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-slate-800">Production</p>
+            <span className={`rounded-full px-2 py-0.5 text-xs ${badge(production?.configured)}`}>
+              {production?.configured ? "Configured" : "Not configured"}
+            </span>
+          </div>
+          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+            <li>
+              Active environment:{" "}
+              <span className={ob.production_active ? "font-medium text-emerald-700" : "text-slate-500"}>
+                {ob.production_active ? "yes" : "no"}
+              </span>
+            </li>
+            <li>Production token test: {production?.tested ? "passed" : "not run"}</li>
+            {production?.last_tested_at && <li className="text-xs text-slate-400">Last tested {fmtWhen(production.last_tested_at)}</li>}
+          </ul>
         </div>
       </div>
-
-      {message && <p className="text-sm text-emerald-700">{message}</p>}
-      {error && <p className="text-sm text-rose-600">{error}</p>}
-      <button className="w-fit bg-win-600 text-white">Save FBR settings</button>
-    </form>
+    </div>
   );
 }
 
