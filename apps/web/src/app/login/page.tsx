@@ -9,6 +9,7 @@ type LoginRes = {
   token: string;
   tenant: { slug: string } | null;
   is_platform_admin?: boolean;
+  account_kind?: "platform_admin" | "seller";
 };
 
 export default function LoginPage() {
@@ -30,8 +31,8 @@ export default function LoginPage() {
           tenant: form.get("tenant"),
         }),
       });
-      const isAdmin = Boolean(res.is_platform_admin || !res.tenant);
-      setSession(res.token, res.tenant?.slug ?? "");
+      const isAdmin = res.account_kind === "platform_admin" || Boolean(res.is_platform_admin);
+      setSession(res.token, isAdmin ? "" : (res.tenant?.slug ?? ""));
       router.replace(isAdmin ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -48,7 +49,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold">Sign in</h1>
         </div>
         <div>
-          <label>Tenant slug</label>
+          <label>Seller slug (sellers only)</label>
           <input name="tenant" placeholder="maktech" defaultValue="maktech" />
         </div>
         <div>
@@ -64,8 +65,9 @@ export default function LoginPage() {
           {loading ? "Signing in..." : "Sign in"}
         </button>
         <p className="text-sm text-slate-500">
-          New company? <Link className="text-win-600" href="/register">Create tenant</Link>
+          New seller? <Link className="text-win-600" href="/register">Create workspace</Link>
         </p>
+        <p className="text-xs text-slate-400">Platform operators sign in with admin@saas.local — seller slug is ignored.</p>
       </form>
     </div>
   );

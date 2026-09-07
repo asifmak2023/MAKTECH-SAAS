@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
-import { TenantDetail, FbrIntegrationRow, fmtWhen, fmtDate } from "@/lib/admin";
+import { TenantDetail, FbrIntegrationRow, PlanBrief, fmtWhen, fmtDate } from "@/lib/admin";
 import { statusStyles, formatStatus, money } from "@/lib/status";
 
 const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
@@ -17,6 +17,7 @@ export default function AdminTenantDetailPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const [plans, setPlans] = useState<PlanBrief[]>([]);
 
   async function reload() {
     try {
@@ -29,6 +30,7 @@ export default function AdminTenantDetailPage() {
 
   useEffect(() => {
     reload();
+    api<PlanBrief[]>("/api/admin/catalog/plans").then(setPlans).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -54,9 +56,9 @@ export default function AdminTenantDetailPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <Link className="text-sm text-win-600" href="/admin/tenants">← All tenants</Link>
+          <Link className="text-sm text-win-600" href="/admin/tenants">← All sellers</Link>
           <h1 className="text-2xl font-semibold">{t.name} <span className="text-slate-400">/{t.slug}</span></h1>
-          {t.legal_name && <p className="text-sm text-slate-500">{t.legal_name}</p>}
+          {t.legal_name && <p className="text-sm text-slate-500">{t.legal_name} · seller profile (no invoices or clients)</p>}
         </div>
         <span className={pill(t.status)}>{formatStatus(t.status)}</span>
       </div>
@@ -106,18 +108,55 @@ export default function AdminTenantDetailPage() {
             )}
           </div>
           <div>
-            <p className="text-xs text-slate-500">FBR mode</p>
+            <p className="text-xs text-slate-500">PRAL</p>
             <p className="mt-1 font-medium text-slate-800">{t.fbr_mode || "sandbox"} · {t.integrator || "pral"}</p>
+            <p className="text-xs text-slate-500">
+              Sandbox {t.pral?.sandbox.status ?? "unconfigured"} · Production {t.pral?.production.status ?? "unconfigured"}
+            </p>
             <p className="text-xs text-slate-500">Auto-submit on buyer approval: {t.auto_submit_on_approval ? "on" : "off"}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500">Volume</p>
+            <p className="text-xs text-slate-500">Usage summary</p>
             <p className="mt-1 font-medium text-slate-800">
-              {t.invoices_count} invoices · {t.customers_count} customers · {t.products_count} products
+              {t.invoices_count} invoices · {t.customers_count} clients · {t.products_count} products
             </p>
-            <p className="text-xs text-slate-500">{t.billing_orders_count} orders · {t.payments_count} payments</p>
+            <p className="text-xs text-slate-500">
+              {t.usage
+                ? `${t.usage.free_credits_remaining} free credits left · ${t.usage.subscription ? `${t.usage.subscription.used}/${t.usage.subscription.invoice_limit ?? "∞"} plan invoices` : "no plan usage"}`
+                : `${t.billing_orders_count} SaaS orders · ${t.payments_count} payments`}
+            </p>
           </div>
         </div>
+
+        <form
+          className="mt-4 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const f = new FormData(e.currentTarget);
+            act("/subscription", {
+              subscription_plan_id: Number(f.get("subscription_plan_id")),
+              billing_interval: f.get("billing_interval") || "monthly",
+            }, "Subscription assigned.");
+          }}
+        >
+          <div>
+            <label>Assign plan</label>
+            <select name="subscription_plan_id" required defaultValue={t.activeSubscription?.subscription_plan_id ?? ""}>
+              <option value="">Select plan</option>
+              {plans.map((p) => (
+                <option key={p.id} value={p.id}>{p.name} · PKR {p.price}/{p.billing_interval}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label>Interval</label>
+            <select name="billing_interval" defaultValue={t.activeSubscription?.billing_interval ?? "monthly"}>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          <button className="bg-win-600 text-white" disabled={saving}>Assign</button>
+        </form>
 
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <div>
@@ -144,6 +183,7 @@ export default function AdminTenantDetailPage() {
 
       <section className={card}>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Seller profile</h2>
+        <p className="mb-3 text-xs text-slate-500">Platform operators edit the seller account, not their buyers or invoices.</p>
         <form
           className="grid gap-4 md:grid-cols-2"
           onSubmit={(e) => {

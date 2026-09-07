@@ -7,8 +7,10 @@ import { api, clearSession, getToken } from "@/lib/api";
 
 const nav = [
   { href: "/admin", label: "Overview", exact: true },
-  { href: "/admin/tenants", label: "Tenants" },
-  { href: "/admin/billing", label: "Billing" },
+  { href: "/admin/tenants", label: "Sellers" },
+  { href: "/admin/subscriptions", label: "Subscriptions" },
+  { href: "/admin/billing", label: "Payments" },
+  { href: "/admin/monitoring", label: "Monitoring" },
   { href: "/admin/support", label: "Support" },
 ];
 
@@ -42,9 +44,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       router.replace("/login");
       return;
     }
-    api<{ user: { name: string; email: string }; tenant: { name: string } | null; is_platform_admin?: boolean }>("/api/auth/me")
+    api<{ user: { name: string; email: string }; tenant: { name: string } | null; is_platform_admin?: boolean; account_kind?: string }>("/api/auth/me")
       .then((res) => {
-        if (!res.is_platform_admin) {
+        if (!res.is_platform_admin && res.account_kind !== "platform_admin") {
           router.replace("/dashboard");
           return;
         }

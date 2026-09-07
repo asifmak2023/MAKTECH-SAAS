@@ -7,10 +7,44 @@ import { money, fmtWhen, ActivityItem, BillingOrder, BillingPayment } from "@/li
 import { statusStyles, formatStatus } from "@/lib/status";
 
 type Dashboard = {
+  sellers: {
+    total: number;
+    active: number;
+    trial: number;
+    pending: number;
+    past_due: number;
+    grace: number;
+    suspended: number;
+    new_today: number;
+  };
   tenants: { total: number; trial: number; active: number; past_due: number; grace: number; suspended: number };
   users: number;
-  finance: { gross_revenue: number; paid_payments: number; open_orders: number; unpaid_invoices: number };
-  subscriptions: Record<string, number>;
+  finance: {
+    gross_revenue: number;
+    paid_payments: number;
+    payments_today: number;
+    open_orders: number;
+    unpaid_invoices: number;
+    pending_manual_payments: number;
+  };
+  subscriptions: {
+    by_status?: Record<string, number>;
+    active: number;
+    pending: number;
+    expired: number;
+    grace: number;
+  };
+  pral: {
+    sandbox_configured: number;
+    production_configured: number;
+    failed_today: number;
+    last_event_at: string | null;
+    last_status: string | null;
+    sandbox_status: string;
+    production_status: string;
+  };
+  support: { open: number; in_progress: number; active: number };
+  errors_today: number;
   recent_orders: BillingOrder[];
   recent_payments: BillingPayment[];
 };
@@ -35,22 +69,36 @@ export default function AdminOverviewPage() {
   if (error && !data) return <p className="text-sm text-rose-600">{error}</p>;
   if (!data) return <p className="text-sm text-slate-500">Loading platform overview...</p>;
 
+  const sellers = data.sellers ?? data.tenants;
+  const subByStatus = data.subscriptions.by_status ?? {};
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Platform overview</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Platform operations</h1>
+          <p className="text-sm text-slate-500">Sellers, subscriptions, payments, PRAL health, and support — not seller invoicing.</p>
+        </div>
+        <Link href="/admin/tenants/new" className="rounded-md bg-win-600 px-4 py-2 text-sm font-medium text-white">
+          Add seller
+        </Link>
       </div>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Tenants</h2>
-        <div className="grid gap-4 md:grid-cols-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Sellers</h2>
+          <Link className="text-sm text-win-600" href="/admin/tenants">View sellers</Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
           {[
-            ["Total", data.tenants.total, "text-slate-900"],
-            ["Trial", data.tenants.trial, "text-sky-600"],
-            ["Active", data.tenants.active, "text-emerald-600"],
-            ["Past due", data.tenants.past_due, "text-orange-600"],
-            ["Grace", data.tenants.grace, "text-amber-600"],
-            ["Suspended", data.tenants.suspended, "text-rose-600"],
+            ["Total", sellers.total, "text-slate-900"],
+            ["Active", sellers.active, "text-emerald-600"],
+            ["Trial", sellers.trial, "text-sky-600"],
+            ["Pending", "pending" in sellers ? sellers.pending : 0, "text-slate-600"],
+            ["Past due", sellers.past_due, "text-orange-600"],
+            ["Grace", sellers.grace, "text-amber-600"],
+            ["Suspended", sellers.suspended, "text-rose-600"],
+            ["New today", "new_today" in sellers ? sellers.new_today : 0, "text-win-700"],
           ].map(([label, value, color]) => (
             <div key={label as string} className={card}>
               <p className="text-xs text-slate-500">{label}</p>
@@ -58,33 +106,18 @@ export default function AdminOverviewPage() {
             </div>
           ))}
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className={card}>
-            <p className="text-xs text-slate-500">Platform users</p>
-            <p className="mt-1 text-2xl font-semibold">{data.users}</p>
-          </div>
-          <div className={card}>
-            <p className="text-xs text-slate-500">Subscriptions by status</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {Object.entries(data.subscriptions).length === 0 && <span className="text-sm text-slate-400">No subscriptions yet</span>}
-              {Object.entries(data.subscriptions).map(([status, count]) => (
-                <span key={status} className={pill(status)}>
-                  {formatStatus(status)} · {count}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Finance</h2>
-        <div className="grid gap-4 md:grid-cols-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">SaaS finance</h2>
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
           {[
-            ["Gross revenue", `PKR ${money(data.finance.gross_revenue)}`, ""],
-            ["Paid payments", String(data.finance.paid_payments), ""],
-            ["Open orders", String(data.finance.open_orders), ""],
-            ["Unpaid invoices", `PKR ${money(data.finance.unpaid_invoices)}`, ""],
+            ["Gross revenue", `PKR ${money(data.finance.gross_revenue)}`],
+            ["Paid payments", String(data.finance.paid_payments)],
+            ["Payments today", String(data.finance.payments_today ?? 0)],
+            ["Open orders", String(data.finance.open_orders)],
+            ["Unpaid invoices", `PKR ${money(data.finance.unpaid_invoices)}`],
+            ["Manual pending", String(data.finance.pending_manual_payments ?? 0)],
           ].map(([label, value]) => (
             <div key={label} className={card}>
               <p className="text-xs text-slate-500">{label}</p>
@@ -93,6 +126,56 @@ export default function AdminOverviewPage() {
           ))}
         </div>
       </section>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section className={card}>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Subscriptions</h2>
+            <Link className="text-sm text-win-600" href="/admin/subscriptions">Manage</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <p>Active <span className="float-right font-semibold">{data.subscriptions.active}</span></p>
+            <p>Pending <span className="float-right font-semibold">{data.subscriptions.pending}</span></p>
+            <p>Grace <span className="float-right font-semibold">{data.subscriptions.grace}</span></p>
+            <p>Expired <span className="float-right font-semibold">{data.subscriptions.expired}</span></p>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {Object.entries(subByStatus).map(([status, count]) => (
+              <span key={status} className={pill(status)}>
+                {formatStatus(status)} · {count}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section className={card}>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">PRAL health</h2>
+            <Link className="text-sm text-win-600" href="/admin/monitoring">Monitoring</Link>
+          </div>
+          <div className="space-y-2 text-sm">
+            <p>Sandbox <span className={`float-right font-medium ${pill(data.pral.sandbox_status)}`}>{formatStatus(data.pral.sandbox_status)}</span></p>
+            <p>Production <span className={`float-right font-medium ${pill(data.pral.production_status)}`}>{formatStatus(data.pral.production_status)}</span></p>
+            <p className="text-slate-600">Configured: {data.pral.sandbox_configured} sandbox · {data.pral.production_configured} production</p>
+            <p className="text-slate-600">Failed submissions today: {data.pral.failed_today}</p>
+            <p className="text-xs text-slate-400">Last event {fmtWhen(data.pral.last_event_at)} · {data.pral.last_status || "—"}</p>
+          </div>
+        </section>
+
+        <section className={card}>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Support & errors</h2>
+            <Link className="text-sm text-win-600" href="/admin/support">Inbox</Link>
+          </div>
+          <div className="space-y-2 text-sm">
+            <p>Open tickets <span className="float-right font-semibold">{data.support.open}</span></p>
+            <p>In progress <span className="float-right font-semibold">{data.support.in_progress}</span></p>
+            <p>Active queue <span className="float-right font-semibold">{data.support.active}</span></p>
+            <p>Errors today <span className="float-right font-semibold text-rose-600">{data.errors_today}</span></p>
+            <p className="text-xs text-slate-500">{data.users} SaaS users across sellers</p>
+          </div>
+        </section>
+      </div>
 
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Live activity</h2>
@@ -123,8 +206,8 @@ export default function AdminOverviewPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Recent orders</h2>
-            <Link className="text-sm text-win-600" href="/admin/billing">View billing</Link>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Recent SaaS orders</h2>
+            <Link className="text-sm text-win-600" href="/admin/billing">View payments</Link>
           </div>
           <div className={card}>
             {data.recent_orders.length === 0 && <p className="text-sm text-slate-400">No orders yet.</p>}
@@ -147,8 +230,8 @@ export default function AdminOverviewPage() {
 
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Recent payments</h2>
-            <Link className="text-sm text-win-600" href="/admin/billing">View billing</Link>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Recent SaaS payments</h2>
+            <Link className="text-sm text-win-600" href="/admin/billing">View payments</Link>
           </div>
           <div className={card}>
             {data.recent_payments.length === 0 && <p className="text-sm text-slate-400">No payments yet.</p>}

@@ -13,6 +13,9 @@ type Stats = {
   approved: number;
   submitted: number;
   failed: number;
+  total?: number;
+  customers?: number;
+  products?: number;
   recent: InvoiceRow[];
 };
 
@@ -79,6 +82,7 @@ export default function DashboardPage() {
     ["Approved", stats?.approved],
     ["Submitted", stats?.submitted],
     ["Failed", stats?.failed],
+    ["Clients", stats?.customers],
   ];
 
   return (
@@ -127,7 +131,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         {cards.map(([label, value]) => (
           <div key={String(label)} className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
             <p className="text-xs uppercase text-slate-500">{label}</p>

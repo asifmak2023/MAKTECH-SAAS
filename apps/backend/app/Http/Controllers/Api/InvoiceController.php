@@ -8,7 +8,9 @@ use App\Jobs\SubmitInvoiceToPralJob;
 use App\Mail\InvoiceApprovalRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Product;
 use App\Models\Tenant;
+use App\Services\AuditService;
 use App\Services\InvoiceCalculator;
 use App\Services\InvoicePdfService;
 use App\Support\TenantContext;
@@ -22,7 +24,7 @@ class InvoiceController extends Controller
     public function __construct(
         protected InvoiceCalculator $calculator,
         protected InvoicePdfService $pdf,
-        protected \App\Services\AuditService $audit,
+        protected AuditService $audit,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -57,6 +59,9 @@ class InvoiceController extends Controller
             'approved' => (int) ($counts[Invoice::STATUS_APPROVED] ?? 0),
             'submitted' => (int) ($counts[Invoice::STATUS_SUBMITTED] ?? 0),
             'failed' => (int) ($counts[Invoice::STATUS_FAILED] ?? 0),
+            'total' => Invoice::query()->count(),
+            'customers' => Customer::query()->where('is_active', true)->count(),
+            'products' => Product::query()->where('is_active', true)->count(),
             'recent' => Invoice::query()->latest()->limit(8)->get(),
         ]);
     }
@@ -65,7 +70,7 @@ class InvoiceController extends Controller
     {
         $invoice = $this->persist($request, new Invoice);
 
-        $this->audit->record('invoice.created', 'invoice', $invoice->id, [], $this->auditPayload($invoice), \App\Support\TenantContext::id(), $request->user());
+        $this->audit->record('invoice.created', 'invoice', $invoice->id, [], $this->auditPayload($invoice), TenantContext::id(), $request->user());
 
         return response()->json($invoice->load('items'), 201);
     }
@@ -92,7 +97,7 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Submitted invoices cannot be deleted.'], 422);
         }
 
-        $this->audit->record('invoice.deleted', 'invoice', $invoice->id, $this->auditPayload($invoice), [], \App\Support\TenantContext::id(), request()->user());
+        $this->audit->record('invoice.deleted', 'invoice', $invoice->id, $this->auditPayload($invoice), [], TenantContext::id(), request()->user());
 
         $invoice->delete();
 
@@ -121,7 +126,7 @@ class InvoiceController extends Controller
             'rejection_note' => null,
         ]);
 
-        $this->audit->record('invoice.sent_for_approval', 'invoice', $invoice->id, [], $this->auditPayload($invoice), \App\Support\TenantContext::id(), $request->user());
+        $this->audit->record('invoice.sent_for_approval', 'invoice', $invoice->id, [], $this->auditPayload($invoice), TenantContext::id(), $request->user());
 
         return response()->json([
             'invoice' => $invoice->fresh('items'),

@@ -70,8 +70,8 @@ export default function Home() {
             <a className="rounded-md px-3 py-1.5 text-slate-600 hover:text-slate-900" href="#features">Features</a>
             <a className="rounded-md px-3 py-1.5 text-slate-600 hover:text-slate-900" href="#pricing">Pricing</a>
             {authed ? (
-              <Link className="rounded-md bg-win-600 px-4 py-1.5 font-medium text-white" href="/dashboard">
-                Open dashboard
+              <Link className="rounded-md bg-win-600 px-4 py-1.5 font-medium text-white" href="/login">
+                Open workspace
               </Link>
             ) : (
               <>

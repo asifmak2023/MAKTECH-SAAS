@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\Admin\ActivityAdminController;
 use App\Http\Controllers\Api\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\AuditAdminController;
@@ -7,9 +8,9 @@ use App\Http\Controllers\Api\Admin\BillingAdminController;
 use App\Http\Controllers\Api\Admin\CatalogAdminController;
 use App\Http\Controllers\Api\Admin\GatewayAdminController;
 use App\Http\Controllers\Api\Admin\SettingsAdminController;
+use App\Http\Controllers\Api\Admin\SubscriptionAdminController;
 use App\Http\Controllers\Api\Admin\SupportAdminController;
 use App\Http\Controllers\Api\Admin\TenantAdminController;
-use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingController;
@@ -34,6 +35,11 @@ Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('auth/me', [AuthController::class, 'me']);
+    Route::post('auth/logout', [AuthController::class, 'logout']);
+});
+
 Route::get('catalog', [CatalogController::class, 'index']);
 
 Route::prefix('public')->group(function () {
@@ -48,9 +54,7 @@ Route::prefix('public')->group(function () {
 | Authenticated tenant area
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum', 'tenant.required'])->group(function () {
-    Route::get('auth/me', [AuthController::class, 'me']);
-    Route::post('auth/logout', [AuthController::class, 'logout']);
+Route::middleware(['auth:sanctum', 'seller', 'tenant.required'])->group(function () {
     Route::post('auth/push-token', [AuthController::class, 'savePushToken']);
 
     Route::get('dashboard', [InvoiceController::class, 'stats']);
@@ -146,9 +150,12 @@ Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(fu
     Route::put('tenants/{tenant}', [TenantAdminController::class, 'update']);
     Route::post('tenants/{tenant}/status', [TenantAdminController::class, 'changeStatus']);
     Route::post('tenants/{tenant}/credits', [TenantAdminController::class, 'adjustCredits']);
+    Route::post('tenants/{tenant}/subscription', [TenantAdminController::class, 'assignSubscription']);
     Route::put('tenants/{tenant}/fbr', [TenantAdminController::class, 'updateFbr']);
     Route::get('tenants/{tenant}/fbr-rows', [TenantAdminController::class, 'integrationRows']);
     Route::delete('customers/{customer}', [CustomerController::class, 'purge']);
+
+    Route::get('subscriptions', [SubscriptionAdminController::class, 'index']);
 
     Route::get('catalog/plans', [CatalogAdminController::class, 'plans']);
     Route::post('catalog/plans', [CatalogAdminController::class, 'storePlan']);

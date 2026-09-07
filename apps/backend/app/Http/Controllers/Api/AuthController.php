@@ -63,11 +63,25 @@ class AuthController extends Controller
         }
 
         $query = User::withoutGlobalScopes()->where('email', $data['email']);
-        if ($tenant) {
-            $query->where('tenant_id', $tenant->id);
-        }
 
-        $user = $query->first();
+        $platformCandidate = User::withoutGlobalScopes()
+            ->where('email', $data['email'])
+            ->where(function ($q) {
+                $q->where('is_platform_admin', true)->orWhereNull('tenant_id');
+            })
+            ->first();
+
+        if ($platformCandidate && Hash::check($data['password'], $platformCandidate->password)) {
+            $user = $platformCandidate;
+        } else {
+            if ($tenant) {
+                $query->where('tenant_id', $tenant->id);
+            } else {
+                $query->whereNotNull('tenant_id')->where('is_platform_admin', false);
+            }
+
+            $user = $query->first();
+        }
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
@@ -75,7 +89,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($user->is_platform_admin || $user->tenant_id === null) {
+        if ($user->isPlatformAdmin() || $user->tenant_id === null) {
             TenantContext::forget();
 
             $user->load('roles');
@@ -85,6 +99,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'tenant' => null,
                 'is_platform_admin' => true,
+                'account_kind' => 'platform_admin',
                 'permissions' => $user->permissionCodes(),
             ]);
         }
@@ -98,6 +113,7 @@ class AuthController extends Controller
             'user' => $user,
             'tenant' => $tenant,
             'is_platform_admin' => false,
+            'account_kind' => 'seller',
             'permissions' => $user->permissionCodes(),
         ]);
     }
@@ -114,10 +130,15 @@ class AuthController extends Controller
         $user = $request->user()->load('tenant');
         $isPlatform = $user->isPlatformAdmin();
 
+        if ($isPlatform) {
+            TenantContext::forget();
+        }
+
         return response()->json([
             'user' => $user,
             'tenant' => $isPlatform ? null : $user->tenant,
             'is_platform_admin' => $isPlatform,
+            'account_kind' => $isPlatform ? 'platform_admin' : 'seller',
             'permissions' => $user->permissionCodes(),
         ]);
     }

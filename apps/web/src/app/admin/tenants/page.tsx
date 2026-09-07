@@ -33,7 +33,7 @@ export default function AdminTenantsPage() {
       setMeta({ current_page: res.current_page, last_page: res.last_page, total: res.total });
       setCur(res.current_page);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load tenants");
+      setError(e instanceof Error ? e.message : "Failed to load sellers");
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,13 @@ export default function AdminTenantsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Tenants</h1>
+        <div>
+          <h1 className="text-2xl font-semibold">Sellers</h1>
+          <p className="text-sm text-slate-500">SaaS tenants — seller profiles, not their customers or invoices.</p>
+        </div>
+        <Link href="/admin/tenants/new" className="rounded-md bg-win-600 px-4 py-2 text-sm font-medium text-white">
+          Add seller
+        </Link>
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
@@ -79,15 +85,15 @@ export default function AdminTenantsPage() {
 
       <div className={card}>
         {loading && <p className="text-sm text-slate-500">Loading...</p>}
-        {!loading && page.length === 0 && <p className="text-sm text-slate-400">No tenants found.</p>}
+        {!loading && page.length === 0 && <p className="text-sm text-slate-400">No sellers found.</p>}
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400">
-              <th className="pb-2 font-medium">Tenant</th>
               <th className="pb-2 font-medium">Seller</th>
-              <th className="pb-2 font-medium">FBR mode</th>
-              <th className="pb-2 font-medium">Invoices</th>
-              <th className="pb-2 font-medium">Users</th>
+              <th className="pb-2 font-medium">NTN / contact</th>
+              <th className="pb-2 font-medium">PRAL</th>
+              <th className="pb-2 font-medium">Usage</th>
+              <th className="pb-2 font-medium">SaaS users</th>
               <th className="pb-2 font-medium">Status</th>
             </tr>
           </thead>
@@ -125,7 +131,7 @@ export default function AdminTenantsPage() {
           >
             Previous
           </button>
-          <span className="text-slate-500">Page {meta.current_page} of {meta.last_page} · {meta.total} tenants</span>
+          <span className="text-slate-500">Page {meta.current_page} of {meta.last_page} · {meta.total} sellers</span>
           <button
             className="rounded-md bg-black/[0.06] px-3 py-1.5 text-slate-700 disabled:opacity-40"
             disabled={meta.current_page >= meta.last_page || loading}

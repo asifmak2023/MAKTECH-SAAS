@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import AppShell from "@/components/AppShell";
 import { api } from "@/lib/api";
 import { fmtWhen, fmtDate } from "@/lib/admin";
 
@@ -71,12 +72,25 @@ export default function FbrSetupPage() {
     reload().catch((e) => setError(e instanceof Error ? e.message : "Failed to load FBR setup"));
   }, []);
 
-  if (error && !data) return <p className="text-sm text-rose-600">{error}</p>;
-  if (!data) return <p className="text-sm text-slate-500">Loading FBR setup...</p>;
+  if (error && !data) {
+    return (
+      <AppShell>
+        <p className="text-sm text-rose-600">{error}</p>
+      </AppShell>
+    );
+  }
+  if (!data) {
+    return (
+      <AppShell>
+        <p className="text-sm text-slate-500">Loading FBR setup...</p>
+      </AppShell>
+    );
+  }
 
   const ob = data.onboarding;
 
   return (
+    <AppShell>
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <Link className="text-sm text-win-600" href="/settings">← Settings</Link>
@@ -121,6 +135,7 @@ export default function FbrSetupPage() {
         </div>
       </details>
     </div>
+    </AppShell>
   );
 }
 

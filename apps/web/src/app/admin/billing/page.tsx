@@ -82,7 +82,10 @@ export default function AdminBillingPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Billing</h1>
+      <div>
+        <h1 className="text-2xl font-semibold">Payments</h1>
+        <p className="text-sm text-slate-500">SaaS subscription and package payments from sellers — not B-to-C invoices.</p>
+      </div>
 
       <div className="flex gap-1 rounded-[10px] bg-black/[0.035] p-1 text-sm w-fit">
         {(["orders", "payments", "invoices"] as Tab[]).map((t) => (
@@ -93,7 +96,7 @@ export default function AdminBillingPage() {
               tab === t ? "bg-white font-semibold text-win-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
             }`}
           >
-            {t}
+            {t === "invoices" ? "SaaS invoices" : t}
           </button>
         ))}
       </div>
@@ -210,7 +213,7 @@ export default function AdminBillingPage() {
           </select>
           <div className={card}>
             {!invoices && <p className="text-sm text-slate-500">Loading...</p>}
-            {invoices && invoices.data.length === 0 && <p className="text-sm text-slate-400">No billing invoices found.</p>}
+            {invoices && invoices.data.length === 0 && <p className="text-sm text-slate-400">No SaaS invoices found.</p>}
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400">

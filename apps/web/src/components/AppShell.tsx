@@ -51,9 +51,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
-    api<{ user: { name: string }; tenant: { name: string } | null; is_platform_admin?: boolean }>("/api/auth/me")
+    api<{ user: { name: string }; tenant: { name: string } | null; is_platform_admin?: boolean; account_kind?: string }>("/api/auth/me")
       .then((res) => {
-        if (res.is_platform_admin || !res.tenant) {
+        if (res.is_platform_admin || res.account_kind === "platform_admin" || !res.tenant) {
           router.replace("/admin");
           return;
         }

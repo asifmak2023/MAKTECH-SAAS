@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
+use App\Models\TenantSubscription;
+use App\Services\EntitlementService;
 use App\Services\Fbr\FbrIntegrationService;
 use App\Services\TenantService;
 use Illuminate\Http\JsonResponse;
@@ -14,18 +17,21 @@ class TenantAdminController extends Controller
     public function __construct(
         protected TenantService $tenants,
         protected FbrIntegrationService $fbr,
+        protected EntitlementService $entitlement,
     ) {}
 
     public function index(Request $request): JsonResponse
     {
         $tenants = Tenant::query()
+            ->with(['activeSubscription.plan:id,code,name', 'owner:id,name,email'])
             ->withCount('users', 'invoices')
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
             ->when($request->query('search'), function ($q, $s) {
                 $q->where(fn ($inner) => $inner->where('name', 'like', "%{$s}%")
                     ->orWhere('slug', 'like', "%{$s}%")
                     ->orWhere('seller_ntn_cnic', 'like', "%{$s}%")
-                    ->orWhere('legal_name', 'like', "%{$s}%"));
+                    ->orWhere('legal_name', 'like', "%{$s}%")
+                    ->orWhere('seller_business_name', 'like', "%{$s}%"));
             })
             ->latest()
             ->paginate(20);
@@ -35,13 +41,22 @@ class TenantAdminController extends Controller
 
     public function show(Tenant $tenant): JsonResponse
     {
-        return response()->json($tenant->load([
-            'owner:id,name,email',
+        $tenant->load([
+            'owner:id,name,email,phone',
             'users:id,tenant_id,name,email,role,is_active',
-            'subscriptions' => fn ($q) => $q->with('plan')->limit(5),
+            'subscriptions' => fn ($q) => $q->with('plan')->limit(8),
             'activeSubscription' => fn ($q) => $q->with('plan'),
             'fbrIntegrations',
-        ])->loadCount('invoices', 'customers', 'products', 'billingOrders', 'payments'));
+        ])->loadCount('invoices', 'customers', 'products', 'billingOrders', 'payments');
+
+        $payload = $tenant->toArray();
+        $payload['usage'] = $this->entitlement->usageSummary($tenant);
+        $payload['pral'] = [
+            'sandbox' => $this->pralStatus($tenant, 'sandbox'),
+            'production' => $this->pralStatus($tenant, 'production'),
+        ];
+
+        return response()->json($payload);
     }
 
     public function store(Request $request): JsonResponse
@@ -67,9 +82,21 @@ class TenantAdminController extends Controller
             'owner.name' => ['required_with:owner', 'string', 'max:255'],
             'owner.email' => ['required_with:owner', 'email'],
             'owner.password' => ['nullable', 'string', 'min:8'],
+            'owner.phone' => ['nullable', 'string', 'max:30'],
+            'subscription_plan_id' => ['nullable', 'integer', 'exists:subscription_plans,id'],
+            'billing_interval' => ['nullable', 'in:monthly,yearly'],
         ]);
 
         $data['_admin_created'] = true;
+
+        if (empty(data_get($data, 'owner.email')) && ! empty($data['seller_email'])) {
+            $data['owner'] = [
+                'name' => $data['owner']['name'] ?? ($data['seller_business_name'] ?? $data['tenant_name']),
+                'email' => $data['seller_email'],
+                'password' => $data['owner']['password'] ?? null,
+                'phone' => $data['owner']['phone'] ?? ($data['seller_phone'] ?? null),
+            ];
+        }
 
         $tenant = $this->tenants->createByAdmin($data, $data['owner'] ?? null);
 
@@ -77,7 +104,11 @@ class TenantAdminController extends Controller
             $this->tenants->adjustCredits($tenant, (int) $data['free_invoice_credits'] - (int) ($tenant->settings['free_invoice_credits'] ?? 0), 'Platform grant on creation');
         }
 
-        return response()->json($tenant->fresh(), 201);
+        if (! empty($data['subscription_plan_id'])) {
+            $this->grantPlan($tenant, (int) $data['subscription_plan_id'], $data['billing_interval'] ?? 'monthly');
+        }
+
+        return response()->json($tenant->fresh(['owner', 'activeSubscription.plan']), 201);
     }
 
     public function update(Request $request, Tenant $tenant): JsonResponse
@@ -118,6 +149,22 @@ class TenantAdminController extends Controller
         ]);
 
         return response()->json($this->tenants->changeStatus($tenant, $data['status'], $data['note'] ?? null));
+    }
+
+    public function assignSubscription(Request $request, Tenant $tenant): JsonResponse
+    {
+        $data = $request->validate([
+            'subscription_plan_id' => ['required', 'integer', 'exists:subscription_plans,id'],
+            'billing_interval' => ['nullable', 'in:monthly,yearly'],
+        ]);
+
+        $subscription = $this->grantPlan($tenant, (int) $data['subscription_plan_id'], $data['billing_interval'] ?? 'monthly');
+
+        return response()->json([
+            'message' => 'Subscription assigned.',
+            'subscription' => $subscription->load('plan'),
+            'tenant' => $tenant->fresh('activeSubscription.plan'),
+        ]);
     }
 
     public function adjustCredits(Request $request, Tenant $tenant): JsonResponse
@@ -173,5 +220,57 @@ class TenantAdminController extends Controller
             'status' => $row->status,
             'config' => $row->configArray(),
         ]));
+    }
+
+    protected function grantPlan(Tenant $tenant, int $planId, string $interval = 'monthly'): TenantSubscription
+    {
+        $plan = SubscriptionPlan::query()->findOrFail($planId);
+        $start = now();
+        $periodEnd = $interval === 'yearly' ? $start->copy()->addYear() : $start->copy()->addMonth();
+        $price = $interval === 'yearly' && $plan->annual_price !== null ? (float) $plan->annual_price : (float) $plan->price;
+
+        TenantSubscription::query()
+            ->where('tenant_id', $tenant->id)
+            ->whereIn('status', [TenantSubscription::STATUS_ACTIVE, TenantSubscription::STATUS_TRIAL, TenantSubscription::STATUS_GRACE_PERIOD, TenantSubscription::STATUS_PENDING])
+            ->update([
+                'status' => TenantSubscription::STATUS_CANCELLED,
+                'cancelled_at' => now(),
+            ]);
+
+        $subscription = TenantSubscription::query()->create([
+            'tenant_id' => $tenant->id,
+            'subscription_plan_id' => $plan->id,
+            'status' => TenantSubscription::STATUS_ACTIVE,
+            'billing_interval' => $interval,
+            'price' => $price,
+            'currency' => $tenant->currency ?? 'PKR',
+            'invoice_limit' => $plan->invoice_limit,
+            'overage_allowed' => $plan->overage_allowed,
+            'overage_price' => $plan->overage_price,
+            'grace_period_hours' => $plan->grace_period_hours,
+            'auto_renew' => true,
+            'starts_at' => $start,
+            'current_period_start' => $start,
+            'current_period_end' => $periodEnd,
+            'next_billing_date' => $periodEnd->copy()->addDay(),
+        ]);
+
+        if ($tenant->status === Tenant::STATUS_PENDING) {
+            $tenant->update(['status' => Tenant::STATUS_ACTIVE, 'is_active' => true]);
+        }
+
+        return $subscription;
+    }
+
+    protected function pralStatus(Tenant $tenant, string $mode): array
+    {
+        $row = $tenant->fbrIntegrations->firstWhere('mode', $mode);
+
+        return [
+            'mode' => $mode,
+            'status' => $row?->status ?? 'unconfigured',
+            'configured' => ($row?->status === 'configured'),
+            'last_tested_at' => $row?->last_tested_at,
+        ];
     }
 }

@@ -3,9 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\BillingLedgerEntry;
+use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
+use App\Models\UsagePackage;
+use App\Services\BillingService;
+use Database\Seeders\CatalogSeeder;
+use Database\Seeders\PlatformBootstrapSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class PlatformAdminFeatureTest extends TestCase
@@ -18,11 +24,11 @@ class PlatformAdminFeatureTest extends TestCase
 
         Mail::fake();
 
-        $this->seed(\Database\Seeders\PlatformBootstrapSeeder::class);
-        $this->seed(\Database\Seeders\CatalogSeeder::class);
+        $this->seed(PlatformBootstrapSeeder::class);
+        $this->seed(CatalogSeeder::class);
     }
 
-    protected function api($method, string $uri, array $headers = [], array $payload = []): \Illuminate\Testing\TestResponse
+    protected function api($method, string $uri, array $headers = [], array $payload = []): TestResponse
     {
         // Guards cache the resolved user per application instance across requests
         // within one test; forget them so a different bearer token is honoured.
@@ -79,8 +85,105 @@ class PlatformAdminFeatureTest extends TestCase
 
     public function test_platform_admin_can_open_dashboard(): void
     {
-        $this->api('GET', '/api/admin/dashboard', $this->platformHeaders())->assertOk();
+        $this->api('GET', '/api/admin/dashboard', $this->platformHeaders())
+            ->assertOk()
+            ->assertJsonStructure(['sellers', 'finance', 'subscriptions', 'pral', 'support', 'errors_today']);
         $this->api('GET', '/api/admin/tenants', $this->platformHeaders())->assertOk();
+        $this->api('GET', '/api/admin/subscriptions', $this->platformHeaders())->assertOk();
+    }
+
+    public function test_platform_admin_cannot_use_seller_invoicing_or_client_apis(): void
+    {
+        $admin = $this->platformHeaders();
+        $this->registerTenant();
+
+        $adminWithTenant = $admin + ['X-Tenant' => 'console-co'];
+
+        $this->api('GET', '/api/dashboard', $adminWithTenant)
+            ->assertForbidden()
+            ->assertJsonPath('code', 'admin_forbidden_seller');
+        $this->api('GET', '/api/invoices', $adminWithTenant)->assertForbidden();
+        $this->api('POST', '/api/invoices', $adminWithTenant, [])->assertForbidden();
+        $this->api('GET', '/api/customers', $adminWithTenant)->assertForbidden();
+        $this->api('POST', '/api/customers', $adminWithTenant, [
+            'business_name' => 'Buyer Co',
+            'ntn_cnic' => '1234567',
+        ])->assertForbidden();
+        $this->api('GET', '/api/settings', $adminWithTenant)->assertForbidden();
+    }
+
+    public function test_seller_cannot_access_platform_admin_apis(): void
+    {
+        $reg = $this->registerTenant();
+        $headers = $this->tenantHeaders($reg['token']);
+
+        $this->api('GET', '/api/admin/dashboard', $headers)->assertForbidden();
+        $this->api('GET', '/api/admin/tenants', $headers)->assertForbidden();
+        $this->api('GET', '/api/admin/subscriptions', $headers)->assertForbidden();
+        $this->api('GET', '/api/admin/billing/payments', $headers)->assertForbidden();
+        $this->api('POST', '/api/admin/tenants', $headers, [
+            'tenant_name' => 'Hijack',
+            'owner' => ['name' => 'X', 'email' => 'x@example.com'],
+        ])->assertForbidden();
+    }
+
+    public function test_login_and_me_report_account_kind(): void
+    {
+        $adminLogin = $this->api('POST', '/api/auth/login', [], [
+            'email' => 'admin@saas.local',
+            'password' => 'password',
+        ]);
+        $adminLogin->assertOk()
+            ->assertJsonPath('account_kind', 'platform_admin')
+            ->assertJsonPath('is_platform_admin', true)
+            ->assertJsonPath('tenant', null);
+
+        $this->api('GET', '/api/auth/me', ['Authorization' => 'Bearer '.$adminLogin->json('token')])
+            ->assertOk()
+            ->assertJsonPath('account_kind', 'platform_admin')
+            ->assertJsonPath('tenant', null);
+
+        $reg = $this->registerTenant();
+        $this->api('GET', '/api/auth/me', $this->tenantHeaders($reg['token']))
+            ->assertOk()
+            ->assertJsonPath('account_kind', 'seller')
+            ->assertJsonPath('is_platform_admin', false);
+    }
+
+    public function test_admin_can_create_seller_and_assign_subscription(): void
+    {
+        $admin = $this->platformHeaders();
+        $plan = SubscriptionPlan::query()->where('code', 'starter')->firstOrFail();
+
+        $created = $this->api('POST', '/api/admin/tenants', $admin, [
+            'tenant_name' => 'North Traders',
+            'tenant_slug' => 'north-traders',
+            'seller_email' => 'owner@north.local',
+            'seller_business_name' => 'North Traders',
+            'owner' => [
+                'name' => 'North Owner',
+                'email' => 'owner@north.local',
+                'password' => 'password123',
+            ],
+            'subscription_plan_id' => $plan->id,
+            'billing_interval' => 'monthly',
+        ]);
+
+        $created->assertCreated()
+            ->assertJsonPath('slug', 'north-traders')
+            ->assertJsonPath('owner.email', 'owner@north.local');
+
+        $tenantId = $created->json('id');
+
+        $show = $this->api('GET', "/api/admin/tenants/{$tenantId}", $admin);
+        $show->assertOk()->assertJsonStructure(['pral' => ['sandbox', 'production'], 'usage']);
+        $this->assertNotNull($show->json('usage.free_credits_remaining'));
+
+        $premium = SubscriptionPlan::query()->where('code', 'premium')->firstOrFail();
+        $this->api('POST', "/api/admin/tenants/{$tenantId}/subscription", $admin, [
+            'subscription_plan_id' => $premium->id,
+            'billing_interval' => 'yearly',
+        ])->assertOk()->assertJsonPath('subscription.billing_interval', 'yearly');
     }
 
     public function test_platform_admin_area_rejects_tenant_users_and_guests(): void
@@ -135,7 +238,7 @@ class PlatformAdminFeatureTest extends TestCase
         $token = $reg['token'];
         $headers = $this->tenantHeaders($token);
 
-        $package = \App\Models\UsagePackage::query()->where('code', 'pack_25')->firstOrFail();
+        $package = UsagePackage::query()->where('code', 'pack_25')->firstOrFail();
 
         $buy = $this->api('POST', '/api/billing/packages', $headers, [
             'usage_package_id' => $package->id,
@@ -169,6 +272,6 @@ class PlatformAdminFeatureTest extends TestCase
         $order = $tenant->billingOrders()->findOrFail($orderId);
         $this->assertSame('refunded', $order->billingInvoice->status);
         $this->assertSame('refunded', $order->payments()->first()->status);
-        $this->assertSame(0.0, app(\App\Services\BillingService::class)->outstandingBalance($tenant));
+        $this->assertSame(0.0, app(BillingService::class)->outstandingBalance($tenant));
     }
 }

@@ -65,7 +65,7 @@ export type FbrIntegrationRow = {
 };
 
 export type TenantDetail = TenantRow & {
-  owner: { id: number; name: string; email: string } | null;
+  owner: { id: number; name: string; email: string; phone?: string | null } | null;
   users: Array<{ id: number; name: string; email: string; role: string; is_active: boolean }>;
   subscriptions: TenantSubscription[];
   activeSubscription: TenantSubscription | null;
@@ -75,6 +75,29 @@ export type TenantDetail = TenantRow & {
   products_count: number;
   billing_orders_count: number;
   payments_count: number;
+  usage?: {
+    free_credits_remaining: number;
+    free_credits_used: number;
+    package_used: number;
+    unlimited: boolean;
+    overage_allowed: boolean;
+    subscription: {
+      plan: string | null;
+      status: string;
+      invoice_limit: number | null;
+      used: number;
+      remaining: number | null;
+      period_end: string | null;
+    } | null;
+  };
+  pral?: {
+    sandbox: { mode: string; status: string; configured: boolean; last_tested_at: string | null };
+    production: { mode: string; status: string; configured: boolean; last_tested_at: string | null };
+  };
+};
+
+export type AdminSubscriptionRow = TenantSubscription & {
+  tenant?: { id: number; name: string; slug: string; status: string } | null;
 };
 
 export type BillingOrder = {
