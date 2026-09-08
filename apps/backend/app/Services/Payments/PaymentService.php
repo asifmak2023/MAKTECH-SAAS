@@ -149,6 +149,7 @@ class PaymentService
                     'manual' => false,
                     'redirect_url' => $result['redirect_url'] ?? null,
                     'provider_reference' => $result['provider_reference'] ?? null,
+                    'urls' => $this->gatewayUrls($gateway->code),
                     'message' => 'Payment successful.',
                 ];
             }
@@ -163,12 +164,37 @@ class PaymentService
                 'manual' => (bool) ($result['manual'] ?? false),
                 'redirect_url' => $result['redirect_url'] ?? null,
                 'provider_reference' => $result['provider_reference'] ?? null,
+                'urls' => $this->gatewayUrls($gateway->code),
                 'message' => $result['manual']
                     ? 'Payment instructions are attached to this order. It will be activated once verified.'
                     : 'Your payment is being processed.',
                 'instructions' => $result['raw'] ?? [],
             ];
         });
+    }
+
+    /**
+     * Public origin of the payer-facing app (configured via WEB_APP_URL).
+     */
+    public function webAppUrl(): string
+    {
+        return rtrim((string) config('saas.web.app_url', config('app.url')), '/');
+    }
+
+    /**
+     * Callback URLs to hand to a payment provider when registering the
+     * transaction, built from the public web origin. Return/cancel are payer
+     * browser redirects; webhook_url is the server-to-server notify endpoint.
+     */
+    public function gatewayUrls(string $gatewayCode): array
+    {
+        $base = $this->webAppUrl();
+
+        return [
+            'return_url' => $base.config('saas.payments.return_path', '/billing/payments/return'),
+            'cancel_url' => $base.config('saas.payments.cancel_path', '/billing'),
+            'webhook_url' => $base.'/'.ltrim((string) config('saas.payments.webhook_prefix', '/api/webhooks'), '/').'/'.$gatewayCode,
+        ];
     }
 
     /**

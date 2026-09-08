@@ -17,7 +17,7 @@ class SettingsAdminController extends Controller
             'available_groups' => [
                 'general' => ['currency', 'platform_name', 'support_email', 'support_phone', 'timezone'],
                 'tenant' => ['trial_days', 'default_grace_period_hours', 'allow_public_registration', 'require_admin_approval', 'registration_credit_invoices'],
-                'billing' => ['default_invoice_price', 'usage_consumption_order', 'low_quota_thresholds', 'tax_rate', 'default_gateway', 'payment_expiry_hours', 'suspend_on_grace_expiry', 'allow_overage'],
+                'billing' => ['default_invoice_price', 'max_invoice_price', 'usage_consumption_order', 'low_quota_thresholds', 'tax_rate', 'default_gateway', 'payment_expiry_hours', 'suspend_on_grace_expiry', 'allow_overage'],
             ],
             'saas_statuses' => config('saas.statuses'),
             'consumption_orders' => ['packages_first', 'credits_first'],

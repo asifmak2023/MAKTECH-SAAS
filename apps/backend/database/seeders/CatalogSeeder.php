@@ -15,23 +15,23 @@ class CatalogSeeder extends Seeder
         $plans = [
             [
                 'code' => 'starter', 'name' => 'Starter', 'billing_interval' => 'monthly',
-                'price' => 1500, 'annual_price' => 15000, 'invoice_limit' => 100,
-                'overage_allowed' => true, 'overage_price' => 12, 'trial_days' => 0,
+                'price' => 900, 'annual_price' => 9000, 'invoice_limit' => 100,
+                'overage_allowed' => true, 'overage_price' => 10, 'trial_days' => 0,
                 'features' => ['100 FBR invoices / month', 'Buy extra packages anytime', 'Email & PDF invoicing', 'Support'],
                 'sort_order' => 1,
             ],
             [
                 'code' => 'standard', 'name' => 'Standard', 'billing_interval' => 'monthly',
                 'price' => 3500, 'annual_price' => 35000, 'invoice_limit' => 500,
-                'overage_allowed' => true, 'overage_price' => 12, 'trial_days' => 0,
-                'features' => ['500 FBR invoices / month', 'Overage at PKR 12 / invoice', 'API access', 'Priority support'],
+                'overage_allowed' => true, 'overage_price' => 10, 'trial_days' => 0,
+                'features' => ['500 FBR invoices / month', 'Overage at PKR 10 / invoice', 'API access', 'Priority support'],
                 'sort_order' => 2,
             ],
             [
                 'code' => 'premium', 'name' => 'Premium', 'billing_interval' => 'monthly',
                 'price' => 8000, 'annual_price' => 80000, 'invoice_limit' => null,
-                'overage_allowed' => true, 'overage_price' => 12, 'trial_days' => 0,
-                'features' => ['Unlimited FBR invoices', 'Overage at PKR 12 / invoice', 'API access', 'Dedicated support'],
+                'overage_allowed' => true, 'overage_price' => 10, 'trial_days' => 0,
+                'features' => ['Unlimited FBR invoices', 'Overage at PKR 10 / invoice', 'API access', 'Dedicated support'],
                 'sort_order' => 3,
             ],
         ];

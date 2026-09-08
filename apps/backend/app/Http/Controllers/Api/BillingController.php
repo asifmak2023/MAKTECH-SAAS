@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\PaymentException;
 use App\Http\Controllers\Controller;
 use App\Models\BillingOrder;
+use App\Models\Payment;
+use App\Models\PaymentGateway;
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
+use App\Models\TenantSubscription;
 use App\Models\UsagePackage;
 use App\Services\BillingService;
 use App\Services\EntitlementService;
@@ -143,6 +146,7 @@ class BillingController extends Controller
             'status' => $result['status'],
             'manual' => $result['manual'],
             'message' => $result['message'],
+            'urls' => $result['urls'] ?? $this->payments->gatewayUrls($data['gateway']),
             'instructions' => $result['instructions'] ?? [],
         ], $result['status'] === 'paid' ? 200 : 202);
     }
@@ -168,6 +172,7 @@ class BillingController extends Controller
             'status' => $result['status'],
             'manual' => $result['manual'],
             'message' => $result['message'],
+            'urls' => $result['urls'] ?? $this->payments->gatewayUrls($data['gateway']),
             'instructions' => $result['instructions'] ?? [],
         ], $result['status'] === 'paid' ? 200 : 202);
     }
@@ -195,6 +200,7 @@ class BillingController extends Controller
             'status' => $result['status'],
             'manual' => $result['manual'],
             'message' => $result['message'],
+            'urls' => $result['urls'] ?? $this->payments->gatewayUrls($data['gateway']),
             'instructions' => $result['instructions'] ?? [],
         ], $result['status'] === 'paid' ? 200 : 202);
     }
@@ -208,6 +214,56 @@ class BillingController extends Controller
         $result = $this->payments->checkout($order, $data['gateway']);
 
         return response()->json($result);
+    }
+
+    /**
+     * Seller-side completion for sandbox gateway payments. A plan is only
+     * activated once this simulated Raast P2M payment succeeds; live gateway
+     * payments keep being confirmed by the gateway webhook / platform admin.
+     */
+    public function completeSandboxPayment(Payment $payment): JsonResponse
+    {
+        if ((int) $payment->tenant_id !== (int) $this->tenant()->id) {
+            abort(404, 'Payment not found.');
+        }
+
+        $gateway = PaymentGateway::query()->where('code', $payment->gateway_code)->first();
+
+        if (! $gateway || ! $gateway->is_sandbox) {
+            throw new PaymentException(
+                'This payment cannot be completed from the seller console. It is confirmed once it clears at the gateway.',
+                403
+            );
+        }
+
+        if ($payment->status !== Payment::STATUS_PENDING) {
+            throw new PaymentException('This payment is not awaiting completion.', 409);
+        }
+
+        $order = $payment->order;
+
+        if (! $order || in_array($order->status, [
+            BillingOrder::STATUS_CANCELLED,
+            BillingOrder::STATUS_REFUNDED,
+            BillingOrder::STATUS_EXPIRED,
+            BillingOrder::STATUS_PAID,
+        ], true)) {
+            throw new PaymentException('This order can no longer be paid.', 409);
+        }
+
+        $this->payments->confirmPayment($payment);
+
+        $subscription = $order->tenant_subscription_id
+            ? TenantSubscription::query()->with('plan')->find($order->tenant_subscription_id)
+            : null;
+
+        return response()->json([
+            'payment' => $payment->fresh(),
+            'order' => $order->fresh(),
+            'subscription' => $subscription,
+            'status' => 'paid',
+            'message' => 'Payment successful. Your subscription is now active.',
+        ]);
     }
 
     public function cancelOrder(BillingOrder $order): JsonResponse

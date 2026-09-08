@@ -3,6 +3,7 @@
 import AppShell from "@/components/AppShell";
 import { api } from "@/lib/api";
 import { formatStatus, money, statusStyles } from "@/lib/status";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 type Plan = {
@@ -125,6 +126,7 @@ function UsageBar({ label, used, total, sub }: { label: string; used: number; to
 }
 
 export default function BillingPage() {
+  const router = useRouter();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -273,7 +275,7 @@ export default function BillingPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
           <h2 className="mb-1 font-semibold">Plans</h2>
-          <p className="mb-3 text-xs text-slate-500">Pay for the plan to activate it immediately. Choosing a new plan replaces the current one.</p>
+          <p className="mb-3 text-xs text-slate-500">Subscribe through the payment gateway (Raast P2M). The plan activates once payment succeeds and replaces your current plan.</p>
           <div className="space-y-3">
             {(catalog?.plans || []).map((plan) => (
               <div key={plan.id} className="rounded-lg border border-slate-200 p-3">
@@ -290,13 +292,10 @@ export default function BillingPage() {
                   </p>
                 </div>
                 <button
-                  disabled={!defaultGateway || busy !== null}
-                  onClick={() =>
-                    pay("/api/billing/subscribe", { subscription_plan_id: plan.id, interval: "monthly", gateway: defaultGateway }, `Subscribing to ${plan.name}`)
-                  }
-                  className="mt-3 rounded-md bg-win-600 px-3 py-1.5 text-xs text-white disabled:opacity-50"
+                  onClick={() => router.push(`/billing/subscribe?plan=${plan.id}`)}
+                  className="mt-3 rounded-md bg-win-600 px-3 py-1.5 text-xs text-white"
                 >
-                  {busy ? "Processing..." : summary?.subscription?.plan === plan.name ? "Re-subscribe" : "Subscribe"}
+                  {summary?.subscription?.plan === plan.name ? "Re-subscribe" : "Subscribe"}
                 </button>
               </div>
             ))}

@@ -10,6 +10,7 @@ const nav = [
   { href: "/admin/tenants", label: "Sellers" },
   { href: "/admin/subscriptions", label: "Subscriptions" },
   { href: "/admin/billing", label: "Payments" },
+  { href: "/admin/settings", label: "Settings" },
   { href: "/admin/monitoring", label: "Monitoring" },
   { href: "/admin/support", label: "Support" },
 ];

@@ -220,11 +220,8 @@ class FbrIntegrationController extends Controller
         $ids = $data['scenarios'] ?? null;
 
         if ($ids === null) {
-            $catalogue = $this->diagnostics->catalogue();
-            // A sensible default subset (retailer-only scenarios SN026-28 are
-            // included when explicitly requested).
-            $defaults = ['SN001', 'SN002', 'SN005', 'SN006', 'SN007', 'SN008', 'SN012', 'SN013', 'SN015', 'SN019', 'SN021'];
-            $ids = array_values(array_intersect($defaults, array_keys($catalogue)));
+            // The full sandbox scenario suite covers every shipped PRAL fixture.
+            $ids = array_keys($this->diagnostics->catalogue());
         }
 
         foreach ($ids as $id) {

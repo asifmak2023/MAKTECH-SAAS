@@ -303,9 +303,9 @@ class EntitlementService
             return null;
         }
 
-        $price = SaasConfig::invoicePrice();
+        $price = SaasConfig::effectiveInvoicePrice();
         if ($subscription && $subscription->overage_price !== null) {
-            $price = (float) $subscription->overage_price;
+            $price = SaasConfig::effectiveInvoicePrice((float) $subscription->overage_price);
         }
 
         return [

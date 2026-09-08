@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SubscriptionPlan;
 use App\Models\UsagePackage;
+use App\Services\SaasConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -43,7 +44,7 @@ class CatalogAdminController extends Controller
             'currency' => ['nullable', 'string', 'size:3'],
             'invoice_limit' => ['nullable', 'integer', 'min:0'],
             'overage_allowed' => ['sometimes', 'boolean'],
-            'overage_price' => ['nullable', 'numeric', 'min:0'],
+            'overage_price' => ['nullable', 'numeric', 'min:0', 'max:'.(string) SaasConfig::maxInvoicePrice()],
             'grace_period_hours' => ['nullable', 'integer', 'min:1', 'max:720'],
             'trial_days' => ['nullable', 'integer', 'min:0', 'max:365'],
             'features' => ['nullable', 'array'],

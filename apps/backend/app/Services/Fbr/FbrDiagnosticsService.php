@@ -70,7 +70,12 @@ class FbrDiagnosticsService
         $payload['sellerBusinessName'] = $tenant->seller_business_name;
         $payload['sellerProvince'] = $tenant->seller_province ?: 'Sindh';
         $payload['sellerAddress'] = $tenant->seller_address ?: $tenant->seller_business_name;
-        $payload['invoiceDate'] = now()->format('Y-m-d');
+        // PRAL's sandbox clock runs on UTC while this app's default timezone is
+        // Asia/Karachi. Using the Karachi date between 00:00-05:00 PKT sends an
+        // invoice dated "tomorrow" from PRAL's perspective and returns 0043
+        // ("invoice date greater than current date"). The UTC date can never be
+        // in the future relative to Pakistan, so stamp that.
+        $payload['invoiceDate'] = now('UTC')->format('Y-m-d');
         $payload['scenarioId'] = $scenarioId;
 
         return $payload;

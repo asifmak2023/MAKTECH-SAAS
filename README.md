@@ -106,12 +106,15 @@ Entitlement consumption order per invoice submitted to FBR:
 ### Tenant flows
 
 - `GET /api/billing/summary` – subscription, usage allowance, outstanding balance, enabled gateways.
-- `POST /api/billing/subscribe { subscription_plan_id, interval, gateway }` – creates a pending subscription, checks out; on paid it activates and cancels the previous plan.
+- `POST /api/billing/subscribe { subscription_plan_id, interval, gateway }` – creates a pending subscription and starts checkout; the plan is **not** activated until the payment clears (then the previous plan is cancelled). The seller web UI routes subscription checkout through Raast (P2M).
+- `POST /api/billing/payments/{payment}/complete` – seller-side completion of a **sandbox** gateway payment (simulated Raast P2M hosted checkout in sandbox; live gateways are confirmed via webhook/platform admin).
 - `POST /api/billing/packages { usage_package_id, gateway }`.
 - `POST /api/billing/overage/settle { gateway }` – collects all unbilled overage into one order.
 - `POST /api/billing/orders/{order}/pay|cancel`, `GET /api/billing/orders|invoices|payments|usage`.
 
-Checkout returns `202` with `manual: true` and payment instructions for real gateways; the `mock` gateway auto-pays in the same request (sandbox).
+Checkout returns `202` with `manual: true` and payment instructions for real/hosted gateways; the `mock` gateway auto-pays in the same request (sandbox) and `raast` (sandbox) waits for the seller to complete the simulated payment.
+
+**Per-invoice cap:** no per-invoice charge may exceed `billing.max_invoice_price` (default **Rs.10**). Overage beyond a plan's allowance and pay-as-you-go invoices are both capped at this ceiling, whatever the plan's stored `overage_price` or `default_invoice_price` say.
 
 ### Platform admin (`/api/admin/*`, requires a platform admin)
 

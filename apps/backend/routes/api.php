@@ -42,6 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('catalog', [CatalogController::class, 'index']);
 
+/*
+| Inbound payment-provider notifications (no auth - gateway signature verified
+| by the adapter). Exposed by the Next.js proxy at {public_url}/api/webhooks/*.
+*/
+Route::post('webhooks/{gateway}', [\App\Http\Controllers\Api\PaymentWebhookController::class, 'handle']);
+
 Route::prefix('public')->group(function () {
     Route::get('invoices/{token}', [ApprovalController::class, 'show']);
     Route::post('invoices/{token}/approve', [ApprovalController::class, 'approve']);
@@ -112,6 +118,7 @@ Route::middleware(['auth:sanctum', 'seller', 'tenant.required'])->group(function
     Route::post('billing/overage/settle', [BillingController::class, 'settleOverage']);
     Route::post('billing/orders/{order}/pay', [BillingController::class, 'payOrder']);
     Route::post('billing/orders/{order}/cancel', [BillingController::class, 'cancelOrder']);
+    Route::post('billing/payments/{payment}/complete', [BillingController::class, 'completeSandboxPayment']);
     Route::get('billing/invoices', [BillingController::class, 'invoices']);
     Route::get('billing/payments', [BillingController::class, 'payments']);
     Route::get('billing/usage', [BillingController::class, 'usage']);

@@ -151,6 +151,41 @@ class DiagnosticsSupportFeatureTest extends TestCase
         $payload = $service->payloadFor($tenant, 'SN001');
         $this->assertSame('9876543', $payload['sellerNTNCNIC']);
         $this->assertSame('SN001', $payload['scenarioId']);
+        // The invoice date must be relative to UTC: between 00:00-05:00 PKT the
+        // Karachi date is "tomorrow" for PRAL's UTC sandbox clock and returns 0043.
+        $this->assertSame(now('UTC')->format('Y-m-d'), $payload['invoiceDate']);
+    }
+
+    public function test_scenario_suite_defaults_to_every_available_scenario(): void
+    {
+        Http::fake([
+            '*' => Http::response([
+                'validationResponse' => ['statusCode' => '00', 'status' => 'Valid', 'error' => ''],
+            ], 200),
+        ]);
+
+        $reg = $this->registerTenant();
+        $h = $this->headers($reg['token'], 'acme');
+
+        $this->api('PUT', '/api/settings/fbr/sandbox', $h, [
+            'token' => 'sandbox-token-abc',
+            'base_url' => 'https://gw.fbr.gov.pk',
+        ])->assertOk();
+
+        $catalogue = app(FbrDiagnosticsService::class)->catalogue();
+
+        $run = $this->api('POST', '/api/settings/fbr/run-tests', $h)
+            ->assertOk()
+            ->json();
+
+        $this->assertSame(count($catalogue), $run['total']);
+        $this->assertSame(count($catalogue), $run['passed']);
+
+        $ids = array_column($run['scenarios'], 'id');
+        sort($ids);
+        $expected = array_keys($catalogue);
+        sort($expected);
+        $this->assertSame($expected, $ids);
     }
 
     public function test_support_session_lifecycle_and_tenant_isolation(): void

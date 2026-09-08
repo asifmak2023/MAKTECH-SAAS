@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->seedMaktechDemo();
+
+        $this->call(DemoSellerSeeder::class);
     }
 
     protected function seedMaktechDemo(): void

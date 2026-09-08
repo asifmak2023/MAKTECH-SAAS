@@ -51,10 +51,26 @@ return [
     */
     'billing' => [
         'default_invoice_price' => (float) env('SAAS_PRICE_PER_INVOICE', 10),
+        'max_invoice_price' => (float) env('SAAS_MAX_INVOICE_PRICE', 10),
         'default_usage_consumption_order' => env('SAAS_USAGE_CONSUMPTION_ORDER', 'packages_first'),
         'low_quota_thresholds' => [80, 90, 95, 100],
         'invoice_number_prefix' => env('SAAS_BILLING_INVOICE_PREFIX', 'BILL'),
         'order_number_prefix' => env('SAAS_ORDER_PREFIX', 'ORD'),
+    ],
+
+    /*
+    | Payer-facing web app. Return/cancel URLs handed to payment providers are
+    | built from this origin. Override WEB_APP_URL in .env whenever the public
+    | host of the Next.js app changes - no code edits required.
+    */
+    'web' => [
+        'app_url' => rtrim((string) env('WEB_APP_URL', env('APP_URL', 'http://localhost')), '/'),
+    ],
+
+    'payments' => [
+        'return_path' => env('SAAS_PAYMENT_RETURN_PATH', '/billing/payments/return'),
+        'cancel_path' => env('SAAS_PAYMENT_CANCEL_PATH', '/billing'),
+        'webhook_prefix' => env('SAAS_PAYMENT_WEBHOOK_PREFIX', '/api/webhooks'),
     ],
 
     /*
@@ -102,8 +118,12 @@ return [
             'name' => 'Raast (P2M)',
             'adapter' => \App\Services\Payments\Gateways\RaastGateway::class,
             'supports_recurring' => false,
-            'enabled' => false,
+            'enabled' => (bool) env('SAAS_ENABLE_RAAST_GATEWAY', true),
             'config_keys' => ['merchant_id', 'api_key', 'api_secret', 'iban', 'alias', 'sandbox_endpoint', 'live_endpoint'],
+            'env_credentials' => [
+                'api_key' => ['env' => 'RAST_API_KEY'],
+                'api_secret' => ['env' => 'RAST_APP_SECRET'],
+            ],
         ],
         'bank_transfer' => [
             'name' => 'Bank Transfer',

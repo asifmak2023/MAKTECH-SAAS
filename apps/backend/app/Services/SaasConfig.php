@@ -17,6 +17,24 @@ class SaasConfig
         return (float) self::get('billing', 'default_invoice_price', config('saas.billing.default_invoice_price'));
     }
 
+    /**
+     * Hard ceiling for any per-invoice charge (overage / pay-as-you-go).
+     */
+    public static function maxInvoicePrice(): float
+    {
+        return (float) self::get('billing', 'max_invoice_price', config('saas.billing.max_invoice_price'));
+    }
+
+    /**
+     * The effective per-invoice rate after applying the platform cap.
+     */
+    public static function effectiveInvoicePrice(?float $rate = null): float
+    {
+        $price = $rate ?? self::invoicePrice();
+
+        return min((float) $price, self::maxInvoicePrice());
+    }
+
     public static function consumptionOrder(): string
     {
         return (string) self::get('billing', 'usage_consumption_order', config('saas.billing.default_usage_consumption_order'));

@@ -30,7 +30,9 @@ class CatalogController extends Controller
             'currency' => $plan->currency,
             'invoice_limit' => $plan->invoice_limit,
             'overage_allowed' => $plan->overage_allowed,
-            'overage_price' => $plan->overage_price !== null ? (float) $plan->overage_price : null,
+            'overage_price' => $plan->overage_price !== null
+                ? SaasConfig::effectiveInvoicePrice((float) $plan->overage_price)
+                : null,
             'trial_days' => $plan->trial_days,
             'features' => $plan->features,
         ]);
@@ -48,7 +50,8 @@ class CatalogController extends Controller
 
         return response()->json([
             'currency' => SaasConfig::currency(),
-            'price_per_invoice' => SaasConfig::invoicePrice(),
+            'price_per_invoice' => SaasConfig::effectiveInvoicePrice(),
+            'max_invoice_price' => SaasConfig::maxInvoicePrice(),
             'free_invoice_allowance' => SaasConfig::registrationFreeInvoices(),
             'payment_gateways' => collect($this->payments->enabledGateways())
                 ->map(fn ($g) => ['code' => $g['code'], 'name' => $g['name'], 'sandbox' => $g['sandbox']])

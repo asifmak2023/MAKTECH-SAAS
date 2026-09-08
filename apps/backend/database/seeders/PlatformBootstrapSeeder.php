@@ -39,6 +39,7 @@ class PlatformBootstrapSeeder extends Seeder
             ['tenant', 'require_admin_approval', config('saas.tenant.require_admin_approval')],
             ['tenant', 'registration_credit_invoices', config('saas.tenant.registration_credit_invoices')],
             ['billing', 'default_invoice_price', config('saas.billing.default_invoice_price')],
+            ['billing', 'max_invoice_price', config('saas.billing.max_invoice_price')],
             ['billing', 'usage_consumption_order', config('saas.billing.default_usage_consumption_order')],
             ['billing', 'low_quota_thresholds', config('saas.billing.low_quota_thresholds')],
             ['billing', 'tax_rate', 0],
