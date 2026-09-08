@@ -11,7 +11,6 @@ Sellers (role B) raise invoices, buyers (role C) approve them, and the platform 
 - `apps/mobile` Expo / React Native
 - `packages/shared` shared TypeScript types
 - **MySQL 8** for production (tests use SQLite `:memory:`)
-- Optional local extras via `docker-compose.yml`: Redis, Mailpit, Postgres (legacy)
 
 ## 1. Backend
 
@@ -171,7 +170,7 @@ Feature suites cover registration + free allowance, package purchase, Raast sand
 
 ## Production (native VPS, MySQL)
 
-Recommended: Ubuntu 24.04, Nginx, PHP-FPM, MySQL 8, `next start`. Do not use the repo `docker-compose.yml` as-is (it is a local Postgres/dev stack).
+Recommended: Ubuntu 24.04, Nginx, PHP-FPM, MySQL 8, `next start`. Native install only.
 
 1. Install MySQL, create database `pral` and user `pral`@`localhost`.
 2. Clone the repo, copy `.env.example` → `.env`, set `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` / `WEB_APP_URL` to the public host, and MySQL credentials.
