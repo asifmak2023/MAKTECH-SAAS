@@ -331,20 +331,57 @@ button,
 }
 
 .dark .btn-primary,
+.dark .btn-secondary,
 .dark button.bg-win-600,
 .dark button.bg-black,
 .dark a.bg-win-600,
-.dark a.bg-black {
+.dark a.bg-black,
+.dark a.btn-primary {
   background-color: #ffffff;
   color: #000000;
 }
 .dark .btn-primary:hover,
+.dark .btn-secondary:hover,
 .dark button.bg-win-600:hover,
 .dark a.bg-win-600:hover,
 .dark button.bg-black:hover,
-.dark a.bg-black:hover {
+.dark a.bg-black:hover,
+.dark a.btn-primary:hover {
   background-color: #e5e5e5;
   color: #000000;
+}
+
+/* Ghost / outline custom button classes are applied via @apply, so they never
+   carry the literal utility classes the dark rules above target. Give them
+   explicit dark variants here. */
+.dark .btn-ghost,
+.dark a.btn-ghost {
+  border-color: #3a3a3a;
+  color: #f5f5f5;
+}
+.dark .btn-ghost:hover,
+.dark a.btn-ghost:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+.dark .btn-secondary,
+.dark a.btn-secondary {
+  background-color: transparent;
+  border-color: #f5f5f5;
+  color: #f5f5f5;
+}
+.dark .btn-secondary:hover,
+.dark a.btn-secondary:hover {
+  background-color: #f5f5f5;
+  border-color: #f5f5f5;
+  color: #000000;
+}
+.dark .card-plain {
+  background-color: #1b1b1b;
+  border-color: #262626;
+}
+.dark .eyebrow {
+  color: #a3a3a3;
 }
 
 .dark .bg-\[\#fafafa\],
@@ -409,6 +446,40 @@ button,
 }
 .dark .border-amber-200\/70 {
   border-color: #3a3a3a !important;
+}
+
+/* ---- Hover state overrides (dark theme) ----
+   Hover variants are separate utility classes, so the base .dark overrides
+   above never match them; without these the rows/buttons flash light on
+   hover in dark mode. */
+.dark .hover\:bg-\[\#fafafa\]:hover,
+.dark .hover\:bg-\[\#fafafa\]\/70:hover,
+.dark .hover\:bg-\[\#f5f5f5\]:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #262626 !important;
+}
+.dark .hover\:text-black:hover,
+.dark .hover\:text-\[\#3f3f46\]:hover {
+  color: #f5f5f5 !important;
+}
+.dark .hover\:text-\[\#767676\]:hover {
+  color: #a3a3a3 !important;
+}
+.dark .hover\:border-black:hover,
+.dark .hover\:border-slate-300:hover {
+  border-color: #f5f5f5 !important;
+}
+
+/* ---- FBR setup wizard chips / progress (dark theme) ----
+   Near-black slate fills and borders used by the step-number circles and the
+   active wizard card have no dark mapping; keep them neutral and visible. */
+.dark .bg-slate-800 {
+  background-color: #3a3a3a;
+}
+.dark .border-slate-800,
+.dark .border-slate-900 {
+  border-color: #f5f5f5;
 }
 
 /* ---- Brand logo on a white circular badge (dark theme) ---- */
