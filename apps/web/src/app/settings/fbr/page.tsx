@@ -687,7 +687,10 @@ function EnvPanel({
           <div>
             <label>Token {env.has_token ? "(leave blank to keep current)" : ""}</label>
             <input name="token" type="password" autoComplete="off" placeholder={env.has_token ? "••••••••" : "Paste token"} />
-            <p className="mt-1 text-xs text-[#525252]">Encrypted at rest — never shown again after saving.</p>
+            <p className="mt-1 text-xs text-[#525252]">
+              Encrypted at rest — never shown again after saving. Each {mode} key can be bound to only one account; if
+              another account already registered this token, saving is rejected.
+            </p>
           </div>
           <div className="md:col-span-2">
             <label>Whitelist IP</label>

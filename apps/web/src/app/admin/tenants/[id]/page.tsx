@@ -390,6 +390,7 @@ function FbrOverrideSection({
                 <div>
                   <label>Token {row?.config?.token && "(blank keeps current)"}</label>
                   <input name="token" type="password" placeholder={row?.config?.token ? "••••••••" : "Paste token"} />
+                  <p className="mt-1 text-xs text-slate-400">A key can be bound to one account only — assigning a token already used by another tenant is rejected.</p>
                 </div>
                 <button className="w-full bg-black text-white" disabled={busy === mode}>
                   {busy === mode ? "Saving..." : `Save ${mode} credentials`}

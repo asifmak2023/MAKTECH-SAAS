@@ -13,9 +13,20 @@ class FbrIntegration extends Model
         'mode',
         'status',
         'config',
+        'token_fingerprint',
         'last_test_response',
         'last_tested_at',
     ];
+
+    /**
+     * Keyed HMAC of a token value. Tokens are stored inside the encrypted
+     * `config` blob, so uniqueness across accounts is derived from this
+     * fingerprint (peppered with the app key) rather than the plaintext.
+     */
+    public static function fingerprintFor(string $token): string
+    {
+        return hash_hmac('sha256', trim($token), (string) config('app.key'));
+    }
 
     protected function casts(): array
     {

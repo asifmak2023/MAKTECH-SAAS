@@ -125,10 +125,20 @@ class FbrIntegrationController extends Controller
         );
         $config = $row->configArray();
 
-        foreach (['base_url', 'token', 'validate_endpoint', 'submit_endpoint', 'whitelist_ip'] as $key) {
+        foreach (['base_url', 'validate_endpoint', 'submit_endpoint', 'whitelist_ip'] as $key) {
             if (array_key_exists($key, $data) && $data[$key] !== null) {
                 $config[$key] = $data[$key];
             }
+        }
+
+        if (array_key_exists('token', $data) && $data['token'] !== null) {
+            $config['token'] = trim((string) $data['token']);
+        }
+
+        try {
+            $fingerprint = $this->fbr->claimToken($tenant, $row->integrator, $row->mode, $config['token'] ?? null);
+        } catch (InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
 
         $hasCredentials = $this->hasCredentials($mode, $config);
@@ -142,7 +152,17 @@ class FbrIntegrationController extends Controller
             $status = 'configured';
         }
 
-        $row->setConfigArray($config)->fill(['status' => $status])->save();
+        try {
+            $row->setConfigArray($config)->fill(['status' => $status, 'token_fingerprint' => $fingerprint])->save();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (! $this->isUniqueViolation($e)) {
+                throw $e;
+            }
+
+            return response()->json([
+                'message' => "This {$mode} key is already registered to another account. Each FBR {$mode} token can be bound to only one account.",
+            ], 422);
+        }
 
         return response()->json([
             'message' => 'FBR integration updated.',
@@ -309,5 +329,18 @@ class FbrIntegrationController extends Controller
         $base = ! empty($config['base_url']) || ! empty(config("pral.{$mode}.base_url"));
 
         return $token && $base;
+    }
+
+    /**
+     * Detect a constraint violation from the underlying driver (the token
+     * uniqueness index is the backstop behind the application-level claim).
+     */
+    protected function isUniqueViolation(\Illuminate\Database\QueryException $e): bool
+    {
+        $state = (string) ($e->errorInfo[0] ?? '');
+        $driver = (int) ($e->errorInfo[1] ?? 0);
+
+        return in_array($state, ['23000', '23505'], true)
+            || in_array($driver, [1062, 19, 1555, 2067, 2601], true);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services\Fbr;
 use App\Models\FbrIntegration;
 use App\Models\Tenant;
 use App\Services\Fbr\Integrators\PralIntegrator;
+use InvalidArgumentException;
 
 class FbrIntegrationService
 {
@@ -59,6 +60,38 @@ class FbrIntegrationService
         }
 
         return $adapter;
+    }
+
+    /**
+     * Claim a token for one environment. Returns the fingerprint to persist
+     * (null when no token is stored) or throws when another account already
+     * bound the same key to the same integrator + mode. One FBR key may be
+     * registered to exactly one workspace.
+     */
+    public function claimToken(Tenant $tenant, string $integrator, string $mode, ?string $token): ?string
+    {
+        $token = is_string($token) ? trim($token) : null;
+
+        if ($token === null || $token === '') {
+            return null;
+        }
+
+        $fingerprint = FbrIntegration::fingerprintFor($token);
+
+        $taken = FbrIntegration::query()
+            ->where('integrator', $integrator)
+            ->where('mode', $mode)
+            ->where('token_fingerprint', $fingerprint)
+            ->where('tenant_id', '!=', $tenant->id)
+            ->exists();
+
+        if ($taken) {
+            throw new InvalidArgumentException(
+                "This {$mode} key is already registered to another account. Each FBR {$mode} token can be bound to only one account — that workspace must release it, or you need a different token."
+            );
+        }
+
+        return $fingerprint;
     }
 
     /**

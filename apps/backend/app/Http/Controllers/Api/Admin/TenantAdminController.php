@@ -11,6 +11,7 @@ use App\Services\Fbr\FbrIntegrationService;
 use App\Services\TenantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 
 class TenantAdminController extends Controller
 {
@@ -201,14 +202,35 @@ class TenantAdminController extends Controller
         $row = $this->fbr->ensureRowFor($tenant);
         $config = $row->configArray();
 
-        foreach (['base_url', 'token', 'validate_endpoint', 'submit_endpoint'] as $key) {
+        foreach (['base_url', 'validate_endpoint', 'submit_endpoint'] as $key) {
             if (array_key_exists($key, $data) && $data[$key] !== null) {
                 $config[$key] = $data[$key];
             }
         }
 
+        if (array_key_exists('token', $data) && $data['token'] !== null) {
+            $config['token'] = trim((string) $data['token']);
+        }
+
+        try {
+            $fingerprint = $this->fbr->claimToken($tenant, $row->integrator, $row->mode, $config['token'] ?? null);
+        } catch (InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
         $status = ! empty($config['base_url']) && ! empty($config['token']) ? 'configured' : 'unconfigured';
-        $row->setConfigArray($config)->fill(['status' => $status])->save();
+
+        try {
+            $row->setConfigArray($config)->fill(['status' => $status, 'token_fingerprint' => $fingerprint])->save();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (! $this->isUniqueViolation($e)) {
+                throw $e;
+            }
+
+            return response()->json([
+                'message' => "This {$row->mode} key is already registered to another account. Each FBR {$row->mode} token can be bound to only one account.",
+            ], 422);
+        }
 
         return response()->json($tenant->fresh()->load('fbrIntegrations'));
     }
@@ -274,5 +296,18 @@ class TenantAdminController extends Controller
             'configured' => ($row?->status === 'configured'),
             'last_tested_at' => $row?->last_tested_at,
         ];
+    }
+
+    /**
+     * Detect a constraint violation from the underlying driver (the token
+     * uniqueness index is the backstop behind the application-level claim).
+     */
+    protected function isUniqueViolation(\Illuminate\Database\QueryException $e): bool
+    {
+        $state = (string) ($e->errorInfo[0] ?? '');
+        $driver = (int) ($e->errorInfo[1] ?? 0);
+
+        return in_array($state, ['23000', '23505'], true)
+            || in_array($driver, [1062, 19, 1555, 2067, 2601], true);
     }
 }
