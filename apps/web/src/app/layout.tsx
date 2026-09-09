@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import CreatorCredit from "@/components/CreatorCredit";
 import SupportWidget from "@/components/SupportWidget";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen antialiased">
         {children}
         <SupportWidget />
+        <CreatorCredit />
       </body>
     </html>
   );

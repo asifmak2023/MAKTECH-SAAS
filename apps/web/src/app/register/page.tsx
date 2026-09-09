@@ -7,25 +7,6 @@ import PasswordField from "@/components/PasswordField";
 import { api, clearSession, setSession } from "@/lib/api";
 import { PAKISTAN_PROVINCES } from "@/lib/provinces";
 
-function Credit() {
-  return (
-    <div className="group fixed bottom-4 left-5 z-40 hidden flex-col items-start gap-1.5 sm:flex">
-      <a
-        href="https://wa.me/923303696062"
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Made by Muhammad Asif — WhatsApp +92 330 3696062"
-        className="font-label text-[10px] font-semibold uppercase tracking-[0.16em] text-[#a3a3a3] transition-colors hover:text-black"
-      >
-        Made by Muhammad Asif
-      </a>
-      <span className="block max-w-0 overflow-hidden whitespace-nowrap text-[11px] font-medium text-black opacity-0 transition-all duration-300 group-hover:max-w-[14rem] group-hover:opacity-100">
-        WhatsApp · +92 330 3696062
-      </span>
-    </div>
-  );
-}
-
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -75,7 +56,6 @@ export default function RegisterPage() {
         </span>
       </div>
       <div className="relative flex flex-1 items-start justify-center px-4 pb-20 pt-2">
-        <Credit />
         <form onSubmit={onSubmit} className="auth-shadow w-full max-w-xl space-y-5 border border-[#e5e5e5] bg-white p-8 md:p-10">
           <div className="pb-1 text-center">
             <h1 className="text-xl font-semibold uppercase tracking-[0.06em] text-black font-label md:text-2xl md:tracking-[0.08em]">
