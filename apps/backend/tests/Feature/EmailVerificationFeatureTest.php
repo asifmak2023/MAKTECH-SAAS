@@ -64,7 +64,7 @@ class EmailVerificationFeatureTest extends TestCase
         Notification::assertSentTo($owner, VerifyEmailAddress::class, function (VerifyEmailAddress $n) use ($owner) {
             $mail = $n->toMail($owner);
 
-            return str_contains($mail->render()->toHtml(), 'images/logo.webp');
+            return str_contains($mail->render()->toHtml(), 'images/logo.png');
         });
 
         $this->getJson('/api/auth/me', $this->headers($token))
@@ -138,7 +138,7 @@ class EmailVerificationFeatureTest extends TestCase
         Notification::assertSentTo($owner, VerifyEmailAddress::class, function (VerifyEmailAddress $n) use ($owner) {
             $mail = $n->toMail($owner);
 
-            return str_contains($mail->render()->toHtml(), 'images/logo.webp');
+            return str_contains($mail->render()->toHtml(), 'images/logo.png');
         });
     }
 
