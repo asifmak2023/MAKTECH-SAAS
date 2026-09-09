@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { api } from "@/lib/api";
@@ -90,69 +90,424 @@ export default function FbrSetupPage() {
     );
   }
 
-  const ob = data.onboarding;
-
   return (
     <AppShell>
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <Link className="text-sm text-black underline underline-offset-4" href="/settings">← Settings</Link>
-        <p className="eyebrow mt-4 mb-2">Integration</p>
-        <h1 className="text-3xl font-medium tracking-tight">FBR digital invoicing setup</h1>
-        <p className="mt-1 text-sm text-[#767676]">
-          Configure and test your Pakistan Revenue Automation Limited (PRAL) credentials. Sandbox first, then activate production.
-        </p>
+      <div className="mx-auto max-w-3xl space-y-6">
+        <div>
+          <Link className="text-sm text-black underline underline-offset-4" href="/settings">← Settings</Link>
+          <p className="eyebrow mt-4 mb-2">Integration</p>
+          <h1 className="text-3xl font-medium tracking-tight">FBR digital invoicing setup</h1>
+          <p className="mt-1 text-sm leading-relaxed text-[#767676]">
+            Connect your workspace to Pakistan Revenue Automation Limited (PRAL) — sandbox first, then production.
+            This wizard matches the official FBR IRIS steps. You will switch between the{" "}
+            <strong className="text-slate-700">FBR IRIS portal</strong> (where FBR issues credentials) and{" "}
+            <strong className="text-slate-700">this page</strong> (where your credentials are configured and tested). Each step says exactly where to act.
+          </p>
+        </div>
+
+        {notice && <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{notice}</p>}
+        {error && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
+
+        <FbrWizard data={data} reload={reload} setNotice={setNotice} setError={setError} />
       </div>
+    </AppShell>
+  );
+}
 
-      <IpWhitelistBanner />
+type StepRow = {
+  key: string;
+  step: number;
+  title: string;
+  where: string;
+  done: boolean;
+  locked: boolean;
+};
 
-      {notice && <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{notice}</p>}
-      {error && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
+function FbrWizard({
+  data,
+  reload,
+  setNotice,
+  setError,
+}: {
+  data: FbrShow;
+  reload: () => Promise<unknown>;
+  setNotice: (m: string) => void;
+  setError: (m: string) => void;
+}) {
+  const ob = data.onboarding;
+  const [ipConfirmed, setIpConfirmed] = useState(false);
 
-      <OnboardingProgress ob={ob} />
+  const steps: StepRow[] = [
+    {
+      key: "profile",
+      step: 1,
+      title: "Seller profile",
+      where: "In this app",
+      done: ob.seller_profile_complete,
+      locked: false,
+    },
+    {
+      key: "sandbox",
+      step: 2,
+      title: "Sandbox token & API details",
+      where: "FBR IRIS → this app",
+      done: ob.sandbox_configured,
+      locked: !ob.seller_profile_complete,
+    },
+    {
+      key: "suite",
+      step: 3,
+      title: "Run sandbox scenario tests (SN001…)",
+      where: "In this app",
+      done: ob.sandbox_suite_passed,
+      locked: !ob.sandbox_configured,
+    },
+    {
+      key: "production",
+      step: 4,
+      title: "Production token & go live",
+      where: "FBR IRIS → this app",
+      done: ob.production_active,
+      locked: !ob.sandbox_suite_passed,
+    },
+    {
+      key: "ip",
+      step: 5,
+      title: "Whitelist your server IP",
+      where: "FBR IRIS",
+      done: ob.production_active && ipConfirmed,
+      locked: !ob.production_active,
+    },
+  ];
 
-      {!ob.seller_profile_complete && (
-        <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Complete your seller profile (NTN/CNIC and business name) in{" "}
-          <Link className="underline" href="/settings">settings</Link> before configuring FBR.
-        </p>
+  const pointer = steps.findIndex((s) => !s.done);
+  const initialKey = pointer >= 0 ? steps[pointer].key : "done";
+  const [activeKey, setActiveKey] = useState<string>(initialKey);
+  const prevPointer = useRef<number>(-1);
+
+  useEffect(() => {
+    const cur = prevPointer.current;
+    prevPointer.current = pointer;
+    if (pointer < 0 && cur >= 0) {
+      setActiveKey("done");
+      return;
+    }
+    if (pointer > cur && pointer >= 0) {
+      setActiveKey(steps[pointer].key);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointer]);
+
+  const allDone = pointer < 0;
+
+  return (
+    <div className="space-y-6">
+      <WizardProgress steps={steps} activeKey={activeKey} onSelect={setActiveKey} />
+
+      {allDone ? (
+        <div className="border border-emerald-600/40 bg-emerald-50/60 p-5">
+          <p className="font-label text-[11px] uppercase tracking-[0.14em] text-emerald-800">Wizard complete</p>
+          <h2 className="mt-1 text-lg font-semibold text-emerald-900">Production is active.</h2>
+          <p className="mt-2 text-sm leading-relaxed text-emerald-800">
+            New invoices now validate and post to PRAL production. If FBR has not yet approved your IP allowlist, PRAL may reject or time out
+            live calls until step 5 is approved — keep the allowlist request details handy.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">
+            Next up — step {steps[pointer].step} of {steps.length}
+          </p>
+          <h2 className="mt-1 text-xl font-semibold text-slate-800">{steps[pointer].title}</h2>
+          <p className="mt-1 text-xs text-slate-500">Where: {steps[pointer].where}</p>
+        </div>
       )}
 
+      {activeKey === "profile" && <ProfileStep done={ob.seller_profile_complete} />}
+
+      {activeKey === "sandbox" && (
+        <SandboxStep
+          data={data}
+          reload={reload}
+          setNotice={setNotice}
+          setError={setError}
+        />
+      )}
+
+      {activeKey === "suite" && (
+        <SuiteStep
+          ob={ob}
+          reload={reload}
+          setNotice={setNotice}
+          setError={setError}
+        />
+      )}
+
+      {activeKey === "production" && (
+        <ProductionStep
+          data={data}
+          reload={reload}
+          setNotice={setNotice}
+          setError={setError}
+        />
+      )}
+
+      {activeKey === "ip" && (
+        <WhitelistStep
+          data={data}
+          reload={reload}
+          ipConfirmed={ipConfirmed}
+          onConfirm={() => {
+            setIpConfirmed(true);
+            setNotice("IP allowlist step marked as submitted. FBR approval happens in IRIS.");
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function WizardProgress({
+  steps,
+  activeKey,
+  onSelect,
+}: {
+  steps: StepRow[];
+  activeKey: string;
+  onSelect: (key: string) => void;
+}) {
+  return (
+    <ol className="space-y-1">
+      {steps.map((s) => {
+        const active = s.key === activeKey;
+        return (
+          <li key={s.key}>
+            <button
+              type="button"
+              disabled={s.locked}
+              onClick={() => onSelect(s.key)}
+              className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition ${
+                s.locked
+                  ? "cursor-not-allowed border-slate-100 bg-slate-50/70 opacity-70"
+                  : active
+                    ? "border-slate-900 bg-white"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+              }`}
+            >
+              <span
+                className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold ${
+                  s.done ? "bg-emerald-500 text-white" : s.locked ? "bg-slate-200 text-slate-400" : "bg-slate-800 text-white"
+                }`}
+              >
+                {s.done ? "✓" : s.step}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={`block truncate text-sm font-medium ${s.done ? "text-emerald-800" : active ? "text-slate-900" : "text-slate-700"}`}>
+                  {s.step}. {s.title}
+                </span>
+                <span className="block text-[11px] text-slate-400">{s.where}</span>
+              </span>
+              {s.locked && <span className="text-[10px] uppercase tracking-wider text-slate-400">Locked</span>}
+            </button>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function ProfileStep({ done }: { done: boolean }) {
+  return (
+    <section className="border border-[#e5e5e5] bg-white p-5">
+      <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">Step 1 · Seller profile</p>
+      <h2 className="mt-1 text-lg font-semibold text-slate-800">Confirm your seller details in this app</h2>
+      <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        Your <strong>NTN/CNIC</strong> and <strong>business name</strong> must match your FBR records exactly — the sandbox and production
+        tokens are issued against this registration number. A mismatch causes PRAL error <code className="rounded bg-slate-100 px-1">0401</code>.
+      </p>
+      <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+        <li>
+          Open <Link className="font-medium text-black underline underline-offset-4" href="/settings">Settings → Seller profile</Link>.
+        </li>
+        <li>Enter your seller business name and NTN/CNIC (add province and address to match the token registration).</li>
+        <li>Return here — the next step unlocks once the profile is complete.</li>
+      </ol>
+      {done && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">Seller profile is complete.</p>}
+    </section>
+  );
+}
+
+function SandboxStep({
+  data,
+  reload,
+  setNotice,
+  setError,
+}: {
+  data: FbrShow;
+  reload: () => Promise<unknown>;
+  setNotice: (m: string) => void;
+  setError: (m: string) => void;
+}) {
+  const env = data.environments.sandbox;
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">Step 2 · Do these steps on FBR IRIS first</p>
+        <h2 className="mt-1 text-lg font-semibold text-slate-800">Get your sandbox API details &amp; token</h2>
+        <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+          <li>
+            Log in to FBR IRIS at{" "}
+            <a className="font-medium text-black underline underline-offset-4" href="https://iris.fbr.gov.pk" target="_blank" rel="noreferrer">
+              iris.fbr.gov.pk
+            </a>{" "}
+            with your Registration Number / NTN and IRIS password.
+          </li>
+          <li>Open <strong>Digital Invoicing</strong> from the IRIS menu.</li>
+          <li>
+            Open <strong>Integration Status</strong>, select your Registration Number, and review the <strong>Technical Details</strong> and{" "}
+            <strong>IP Details</strong>. You will see the <strong>Sandbox Environment</strong> section here.
+          </li>
+          <li>
+            In the Sandbox Environment section click <strong>View Web API Details</strong> and copy the <strong>Sandbox API URL</strong> and{" "}
+            <strong>Sandbox Token</strong>. These are the values for this page.
+          </li>
+        </ol>
+      </section>
+
       <EnvPanel
-        title="Sandbox"
-        env={data.environments.sandbox}
-        guide={
-          <Guide kind="sandbox" />
-        }
+        title="Sandbox credentials"
+        env={env}
+        guide={<SandboxGuide />}
         canEdit
         onChanged={reload}
         setNotice={setNotice}
         setError={setError}
       />
-
-      <SuitePanel reload={reload} setNotice={setNotice} setError={setError} />
-
-      <ProductionPanel data={data} reload={async () => reload()} setNotice={setNotice} setError={setError} />
-
-      <details className={card}>
-        <summary className="cursor-pointer text-sm font-semibold text-slate-700">
-          How do I get a PRAL token? (sandbox &amp; production)
-        </summary>
-        <div className="mt-3 space-y-3 text-sm text-slate-600">
-          <Guide kind="general" />
-        </div>
-      </details>
     </div>
-    </AppShell>
   );
 }
 
-function IpWhitelistBanner() {
+function SandboxGuide() {
+  return (
+    <ol className="list-decimal space-y-1.5 pl-5 text-sm text-slate-600">
+      <li>Paste the sandbox token and API URL you copied from IRIS → Digital Invoicing → Integration Status → Sandbox Environment → View Web API Details.</li>
+      <li>Leave the base URL on the PRAL gateway default (<code className="rounded bg-slate-100 px-1">https://gw.fbr.gov.pk</code>). Sandbox endpoints carry the <code className="rounded bg-slate-100 px-1">_sb</code> suffix.</li>
+      <li>Save, then click <strong>Run token test</strong> to confirm IRIS accepts the token for your seller registration.</li>
+      <li>Sandbox submissions never post invoices — everything stays in PRAL&apos;s test environment.</li>
+    </ol>
+  );
+}
+
+function SuiteStep({
+  ob,
+  reload,
+  setNotice,
+  setError,
+}: {
+  ob: FbrShow["onboarding"];
+  reload: () => Promise<unknown>;
+  setNotice: (m: string) => void;
+  setError: (m: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {!ob.sandbox_tested && (
+        <p className="rounded-lg bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+          Tip: run the <strong>token test</strong> first (step 2) so a transport or token problem is obvious before you run the full suite.
+        </p>
+      )}
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">Step 3 · In this app</p>
+        <h2 className="mt-1 text-lg font-semibold text-slate-800">Prove your integration with the scenario suite</h2>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          FBR expects your application to handle the invoice scenarios (SN001, SN002, …) that apply to your Business Nature and sector. Run
+          the suite below against the sandbox — validation only, nothing is posted. Failed scenarios usually mean the fixture&apos;s sale type is
+          outside the categories your registration is set up for.
+        </p>
+      </section>
+
+      <SuitePanel reload={reload} setNotice={setNotice} setError={setError} />
+
+      <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/60 p-4">
+        <p className="text-sm font-semibold text-emerald-800">Keep your results as proof</p>
+        <p className="mt-1 text-sm leading-relaxed text-emerald-800">
+          Save the pass list (scenario IDs + returned statuses) shown above. Once the required sandbox scenarios succeed, FBR/PRAL issues your{" "}
+          <strong>production token automatically</strong> — there is no fixed 24/48-hour waiting period. Move to step 4 and check{" "}
+          <strong>Integration Status → Production Environment</strong> in IRIS.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ProductionStep({
+  data,
+  reload,
+  setNotice,
+  setError,
+}: {
+  data: FbrShow;
+  reload: () => Promise<unknown>;
+  setNotice: (m: string) => void;
+  setError: (m: string) => void;
+}) {
+  const ob = data.onboarding;
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">Step 4 · IRIS first, then this app</p>
+        <h2 className="mt-1 text-lg font-semibold text-slate-800">Production token &amp; going live</h2>
+        <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+          <li>
+            In IRIS open <strong>Integration Status → Production Environment</strong> for your registration number.
+          </li>
+          <li>
+            After your sandbox test invoices were submitted successfully, FBR/PRAL <strong>generates the production token automatically</strong>{" "}
+            — you do not need to request it or wait a fixed number of hours. If it is not there yet, confirm every required SN scenario passed in step 3.
+          </li>
+          <li>Copy the production token and paste it below. Never reuse the sandbox token — they are not interchangeable.</li>
+          <li>Save, run the production token test, then click <strong>Activate production</strong>. Live invoices then post to PRAL.</li>
+        </ol>
+      </section>
+
+      <ProductionPanel data={data} reload={reload} setNotice={setNotice} setError={setError} />
+
+      {ob.production_active && (
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <p className="text-sm font-medium text-slate-700">Before you go live, remember</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed text-slate-600">
+            <li>Your server IP must be allowlisted by PRAL (step 5) or live calls can be rejected or time out.</li>
+            <li>Tokens are encrypted and never shown again after saving — store a copy somewhere safe.</li>
+            <li>Switch back to sandbox anytime by activating it here if you need to re-test.</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WhitelistStep({
+  data,
+  reload,
+  ipConfirmed,
+  onConfirm,
+}: {
+  data: FbrShow;
+  reload: () => Promise<unknown>;
+  ipConfirmed: boolean;
+  onConfirm: () => void;
+}) {
+  const prodCfg = data.environments.production?.config ?? {};
+  const current = prodCfg.whitelist_ip?.trim() || DEFAULT_WHITELIST_IP;
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(DEFAULT_WHITELIST_IP);
+      await navigator.clipboard.writeText(current);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -160,185 +515,69 @@ function IpWhitelistBanner() {
     }
   }
 
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border border-black bg-white px-4 py-3">
-      <div className="min-w-0">
-        <p className="font-label text-[11px] uppercase tracking-[0.14em] text-[#525252]">PRAL IP allowlist</p>
-        <p className="mt-1 text-sm leading-relaxed text-[#525252]">
-          Public outbound IP of this server. Give this to PRAL in IRIS → Digital Invoicing so gateway calls from your workspace are
-          allowlisted.
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <code className="border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1.5 text-sm tabular-nums">{DEFAULT_WHITELIST_IP}</code>
-        <button type="button" className="btn-ghost" onClick={copy}>
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Guide({ kind }: { kind: "sandbox" | "general" }) {
-  if (kind === "sandbox") {
-    return (
-      <ol className="list-decimal space-y-1.5 pl-5 text-sm text-slate-600">
-        <li>
-          Sign in to the FBR <strong>IRIS</strong> portal (<code className="rounded bg-slate-100 px-1">iris.fbr.gov.pk</code>) and open{" "}
-          <strong>Registration → Digital Invoicing</strong>. If your entity is eligible (active NTN + STRN), register and select{" "}
-          <strong>PRAL</strong> as your licensed integrator.
-        </li>
-        <li>
-          Enter your seller business name, NTN/CNIC, STRN, province and address <strong>exactly</strong> as they appear on FBR records — the
-          sandbox token is issued against this registration number.
-        </li>
-        <li>
-          Generate your sandbox API credentials/token in the DI registration, paste it here and save using the default gateway{" "}
-          <code className="rounded bg-slate-100 px-1">https://gw.fbr.gov.pk</code> (sandbox endpoints carry the{" "}
-          <code className="rounded bg-slate-100 px-1">_sb</code> suffix).
-        </li>
-        <li>
-          Run the <strong>token test</strong>, then the <strong>scenario suite</strong> — validation only, nothing is posted in the sandbox.
-        </li>
-      </ol>
-    );
+  async function save(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const ip = String(new FormData(e.currentTarget).get("whitelist_ip") ?? "").trim();
+    if (!ip) return;
+    setSaving(true);
+    try {
+      await api("/api/settings/fbr/production", { method: "PUT", body: JSON.stringify({ whitelist_ip: ip }) });
+      await reload();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
-    <div className="space-y-4">
-      <p className="rounded-lg bg-slate-50 px-3 py-2 text-[13px] leading-relaxed text-slate-600">
-        PRAL does not hand out tokens on request. A token is issued for your <strong>FBR Digital Invoicing registration</strong> and is bound
-        to your seller registration number — one token per environment: a <strong>sandbox</strong> token for testing and a separate{" "}
-        <strong>production</strong> token for live invoicing. This platform cannot request a token on your behalf.
+    <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">Step 5 · Do this on FBR IRIS</p>
+      <h2 className="mt-1 text-lg font-semibold text-slate-800">Whitelist your production server IP</h2>
+      <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        PRAL only accepts gateway calls from IP addresses it has allowlisted for your registration. This is submitted in IRIS, not in this app
+        — FBR approves the request before production traffic flows reliably.
       </p>
 
-      <div>
-        <p className="mb-1.5 text-[13px] font-semibold text-slate-700">1 · Register for Digital Invoicing (needed for both tokens)</p>
-        <ol className="list-decimal space-y-1.5 pl-5 text-[13px] leading-relaxed">
-          <li>
-            Confirm your business is in scope. FBR notifies categories of taxpayers that must use digital invoicing (based on SROs and
-            turnover); only entities with an <strong>active NTN and Sales Tax Registration Number (STRN)</strong> can register.
-          </li>
-          <li>
-            Log in to the FBR <strong>IRIS</strong> portal at{" "}
-            <a className="font-medium text-black underline underline-offset-4" href="https://iris.fbr.gov.pk" target="_blank" rel="noreferrer">
-              iris.fbr.gov.pk
-            </a>{" "}
-            with your NTN credentials and open <strong>Registration → Digital Invoicing</strong> to start the taxpayer registration flow.
-          </li>
-          <li>
-            Choose your integration path: <strong>PRAL</strong> (FBR&apos;s government technology partner, free of cost) or an{" "}
-            <strong>FBR-licensed integrator</strong>. Whichever you choose, the credentials you paste in this page are the ones issued{" "}
-            <em>for your registration number</em>.
-          </li>
-          <li>
-            For a direct PRAL integration, accept the integrator terms in IRIS and provide your outbound server{" "}
-            <strong>public IP(s) or domain</strong> — PRAL allowlists them on the gateway before the token works.
-          </li>
-        </ol>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+        <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-500">Public outbound IP of this server</p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          Give this exact value to PRAL. If you are on a different hosting server, use that server&apos;s public outbound IP instead.
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <code className="border border-slate-200 bg-white px-2.5 py-1.5 text-sm tabular-nums">{current}</code>
+          <button type="button" className="btn-ghost" onClick={copy}>
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
       </div>
 
-      <div>
-        <p className="mb-1.5 text-[13px] font-semibold text-emerald-700">2 · Sandbox token (testing)</p>
-        <ol className="list-decimal space-y-1.5 pl-5 text-[13px] leading-relaxed">
-          <li>Generate the sandbox API token in the same DI registration and paste it in the Sandbox panel above.</li>
-          <li>
-            Save it, then run the <strong>token test</strong> (validates the token via <em>validateinvoicedata</em> using your seller
-            profile) and the <strong>scenario suite</strong> to confirm the invoice types and sale types your business uses.
-          </li>
-          <li>
-            Sandbox submissions are never recorded — use them to fix HS codes, UOMs, tax rates and buyer NTN/registration-type mismatches
-            before going live.
-          </li>
-        </ol>
-      </div>
+      <ol className="mt-4 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+        <li>In IRIS → Digital Invoicing, open the <strong>IP Details / IP Whitelisting</strong> section.</li>
+        <li>Enter your <strong>hosting server company</strong>, <strong>hosting server country</strong>, and the <strong>public IP</strong> above.</li>
+        <li>Submit the whitelisting request and wait for FBR to approve/activate it.</li>
+      </ol>
 
-      <div>
-        <p className="mb-1.5 text-[13px] font-semibold text-black">3 · Production token (live)</p>
-        <ol className="list-decimal space-y-1.5 pl-5 text-[13px] leading-relaxed">
-          <li>
-            Complete sandbox onboarding first — FBR/PRAL normally clears the sandbox <strong>scenario suite</strong> before a production
-            token is released for your registration.
-          </li>
-          <li>
-            In IRIS → Digital Invoicing, request production access. After FBR/PRAL verification a <strong>separate production token</strong>{" "}
-            is issued for the same registration number.
-          </li>
-          <li>
-            Paste it in the Production panel (never reuse the sandbox token) and click{" "}
-            <strong>Activate production</strong> — invoices created after activation validate and post to FBR in real time (returning the
-            FBR invoice reference and QR data).
-          </li>
-        </ol>
-      </div>
+      <form onSubmit={save} className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+        <div>
+          <label>Record the IP this workspace posts from (optional)</label>
+          <input name="whitelist_ip" defaultValue={current} placeholder={DEFAULT_WHITELIST_IP} />
+        </div>
+        <div className="flex items-end">
+          <button className="bg-black text-white" disabled={saving}>{saving ? "Saving…" : "Save IP"}</button>
+        </div>
+      </form>
 
-      <div className="rounded-lg border border-amber-200/70 bg-amber-50/60 px-3 py-2.5">
-        <p className="text-[13px] font-semibold text-amber-800">Checklist &amp; gotchas</p>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] leading-relaxed text-amber-800">
-          <li>
-            Your seller NTN/CNIC, business name, province and address must <strong>exactly match</strong> the registration the token was
-            issued for — otherwise PRAL returns error <code className="rounded bg-amber-100 px-1">0401</code>.
-          </li>
-          <li>
-            If your business integrates through an FBR-licensed integrator, paste the credentials that integrator issues for your
-            registration instead of PRAL-generated ones.
-          </li>
-          <li>
-            Tokens are stored encrypted and are never displayed again once saved. If you lose one, re-issue it through the same IRIS
-            registration flow.
-          </li>
-          <li>
-            Production endpoints have <strong>no</strong> <code className="rounded bg-amber-100 px-1">_sb</code> suffix; sandbox and
-            production tokens are never interchangeable.
-          </li>
-          <li>
-            Reference portals: FBR IRIS (<code className="rounded bg-amber-100 px-1">iris.fbr.gov.pk</code>) · FBR Digital Invoicing
-            section on{" "}
-            <a className="font-medium underline" href="https://www.fbr.gov.pk" target="_blank" rel="noreferrer">
-              fbr.gov.pk
-            </a>{" "}
-            · PRAL DI-CRM login at{" "}
-            <a className="font-medium underline" href="https://pral.com.pk" target="_blank" rel="noreferrer">
-              pral.com.pk
-            </a>
-            .
-          </li>
-        </ul>
-      </div>
-    </div>
+      {ipConfirmed ? (
+        <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Marked as submitted. Approval happens on the FBR side — if you see transport/IP errors later, the allowlist may still be pending.
+        </p>
+      ) : (
+        <button type="button" onClick={onConfirm} className="mt-4 bg-emerald-600 px-4 py-2 text-sm text-white">
+          I&apos;ve submitted the allowlist request in IRIS
+        </button>
+      )}
+    </section>
   );
 }
-
-function OnboardingProgress({ ob }: { ob: FbrShow["onboarding"] }) {
-  const steps = [
-    { label: "Seller profile", done: ob.seller_profile_complete },
-    { label: "Sandbox token", done: ob.sandbox_configured },
-    { label: "Token test", done: ob.sandbox_tested },
-    { label: "Scenario suite", done: ob.sandbox_suite_passed },
-    { label: "Production ready", done: ob.production_configured },
-  ];
-
-  return (
-    <div className={card}>
-      <div className="flex items-center justify-between gap-2">
-        {steps.map((s, i) => (
-          <div key={s.label} className="flex flex-1 items-center gap-2">
-            <span
-              className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold ${
-                s.done ? "bg-emerald-500 text-white" : i === 0 && !s.done ? "bg-amber-400 text-white" : "bg-slate-200 text-slate-500"
-              }`}
-            >
-              {s.done ? "✓" : i + 1}
-            </span>
-            <span className={`hidden text-xs sm:block ${s.done ? "text-emerald-700" : "text-slate-500"}`}>{s.label}</span>
-            {i < steps.length - 1 && <span className="h-px flex-1 bg-slate-200" />}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function EnvPanel({
   title,
   env,
