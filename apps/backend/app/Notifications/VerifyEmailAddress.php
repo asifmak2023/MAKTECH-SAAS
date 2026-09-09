@@ -17,15 +17,13 @@ class VerifyEmailAddress extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = $this->verificationUrl($notifiable);
-
         return (new MailMessage)
             ->subject('Verify your email address')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('Please confirm this email belongs to your '.config('app.name').' workspace.')
-            ->action('Verify email', $url)
-            ->line('This link expires in '.(int) config('saas.auth.verification_expire_minutes', 60).' minutes.')
-            ->line('If you did not create an account, you can ignore this message.');
+            ->view('mail.auth.verify-email', [
+                'name' => $notifiable->name,
+                'url' => $this->verificationUrl($notifiable),
+                'minutes' => (int) config('saas.auth.verification_expire_minutes', 60),
+            ]);
     }
 
     public static function makeSignature(int|string $id, string $emailHash, int $expires): string

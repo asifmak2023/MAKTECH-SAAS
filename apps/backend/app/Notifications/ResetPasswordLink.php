@@ -27,11 +27,13 @@ class ResetPasswordLink extends Notification
 
         return (new MailMessage)
             ->subject('Reset your '.config('app.name').' password')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('We received a request to reset the password for '.$this->email.'.')
             ->action('Reset password', $this->resetUrl())
-            ->line('This link expires in '.$expires.' minutes.')
-            ->line('If you did not request a password reset, you can ignore this message.');
+            ->view('mail.auth.reset-password', [
+                'name' => $notifiable->name,
+                'email' => $this->email,
+                'url' => $this->resetUrl(),
+                'minutes' => $expires,
+            ]);
     }
 
     protected function resetUrl(): string

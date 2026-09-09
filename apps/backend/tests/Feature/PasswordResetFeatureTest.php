@@ -55,7 +55,7 @@ class PasswordResetFeatureTest extends TestCase
             return str_contains($mail->actionUrl ?? '', '/reset-password?')
                 && str_contains($mail->actionUrl ?? '', 'email=owner%40reset.local')
                 && str_contains($mail->actionUrl ?? '', 'tenant=reset-co')
-                && str_contains($mail->render()->toHtml(), 'images/logo.png');
+                && str_contains((string) $mail->render(), 'images/logo.png');
         });
 
         $this->assertDatabaseHas('password_reset_tokens', ['email' => $user->email]);
