@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setSession } from "@/lib/api";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 type LoginRes = {
   token: string;
@@ -104,6 +105,7 @@ export default function LoginPage() {
           <button className="w-full bg-black text-white transition-colors hover:bg-[#262626]" disabled={loading}>
             {loading ? "Signing in..." : "Sign in"}
           </button>
+          <GoogleSignInButton onError={setError} />
           <p className="text-sm text-[#767676]">
             New seller? <Link className="text-black underline underline-offset-4" href="/register">Create account</Link>
             {" · "}

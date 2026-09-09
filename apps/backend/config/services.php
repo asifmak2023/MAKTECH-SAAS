@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', rtrim((string) env('APP_URL'), '/').'/api/auth/google/callback'),
+        'enabled' => env('GOOGLE_ENABLED', ! empty(env('GOOGLE_CLIENT_ID')) && ! empty(env('GOOGLE_CLIENT_SECRET'))),
+    ],
+
 ];

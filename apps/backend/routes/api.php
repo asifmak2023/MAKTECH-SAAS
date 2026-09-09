@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Admin\SupportAdminController;
 use App\Http\Controllers\Api\Admin\TenantAdminController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\CustomerController;
@@ -36,6 +37,9 @@ Route::prefix('auth')->group(function () {
     Route::post('email/verify', [AuthController::class, 'verifyEmail'])->middleware('throttle:12,1');
     Route::post('password/forgot', [AuthController::class, 'sendPasswordResetLink'])->middleware('throttle:3,1');
     Route::post('password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
+    Route::get('google/status', [GoogleAuthController::class, 'status']);
+    Route::get('google/redirect', [GoogleAuthController::class, 'redirect'])->middleware('throttle:10,1');
+    Route::get('google/callback', [GoogleAuthController::class, 'callback']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

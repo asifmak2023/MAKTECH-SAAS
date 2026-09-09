@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PasswordField from "@/components/PasswordField";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { api, clearSession, setSession } from "@/lib/api";
 import { PAKISTAN_PROVINCES } from "@/lib/provinces";
 
@@ -128,6 +129,7 @@ export default function RegisterPage() {
           <button className="w-full bg-black text-white transition-colors hover:bg-[#262626]" disabled={loading}>
             {loading ? "Creating..." : "Create account"}
           </button>
+          <GoogleSignInButton onError={setError} />
           <p className="text-sm text-[#767676]">
             Already registered? <Link className="text-black underline underline-offset-4" href="/login">Sign in</Link>
           </p>
