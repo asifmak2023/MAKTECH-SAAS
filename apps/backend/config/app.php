@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'PRAL Digital Invoicing System'),
+    'name' => env('APP_NAME', 'FBR Digital Invoicing System'),
 
     /*
     |--------------------------------------------------------------------------

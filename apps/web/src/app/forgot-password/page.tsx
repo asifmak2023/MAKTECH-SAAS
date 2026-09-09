@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md space-y-5 border border-[#e5e5e5] bg-white p-8">
         <div className="pb-1 text-center">
           <div className="space-y-1">
-            <p className="eyebrow">PRAL Digital Invoicing System</p>
+            <p className="eyebrow">FBR Digital Invoicing System</p>
             <h1 className="text-2xl font-medium tracking-tight">Forgot your password?</h1>
           </div>
         </div>

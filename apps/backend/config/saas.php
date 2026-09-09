@@ -14,7 +14,7 @@ return [
 
     'currency' => env('SAAS_CURRENCY', 'PKR'),
 
-    'platform_name' => env('APP_NAME', 'PRAL Digital Invoicing System'),
+    'platform_name' => env('APP_NAME', 'FBR Digital Invoicing System'),
 
     'support_email' => env('SAAS_SUPPORT_EMAIL', 'support@example.com'),
 

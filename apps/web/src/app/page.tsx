@@ -66,7 +66,7 @@ export default function Home() {
           <Link href="/" className="flex items-center gap-3">
             <BrandMark />
             <span className="hidden text-[11px] uppercase tracking-[0.16em] text-[#767676] sm:inline font-label">
-              PRAL Digital Invoicing System
+              FBR Digital Invoicing System
             </span>
           </Link>
           <nav className="flex items-center gap-6 text-[11px] font-semibold uppercase tracking-[0.12em] font-label">
@@ -100,7 +100,7 @@ export default function Home() {
             <div className="max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-2">
                 <span className="h-1.5 w-1.5 bg-black" />
-                <span className="eyebrow">PRAL Digital Invoicing System</span>
+                <span className="eyebrow">FBR Digital Invoicing System</span>
               </div>
               <h1 className="text-balance text-4xl font-medium leading-[1.08] tracking-tight text-black sm:text-5xl md:text-6xl">
                 Invoicing, without the complexity.
@@ -442,7 +442,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-12 border-t border-[#e5e5e5] pt-6 text-xs text-[#767676]">
-            PRAL Digital Invoicing System · FBR-compliant invoicing workspace for Pakistan.
+            FBR Digital Invoicing System · FBR-compliant invoicing workspace for Pakistan.
           </div>
         </div>
       </footer>

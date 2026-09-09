@@ -25,7 +25,7 @@ export default function Login() {
 
   return (
     <View className="flex-1 justify-center bg-white px-6">
-      <Text className="mb-1 text-center text-xl font-bold uppercase tracking-widest">PRAL Digital Invoicing System</Text>
+      <Text className="mb-1 text-center text-xl font-bold uppercase tracking-widest">FBR Digital Invoicing System</Text>
       <Text className="mb-8 text-center text-sm text-neutral-500">Sign in to your workspace.</Text>
 
       <Text className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Username</Text>

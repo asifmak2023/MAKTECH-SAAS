@@ -51,7 +51,7 @@ export default function PricingPage() {
           <Link href="/" className="flex items-center gap-3">
             <BrandMark />
             <span className="hidden text-[11px] uppercase tracking-[0.16em] text-[#767676] sm:inline font-label">
-              PRAL Digital Invoicing System
+              FBR Digital Invoicing System
             </span>
           </Link>
           <nav className="flex items-center gap-6 text-[11px] font-semibold uppercase tracking-[0.12em] font-label">
@@ -166,7 +166,7 @@ export default function PricingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-6 py-12 sm:flex-row sm:items-center md:px-10 lg:px-12">
           <Link href="/" className="flex items-center gap-3">
             <BrandMark size={32} />
-            <span className="text-[11px] uppercase tracking-[0.16em] text-[#767676] font-label">PRAL Digital Invoicing System</span>
+            <span className="text-[11px] uppercase tracking-[0.16em] text-[#767676] font-label">FBR Digital Invoicing System</span>
           </Link>
           <nav className="flex items-center gap-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#525252] font-label">
             <Link className="transition-colors hover:text-black" href="/">Home</Link>

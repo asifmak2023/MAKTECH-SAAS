@@ -54,14 +54,14 @@ export default function LoginPage() {
           Back
         </Link>
         <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
-          PRAL Digital Invoicing System
+          FBR Digital Invoicing System
         </span>
       </div>
       <div className="relative flex flex-1 items-center justify-center px-4 pb-16">
         <form onSubmit={onSubmit} className="auth-shadow w-full max-w-md space-y-5 border border-[#e5e5e5] bg-white p-8 md:p-10">
           <div className="pb-1 text-center">
             <h1 className="text-xl font-semibold uppercase tracking-[0.06em] text-black font-label md:text-2xl md:tracking-[0.08em]">
-              PRAL Digital Invoicing System
+              FBR Digital Invoicing System
             </h1>
             <p className="mt-3 text-sm text-[#767676]">Sign in to your workspace.</p>
           </div>

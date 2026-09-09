@@ -12,7 +12,7 @@ export default function RootLayout() {
           headerTitleStyle: { fontWeight: "600" },
         }}
       >
-        <Stack.Screen name="index" options={{ title: "PRAL Invoicing" }} />
+        <Stack.Screen name="index" options={{ title: "FBR Invoicing" }} />
         <Stack.Screen name="login" options={{ title: "Sign in" }} />
         <Stack.Screen name="billing" options={{ title: "Billing" }} />
         <Stack.Screen name="create" options={{ title: "New invoice" }} />

@@ -10,7 +10,7 @@ export default function BrandMark({ size = 40 }: { size?: number }) {
   const mark = (
     <Image
       src={logo}
-      alt="PRAL"
+      alt="FBR"
       width={size}
       height={size}
       className="block shrink-0"
@@ -27,7 +27,7 @@ export default function BrandMark({ size = 40 }: { size?: number }) {
     <span
       className="logo-badge"
       role="img"
-      aria-label="PRAL"
+      aria-label="FBR"
       style={{ width: size, height: size }}
     >
       {mark}

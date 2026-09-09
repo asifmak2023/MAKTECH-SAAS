@@ -4,7 +4,7 @@ import CreatorCredit from "@/components/CreatorCredit";
 import SupportWidget from "@/components/SupportWidget";
 
 export const metadata: Metadata = {
-  title: "PRAL Digital Invoicing System",
+  title: "FBR Digital Invoicing System",
   description: "FBR / PRAL digital invoicing for Pakistani businesses",
 };
 

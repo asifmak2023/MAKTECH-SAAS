@@ -30,7 +30,7 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <div class="brand">PRAL Digital Invoicing System</div>
+            <div class="brand">FBR Digital Invoicing System</div>
             <div>{{ $invoice->seller_business_name }}</div>
             <div class="muted">NTN/CNIC: {{ $invoice->seller_ntn_cnic }}</div>
             <div class="muted">{{ $invoice->seller_address }}, {{ $invoice->seller_province }}</div>
@@ -114,7 +114,7 @@
     </table>
 
     <div class="footer">
-        Generated for PRAL Digital Invoicing System (FBR). QR encodes {{ $invoice->fbr_invoice_number ?: 'a temporary identifier until FBR issues the invoice number' }}.
+        Generated for FBR Digital Invoicing System (FBR). QR encodes {{ $invoice->fbr_invoice_number ?: 'a temporary identifier until FBR issues the invoice number' }}.
     </div>
 </body>
 </html>
