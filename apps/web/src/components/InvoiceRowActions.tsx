@@ -36,17 +36,17 @@ export default function InvoiceRowActions({
 
   return (
     <span className="flex items-center justify-end gap-2">
-      <Link href={`/invoices/${invoice.id}/edit`} className="rounded-md bg-slate-100 px-2 py-1 text-xs">
+      <Link href={`/invoices/${invoice.id}/edit`} className="text-xs font-medium uppercase tracking-wider text-black underline underline-offset-2 font-label">
         Edit
       </Link>
       <button
-        className="rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700"
+        className="border border-black px-2 py-1 text-xs text-black"
         onClick={onDelete}
         disabled={busy}
       >
         {busy ? "Deleting..." : "Delete"}
       </button>
-      {error && <span className="text-xs text-rose-600">{error}</span>}
+      {error && <span className="text-xs text-black">{error}</span>}
     </span>
   );
 }

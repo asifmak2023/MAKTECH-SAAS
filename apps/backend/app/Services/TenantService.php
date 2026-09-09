@@ -49,6 +49,7 @@ class TenantService
             $tenant = $this->createTenant($data);
 
             if (! empty($owner['name']) && ! empty($owner['email'])) {
+                $owner['email_verified'] = $owner['email_verified'] ?? true;
                 $user = $this->createOwner($tenant, $owner);
                 $tenant->update(['owner_user_id' => $user->id]);
             }
@@ -82,14 +83,25 @@ class TenantService
 
     public function createOwner(Tenant $tenant, array $data): User
     {
-        $user = User::query()->create([
+        $attributes = [
             'tenant_id' => $tenant->id,
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => $data['password'] ?? Str::password(16),
+            'password' => $data['password'] ?? Str::password(12),
             'role' => 'admin',
             'phone' => $data['phone'] ?? null,
-        ]);
+        ];
+
+        $username = trim((string) ($data['username'] ?? $tenant->slug ?? ''));
+        if ($username !== '' && ! User::withoutGlobalScopes()->where('username', $username)->exists()) {
+            $attributes['username'] = $username;
+        }
+
+        $user = User::withoutGlobalScopes()->create($attributes);
+
+        if (! empty($data['email_verified'])) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
 
         $ownerRole = Role::query()->where('tenant_id', null)->where('code', 'tenant_owner')->first();
         if ($ownerRole) {

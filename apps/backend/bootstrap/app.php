@@ -4,6 +4,7 @@ use App\Exceptions\PaymentException;
 use App\Exceptions\TenantStatusException;
 use App\Exceptions\UsageLimitExceededException;
 use App\Http\Middleware\EnsureActiveTenant;
+use App\Http\Middleware\EnsureEmailVerified;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureSeller;
 use App\Http\Middleware\EnsureTenant;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.active' => EnsureActiveTenant::class,
             'seller' => EnsureSeller::class,
             'platform.admin' => EnsurePlatformAdmin::class,
+            'verified' => EnsureEmailVerified::class,
         ]);
 
         $middleware->api(prepend: [

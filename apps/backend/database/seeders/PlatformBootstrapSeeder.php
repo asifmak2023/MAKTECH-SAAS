@@ -5,9 +5,11 @@ namespace Database\Seeders;
 use App\Models\PaymentGateway;
 use App\Models\PlatformSetting;
 use App\Models\Role;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Services\RoleService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PlatformBootstrapSeeder extends Seeder
 {
@@ -63,11 +65,39 @@ class PlatformBootstrapSeeder extends Seeder
                 'role' => $user->role ?? 'admin',
                 'is_platform_admin' => true,
                 'is_active' => true,
+                'email_verified_at' => $user->email_verified_at ?? now(),
             ])->save();
 
             if ($superAdminRole && ! $user->roles()->where('role_id', $superAdminRole->id)->exists()) {
                 $user->roles()->attach($superAdminRole->id);
             }
+
+            if (! $user->username) {
+                $this->assignUniqueUsername($user);
+            }
         }
+    }
+
+    protected function assignUniqueUsername(User $user): void
+    {
+        $local = (string) Str::of((string) $user->email)->before('@')->lower();
+        $base = preg_replace('/[^a-z0-9]+/', '-', $local) ?: 'admin';
+        $base = trim((string) $base, '-') ?: 'admin';
+
+        $taken = User::withoutGlobalScopes()
+            ->whereNotNull('username')
+            ->pluck('username')
+            ->merge(Tenant::query()->pluck('slug'))
+            ->map(fn ($value) => (string) $value)
+            ->all();
+
+        $candidate = Str::substr($base, 0, 48);
+        $counter = 2;
+        while (in_array($candidate, $taken, true)) {
+            $candidate = Str::substr($base, 0, 44).'-'.$counter;
+            $counter++;
+        }
+
+        $user->forceFill(['username' => $candidate])->save();
     }
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 import InvoiceRowActions from "@/components/InvoiceRowActions";
+import SearchInput from "@/components/SearchInput";
 import { api } from "@/lib/api";
 import { formatStatus, money, statusStyles } from "@/lib/status";
 
@@ -31,58 +32,52 @@ export default function InvoicesPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Invoices</h1>
-        <Link href="/invoices/create" className="rounded-md bg-win-600 px-4 py-2 text-sm text-white">
-          Create invoice
-        </Link>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow mb-2">Ledger</p>
+          <h1 className="text-3xl font-medium tracking-tight">Invoices</h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <SearchInput value={query} onChange={setQuery} placeholder="Search buyer, invoice ref or FBR no…" className="w-full sm:w-80" />
+          <Link href="/invoices/create" className="btn-primary">
+            Create invoice
+          </Link>
+        </div>
       </div>
-      <div className="mb-4 relative max-w-md">
-        <svg viewBox="0 0 24 24" fill="none" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search buyer, invoice ref or FBR no…"
-          className="pl-9"
-        />
-      </div>
-      <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-        <table className="w-full text-sm">
+      <div className="overflow-hidden border border-[#e5e5e5] bg-white">
+        <table className="w-full text-left text-sm">
           <thead>
-            <tr className="text-left text-slate-500">
-              <th className="py-2">Buyer</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th className="text-right">Total</th>
-              <th className="text-right">Actions</th>
+            <tr className="border-b border-[#e5e5e5] bg-[#fafafa] text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">
+              <th className="px-6 py-3.5 font-semibold">Buyer</th>
+              <th className="px-6 py-3.5 font-semibold">Date</th>
+              <th className="px-6 py-3.5 font-semibold">Status</th>
+              <th className="px-6 py-3.5 text-right font-semibold">Total</th>
+              <th className="px-6 py-3.5 text-right font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((inv) => (
-              <tr key={inv.id} className="border-t">
-                <td className="py-2">
-                  <Link className="text-win-600" href={`/invoices/${inv.id}`}>
+              <tr key={inv.id} className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa]">
+                <td className="px-6 py-4">
+                  <Link className="font-medium text-black underline underline-offset-4" href={`/invoices/${inv.id}`}>
                     {inv.buyer_business_name}
                   </Link>
                 </td>
-                <td>{inv.invoice_date?.slice(0, 10)}</td>
-                <td>
-                  <span className={`rounded-full px-2 py-1 text-xs ${statusStyles[inv.status] || ""}`}>
+                <td className="px-6 py-4 tabular-nums text-[#525252]">{inv.invoice_date?.slice(0, 10)}</td>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[inv.status] || ""}`}>
                     {formatStatus(inv.status)}
                   </span>
                 </td>
-                <td className="text-right">PKR {money(inv.grand_total)}</td>
-                <td className="text-right">
+                <td className="px-6 py-4 text-right font-semibold tabular-nums">PKR {money(inv.grand_total)}</td>
+                <td className="px-6 py-4 text-right">
                   <InvoiceRowActions invoice={{ id: inv.id, status: inv.status }} onDeleted={() => load(query)} />
                 </td>
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr className="border-t">
-                <td colSpan={5} className="py-8 text-center text-sm text-slate-500">
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-sm text-[#767676]">
                   {query.trim() ? `No invoices match “${query.trim()}”.` : "No invoices yet."}
                 </td>
               </tr>

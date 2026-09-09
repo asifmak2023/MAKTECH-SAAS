@@ -3,10 +3,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import PasswordField from "@/components/PasswordField";
 import { api } from "@/lib/api";
 import { PlanBrief } from "@/lib/admin";
+import { PAKISTAN_PROVINCES } from "@/lib/provinces";
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
+const card = "border border-[#e5e5e5] bg-white p-4";
 
 export default function AddSellerPage() {
   const router = useRouter();
@@ -65,9 +67,10 @@ export default function AddSellerPage() {
   return (
     <div className="space-y-4">
       <div>
-        <Link className="text-sm text-win-600" href="/admin/tenants">← All sellers</Link>
-        <h1 className="text-2xl font-semibold">Add seller</h1>
-        <p className="text-sm text-slate-500">Create a SaaS tenant and owner login. This is not a buyer/client of a seller.</p>
+        <Link className="text-sm text-black underline underline-offset-4" href="/admin/tenants">← All sellers</Link>
+        <p className="eyebrow mt-4 mb-2">Directory</p>
+        <h1 className="text-3xl font-medium tracking-tight">Add seller</h1>
+        <p className="mt-1 text-sm text-[#767676]">Create a SaaS tenant and owner login. This is not a buyer/client of a seller.</p>
       </div>
 
       {error && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
@@ -76,11 +79,11 @@ export default function AddSellerPage() {
         <section className="grid gap-4 md:grid-cols-2">
           <h2 className="md:col-span-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Company</h2>
           <div>
-            <label htmlFor="tenant_name">Workspace name</label>
+            <label htmlFor="tenant_name">Company name</label>
             <input id="tenant_name" name="tenant_name" required />
           </div>
           <div>
-            <label htmlFor="tenant_slug">Slug</label>
+            <label htmlFor="tenant_slug">Username</label>
             <input id="tenant_slug" name="tenant_slug" placeholder="acme-traders" />
           </div>
           <div>
@@ -101,7 +104,12 @@ export default function AddSellerPage() {
           </div>
           <div>
             <label htmlFor="seller_province">Province</label>
-            <input id="seller_province" name="seller_province" />
+            <select id="seller_province" name="seller_province" defaultValue="">
+              <option value="">Select province</option>
+              {PAKISTAN_PROVINCES.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label htmlFor="city">City</label>
@@ -135,10 +143,7 @@ export default function AddSellerPage() {
             <label htmlFor="owner_email">Email</label>
             <input id="owner_email" name="owner_email" type="email" required />
           </div>
-          <div>
-            <label htmlFor="owner_password">Password</label>
-            <input id="owner_password" name="owner_password" type="password" minLength={8} placeholder="Leave blank to auto-generate" />
-          </div>
+          <PasswordField id="owner_password" name="owner_password" optionalHint="Leave blank to auto-generate" />
           <div>
             <label htmlFor="owner_phone">Phone</label>
             <input id="owner_phone" name="owner_phone" />
@@ -174,7 +179,7 @@ export default function AddSellerPage() {
         </section>
 
         <div className="flex justify-end">
-          <button className="bg-win-600 text-white" disabled={saving}>
+          <button className="bg-black text-white" disabled={saving}>
             {saving ? "Creating..." : "Create seller"}
           </button>
         </div>

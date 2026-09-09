@@ -81,10 +81,12 @@ class TenantAdminController extends Controller
             'owner' => ['nullable', 'array'],
             'owner.name' => ['required_with:owner', 'string', 'max:255'],
             'owner.email' => ['required_with:owner', 'email'],
-            'owner.password' => ['nullable', 'string', 'min:8'],
+            'owner.password' => ['nullable', 'string', 'min:8', 'max:12'],
             'owner.phone' => ['nullable', 'string', 'max:30'],
             'subscription_plan_id' => ['nullable', 'integer', 'exists:subscription_plans,id'],
             'billing_interval' => ['nullable', 'in:monthly,yearly'],
+        ], [], [
+            'tenant_slug' => 'username',
         ]);
 
         $data['_admin_created'] = true;

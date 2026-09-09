@@ -105,7 +105,7 @@ type RecentEvent = {
 };
 
 function pill(status: string) {
-  return <span className={`rounded-full px-2 py-1 text-xs ${statusStyles[status] || "bg-slate-100 text-slate-600"}`}>{formatStatus(status)}</span>;
+  return <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[status] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`}>{formatStatus(status)}</span>;
 }
 
 function UsageBar({ label, used, total, sub }: { label: string; used: number; total: number; sub?: string }) {
@@ -113,13 +113,13 @@ function UsageBar({ label, used, total, sub }: { label: string; used: number; to
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="font-medium text-slate-700">{label}</span>
-        <span className="text-slate-500">
+        <span className="font-medium text-black">{label}</span>
+        <span className="text-[#767676]">
           {used} / {total} used{sub ? ` · ${sub}` : ""}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-        <div className={`h-full rounded-full ${pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-400" : "bg-win-600"}`} style={{ width: `${pct}%` }} />
+      <div className="h-px overflow-hidden bg-[#e5e5e5]">
+        <div className="h-full bg-black" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -187,9 +187,10 @@ export default function BillingPage() {
 
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Billing &amp; subscriptions</h1>
-        <p className="text-sm text-slate-500">Invoices are drawn from free credits first, then packages and your subscription.</p>
+      <div className="mb-8">
+        <p className="eyebrow mb-2">Account</p>
+        <h1 className="text-3xl font-medium tracking-tight">Billing &amp; subscriptions</h1>
+        <p className="mt-1 text-sm text-[#767676]">Invoices are drawn from free credits first, then packages and your subscription.</p>
       </div>
 
       {(error || notice) && (
@@ -210,8 +211,8 @@ export default function BillingPage() {
         <p className="text-sm text-slate-500">Loading billing overview...</p>
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-            <p className="text-xs uppercase text-slate-500">Subscription</p>
+          <div className="border border-[#e5e5e5] bg-white p-4">
+            <p className="eyebrow">Subscription</p>
             {summary.subscription ? (
               <>
                 <p className="mt-1 text-lg font-semibold capitalize">{summary.subscription.plan}</p>
@@ -225,22 +226,22 @@ export default function BillingPage() {
               <p className="mt-1 text-sm text-slate-500">No active subscription — invoices draw from credits or packages.</p>
             )}
           </div>
-          <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-            <p className="text-xs uppercase text-slate-500">Outstanding balance</p>
+          <div className="border border-[#e5e5e5] bg-white p-4">
+            <p className="eyebrow">Outstanding balance</p>
             <p className="mt-1 text-lg font-semibold">{money(summary.outstanding_balance)} {currency}</p>
             <p className="text-xs text-slate-500">Overages beyond your allowance</p>
             {summary.outstanding_balance > 0 && (
               <button
                 disabled={!defaultGateway || busy !== null}
                 onClick={() => pay("/api/billing/overage/settle", { gateway: defaultGateway }, "Settling outstanding usage")}
-                className="mt-3 w-full rounded-md bg-win-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                className="mt-3 w-full bg-black px-3 py-1.5 text-white disabled:opacity-50"
               >
                 {busy ? "Processing..." : `Settle via ${defaultGateway || "gateway"}`}
               </button>
             )}
           </div>
-          <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-            <p className="text-xs uppercase text-slate-500">Status</p>
+          <div className="border border-[#e5e5e5] bg-white p-4">
+            <p className="eyebrow">Status</p>
             <div className="mt-1">{pill(summary.tenant?.status || "")}</div>
             <p className="mt-2 text-xs text-slate-500">
               Mode: {summary.billing_mode} · {summary.open_orders} open order{summary.open_orders === 1 ? "" : "s"}
@@ -250,7 +251,7 @@ export default function BillingPage() {
       )}
 
       {summary && (
-        <div className="mt-6 rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="mt-6 border border-[#e5e5e5] bg-white p-4">
           <h2 className="mb-4 font-semibold">Usage allowance</h2>
           <div className="grid gap-4 md:grid-cols-2">
             <UsageBar label="Free credits" used={summary.usage.free_credits_used} total={summary.usage.free_credits_used + summary.usage.free_credits_remaining} />
@@ -273,7 +274,7 @@ export default function BillingPage() {
       )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="border border-[#e5e5e5] bg-white p-4">
           <h2 className="mb-1 font-semibold">Plans</h2>
           <p className="mb-3 text-xs text-slate-500">Subscribe through the payment gateway (Raast P2M). The plan activates once payment succeeds and replaces your current plan.</p>
           <div className="space-y-3">
@@ -293,7 +294,7 @@ export default function BillingPage() {
                 </div>
                 <button
                   onClick={() => router.push(`/billing/subscribe?plan=${plan.id}`)}
-                  className="mt-3 rounded-md bg-win-600 px-3 py-1.5 text-xs text-white"
+                  className="mt-3 bg-black px-3 py-1.5 text-xs text-white"
                 >
                   {summary?.subscription?.plan === plan.name ? "Re-subscribe" : "Subscribe"}
                 </button>
@@ -302,7 +303,7 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="border border-[#e5e5e5] bg-white p-4">
           <h2 className="mb-1 font-semibold">Invoice packages</h2>
           <p className="mb-3 text-xs text-slate-500">One-time allowances consumed before your subscription allowance.</p>
           <div className="space-y-3">
@@ -320,7 +321,7 @@ export default function BillingPage() {
                 <button
                   disabled={!defaultGateway || busy !== null}
                   onClick={() => pay("/api/billing/packages", { usage_package_id: pkg.id, gateway: defaultGateway }, `Buying ${pkg.name}`)}
-                  className="mt-3 rounded-md bg-win-600 px-3 py-1.5 text-xs text-white disabled:opacity-50"
+                  className="mt-3 bg-black px-3 py-1.5 text-xs text-white disabled:opacity-50"
                 >
                   {busy ? "Processing..." : "Buy package"}
                 </button>
@@ -331,7 +332,7 @@ export default function BillingPage() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="border border-[#e5e5e5] bg-white p-4">
           <h2 className="mb-3 font-semibold">Recent orders</h2>
           <table className="w-full text-sm">
             <thead className="text-left text-slate-500">
@@ -364,7 +365,7 @@ export default function BillingPage() {
           </table>
         </div>
 
-        <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="border border-[#e5e5e5] bg-white p-4">
           <h2 className="mb-3 font-semibold">Recent usage</h2>
           <table className="w-full text-sm">
             <thead className="text-left text-slate-500">

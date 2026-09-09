@@ -26,7 +26,7 @@ type Order = {
 };
 
 const pill = (status: string) => (
-  <span className="inline-block rounded-full bg-sky-100 px-2 py-1 text-xs text-sky-800">{formatStatus(status)}</span>
+  <span className="inline-flex border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-xs font-medium text-[#262626]">{formatStatus(status)}</span>
 );
 
 const TERMINAL = new Set(["paid", "cancelled", "refunded", "expired", "failed"]);
@@ -74,23 +74,24 @@ function ReturnContent() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Payment return</h1>
-          <p className="text-sm text-slate-500">
+          <p className="eyebrow mb-2">Account</p>
+          <h1 className="text-3xl font-medium tracking-tight">Payment return</h1>
+          <p className="mt-1 text-sm text-[#767676]">
             {orderId ? `Order ${orderId} payment status after being redirected back from the bank.` : "Redirected from the payment provider."}
           </p>
         </div>
         <Link
           href="/billing"
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+          className="btn-ghost"
         >
           Back to billing
         </Link>
       </div>
 
       {!getToken() ? (
-        <div className="max-w-lg rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
           <p className="font-semibold">You need to sign in to view this payment.</p>
           <p className="mt-1 text-sm text-slate-600">
             {payment?.provider_reference ? `Transaction reference: ${payment.provider_reference}. ` : ""}
@@ -98,7 +99,7 @@ function ReturnContent() {
           </p>
           <button
             onClick={() => router.push("/login")}
-            className="mt-4 rounded-md bg-win-600 px-4 py-2 text-sm text-white"
+            className="mt-4 bg-black px-4 py-2 text-white"
           >
             Sign in
           </button>
@@ -106,7 +107,7 @@ function ReturnContent() {
       ) : loading ? (
         <p className="text-sm text-slate-500">Checking payment status...</p>
       ) : (
-        <div className="max-w-lg rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
           {notice && (
             <div
               className={`mb-4 rounded-lg px-4 py-3 text-sm ${
@@ -166,7 +167,7 @@ function ReturnContent() {
                         setAttempt((n) => n + 1);
                         setTimeout(() => setBusy(false), 1200);
                       }}
-                      className="rounded-md bg-win-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+                      className="bg-black px-4 py-2 text-white disabled:opacity-50"
                     >
                       {busy ? "Checking..." : "Check again"}
                     </button>

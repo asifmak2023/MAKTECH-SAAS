@@ -65,9 +65,12 @@ export default function EditInvoicePage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Edit invoice</h1>
-        <Link href={`/invoices/${params.id}`} className="rounded-md bg-slate-100 px-4 py-2 text-sm">
+      <div className="mb-8 flex items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow mb-2">Workspace</p>
+          <h1 className="text-3xl font-medium tracking-tight">Edit invoice</h1>
+        </div>
+        <Link href={`/invoices/${params.id}`} className="btn-ghost">
           Back to invoice
         </Link>
       </div>

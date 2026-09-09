@@ -27,8 +27,8 @@ type Message = {
   sender?: { id: number; name: string; email: string } | null;
 };
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 const filters = ["", "open", "in_progress", "resolved"] as const;
 
 export default function SupportPage() {
@@ -134,12 +134,13 @@ export default function SupportPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Support</h1>
-          <p className="text-sm text-slate-500">Questions about invoicing, PRAL, billing or your account.</p>
+          <p className="eyebrow mb-2">Help</p>
+          <h1 className="text-3xl font-medium tracking-tight">Support</h1>
+          <p className="mt-1 text-sm text-[#767676]">Questions about invoicing, PRAL, billing or your account.</p>
         </div>
-        <button className="rounded-md bg-win-600 px-4 py-2 text-sm text-white" onClick={() => setShowNew((v) => !v)}>
+        <button className={showNew ? "btn-secondary" : "btn-primary"} onClick={() => setShowNew((v) => !v)}>
           {showNew ? "Cancel" : "New request"}
         </button>
       </div>
@@ -179,20 +180,20 @@ export default function SupportPage() {
             <textarea name="message" rows={4} required placeholder="Describe the issue — include invoice or order references if relevant." />
           </div>
           <div className="md:col-span-2">
-            <button className="bg-win-600 text-white" disabled={busy}>{busy ? "Opening…" : "Open request"}</button>
+            <button className="bg-black text-white" disabled={busy}>{busy ? "Opening…" : "Open request"}</button>
           </div>
         </form>
       )}
 
       <div className="grid gap-4 lg:grid-cols-5">
         <div className={`${card} max-h-[70vh] overflow-y-auto lg:col-span-2`}>
-          <div className="mb-2 flex gap-1 rounded-[10px] bg-black/[0.035] p-1 text-xs w-fit">
+          <div className="mb-2 flex w-fit border border-[#e5e5e5] text-xs">
             {filters.map((f) => (
               <button
                 key={f}
                 onClick={() => { setFilter(f); loadList(f); }}
-                className={`rounded-[6px] px-2.5 py-1 capitalize transition-all ${
-                  filter === f ? "bg-white font-semibold text-win-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
+                className={`px-2.5 py-1 capitalize ${
+                  filter === f ? "bg-black text-white" : "bg-white text-[#525252]"
                 }`}
               >
                 {f === "" ? "All" : f}
@@ -204,7 +205,7 @@ export default function SupportPage() {
           <ul className="divide-y divide-slate-100">
             {sessions.map((s) => (
               <li key={s.id}>
-                <button onClick={() => open(s)} className={`w-full px-2 py-3 text-left ${selected?.id === s.id ? "bg-win-50" : "hover:bg-black/[0.02]"}`}>
+                <button onClick={() => open(s)} className={`w-full px-2 py-3 text-left ${selected?.id === s.id ? "bg-[#f5f5f5]" : "hover:bg-[#fafafa]"}`}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-800">{s.reference}</p>
                     <span className={pill(s.status)}>{formatStatus(s.status)}</span>
@@ -228,7 +229,7 @@ export default function SupportPage() {
                   <p className="text-xs text-slate-500">{selected.reference} · {selected.category} · opened {fmtWhen(selected.opened_at)}</p>
                 </div>
                 {selected.status !== "resolved" && selected.status !== "archived" && (
-                  <button className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs text-white" onClick={() => resolve(selected)} disabled={busy}>
+                  <button className="bg-black px-3 py-1.5 text-white" onClick={() => resolve(selected)} disabled={busy}>
                     Mark resolved
                   </button>
                 )}
@@ -238,7 +239,7 @@ export default function SupportPage() {
                   const isAdmin = m.sender_type === "admin";
                   return (
                     <div key={m.id} className={`max-w-[85%] ${isAdmin ? "" : "ml-auto"}`}>
-                      <div className={`rounded-xl px-3 py-2 text-sm shadow-sm ${m.sender_type === "system" ? "bg-slate-100 text-slate-500" : isAdmin ? "bg-black/[0.05] text-slate-800" : "bg-win-600 text-white"}`}>
+                      <div className={`border border-[#e5e5e5] px-3 py-2 text-sm ${m.sender_type === "system" ? "bg-[#f5f5f5] text-[#525252]" : isAdmin ? "bg-[#f5f5f5] text-black" : "bg-black text-white"}`}>
                         {m.body}
                       </div>
                       <p className={`mt-0.5 text-xs text-slate-400 ${!isAdmin ? "text-right" : ""}`}>
@@ -251,7 +252,7 @@ export default function SupportPage() {
               {selected.status !== "resolved" && (
                 <form onSubmit={reply} className="flex items-end gap-2 border-t border-slate-100 pt-3">
                   <textarea name="body" rows={2} required placeholder="Write a message…" className="flex-1" />
-                  <button className="bg-win-600 text-white" disabled={busy}>{busy ? "Sending…" : "Send"}</button>
+                  <button className="bg-black text-white" disabled={busy}>{busy ? "Sending…" : "Send"}</button>
                 </form>
               )}
             </>

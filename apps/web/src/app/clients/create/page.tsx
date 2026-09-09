@@ -6,7 +6,10 @@ import ClientForm from "@/components/ClientForm";
 export default function CreateClientPage() {
   return (
     <AppShell>
-      <h1 className="mb-6 text-2xl font-semibold">Add client</h1>
+      <div className="mb-8">
+        <p className="eyebrow mb-2">Directory</p>
+        <h1 className="text-3xl font-medium tracking-tight">Add client</h1>
+      </div>
       <ClientForm />
     </AppShell>
   );

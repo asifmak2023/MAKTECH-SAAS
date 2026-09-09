@@ -30,7 +30,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getToken();
   const tenant = getTenantSlug();
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (tenant) headers.set("X-Tenant", tenant);
+  if (tenant && path !== "/api/auth/register") headers.set("X-Tenant", tenant);
 
   const res = await fetch(path, { ...init, headers });
   const text = await res.text();

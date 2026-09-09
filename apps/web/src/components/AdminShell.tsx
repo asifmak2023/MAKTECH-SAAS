@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import BrandMark from "@/components/BrandMark";
 import { api, clearSession, getToken } from "@/lib/api";
 
 const nav = [
@@ -12,24 +13,7 @@ const nav = [
   { href: "/admin/billing", label: "Payments" },
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/monitoring", label: "Monitoring" },
-  { href: "/admin/support", label: "Support" },
 ];
-
-function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
-  return (
-    <span
-      className={`${className} inline-flex items-center justify-center rounded-[8px] bg-gradient-to-b from-win-500 to-win-700 text-white shadow-sm`}
-    >
-      <svg viewBox="0 0 24 24" fill="none" className="h-[55%] w-[55%]" aria-hidden>
-        <path
-          d="M4 5.5a1.5 1.5 0 0 1 1.5-1.5h7.2l3.8 3.8v10.7a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 18.5v-13Z"
-          fill="rgba(255,255,255,0.18)"
-        />
-        <path d="M12.5 4v4h4M7.5 11h5.5m-5.5 3h3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
-  );
-}
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -37,6 +21,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [ready, setReady] = useState(false);
   const [who, setWho] = useState("");
   const [dark, setDark] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const theme = document.documentElement.classList.contains("dark");
@@ -68,35 +53,32 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }
 
   if (!ready) {
-    return <div className="p-10 text-sm text-slate-500">Loading platform console...</div>;
+    return <div className="p-10 text-sm text-[#767676]">Loading platform console...</div>;
   }
 
   const isActive = (item: (typeof nav)[number]) =>
     item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-black/[0.06] bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex items-center gap-3">
-            <LogoMark />
-            <div className="leading-tight">
-              <p className="text-[15px] font-semibold tracking-tight text-win-700">PRAL Platform</p>
-              <p className="text-xs text-slate-500">SaaS operations console</p>
-            </div>
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-20 border-b border-[#e5e5e5] bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 md:px-10">
+          <div className="flex min-w-0 items-center gap-4">
+            <Link href="/admin">
+              <BrandMark />
+            </Link>
+            <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
+              Platform · {who}
+            </span>
           </div>
-          <nav className="flex items-center gap-1 rounded-[10px] bg-black/[0.035] p-1 text-sm">
+          <nav className="hidden items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.12em] lg:flex font-label">
             {nav.map((item) => {
               const active = isActive(item);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-[7px] px-3 py-1.5 transition-all duration-200 ease-in-out ${
-                    active
-                      ? "bg-white font-semibold text-win-700 shadow-sm"
-                      : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
-                  }`}
+                  className={active ? "text-black underline underline-offset-4" : "text-[#767676] hover:text-black"}
                 >
                   {item.label}
                 </Link>
@@ -105,7 +87,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </nav>
           <div className="flex items-center gap-2">
             <button
-              className="grid h-9 w-9 place-items-center rounded-[6px] bg-black/[0.06] text-slate-600 transition-all duration-200 ease-in-out hover:scale-[1.05] hover:bg-black/[0.1]"
+              className="grid h-11 w-11 place-items-center border border-[#e5e5e5] text-[#262626] hover:border-black"
               onClick={toggleTheme}
               title={dark ? "Switch to light theme" : "Switch to dark theme"}
               aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
@@ -122,7 +104,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               )}
             </button>
             <button
-              className="rounded-[6px] bg-black/[0.06] px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 ease-in-out hover:scale-[1.02] hover:bg-black/[0.1]"
+              className="hidden border border-[#e5e5e5] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#262626] hover:border-black sm:inline-flex font-label"
               onClick={() => {
                 api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
                 clearSession();
@@ -131,11 +113,30 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             >
               Log out
             </button>
+            <button
+              className="grid h-11 w-11 place-items-center border border-[#e5e5e5] lg:hidden"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Open menu"
+              aria-expanded={open}
+            >
+              <span className="block h-px w-4 bg-black" />
+              <span className="mt-1 block h-px w-4 bg-black" />
+            </button>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-6 pb-2 text-xs text-slate-500">Signed in as {who}</div>
+        {open && (
+          <nav className="border-t border-[#e5e5e5] px-6 py-4 lg:hidden">
+            <div className="flex flex-col gap-3 text-[11px] font-semibold uppercase tracking-[0.12em] font-label">
+              {nav.map((item) => (
+                <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={isActive(item) ? "text-black" : "text-[#767676]"}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-6 py-8 md:px-10">{children}</main>
     </div>
   );
 }

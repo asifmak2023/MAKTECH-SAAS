@@ -55,6 +55,7 @@ class ClientsModuleFeatureTest extends TestCase
             'name' => 'Owner',
             'email' => $email,
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'seller_ntn_cnic' => '1234567',
             'seller_business_name' => ucwords(str_replace('-', ' ', $slug)),
             'seller_province' => 'Sindh',

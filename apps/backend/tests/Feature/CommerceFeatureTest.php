@@ -35,6 +35,7 @@ class CommerceFeatureTest extends TestCase
             'name' => 'Owner',
             'email' => 'owner@commerce.local',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'seller_ntn_cnic' => '1234567',
             'seller_business_name' => 'Commerce Co',
             'seller_province' => 'Sindh',

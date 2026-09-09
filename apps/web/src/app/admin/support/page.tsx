@@ -5,8 +5,8 @@ import { api } from "@/lib/api";
 import { SupportSession, SupportMessage, fmtWhen } from "@/lib/admin";
 import { statusStyles, formatStatus } from "@/lib/status";
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 const filters = ["active", "all", "open", "in_progress", "resolved", "archived"] as const;
 
 export default function AdminSupportPage() {
@@ -94,15 +94,18 @@ export default function AdminSupportPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Support</h1>
-        <div className="flex gap-1 rounded-[10px] bg-black/[0.035] p-1 text-sm">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow mb-2">Inbox</p>
+          <h1 className="text-3xl font-medium tracking-tight">Support</h1>
+        </div>
+        <div className="flex border border-[#e5e5e5] text-sm">
           {filters.map((f) => (
             <button
               key={f}
               onClick={() => { setFilter(f); loadList(f); }}
-              className={`rounded-[7px] px-3 py-1.5 capitalize transition-all ${
-                filter === f ? "bg-white font-semibold text-win-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
+              className={`px-3 py-1.5 capitalize ${
+                filter === f ? "bg-black text-white" : "bg-white text-[#525252]"
               }`}
             >
               {f}
@@ -122,7 +125,7 @@ export default function AdminSupportPage() {
               <li key={s.id}>
                 <button
                   onClick={() => openSession(s)}
-                  className={`w-full px-2 py-3 text-left transition-colors ${selected?.id === s.id ? "bg-win-50" : "hover:bg-black/[0.02]"}`}
+                  className={`w-full px-2 py-3 text-left ${selected?.id === s.id ? "bg-[#f5f5f5]" : "hover:bg-[#fafafa]"}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-800">{s.reference}</p>
@@ -174,12 +177,12 @@ export default function AdminSupportPage() {
                   return (
                     <div key={m.id} className={`max-w-[85%] ${isAdmin ? "ml-auto" : isSystem ? "mx-auto" : ""}`}>
                       <div
-                        className={`rounded-xl px-3 py-2 text-sm shadow-sm ${
+                        className={`border border-[#e5e5e5] px-3 py-2 text-sm ${
                           isSystem
-                            ? "bg-slate-100 text-slate-500"
+                            ? "bg-[#f5f5f5] text-[#525252]"
                             : isAdmin
-                              ? "bg-win-600 text-white"
-                              : "bg-black/[0.05] text-slate-800"
+                              ? "bg-black text-white"
+                              : "bg-[#f5f5f5] text-black"
                         }`}
                       >
                         {m.body}
@@ -201,7 +204,7 @@ export default function AdminSupportPage() {
                   placeholder="Write a reply…"
                   className="flex-1"
                 />
-                <button className="bg-win-600 text-white" disabled={busy}>{busy ? "Sending..." : "Send reply"}</button>
+                <button className="bg-black text-white" disabled={busy}>{busy ? "Sending..." : "Send reply"}</button>
               </form>
             </>
           )}

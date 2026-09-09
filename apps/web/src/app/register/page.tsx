@@ -3,7 +3,28 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { api, setSession } from "@/lib/api";
+import PasswordField from "@/components/PasswordField";
+import { api, clearSession, setSession } from "@/lib/api";
+import { PAKISTAN_PROVINCES } from "@/lib/provinces";
+
+function Credit() {
+  return (
+    <div className="group fixed bottom-4 left-5 z-40 hidden flex-col items-start gap-1.5 sm:flex">
+      <a
+        href="https://wa.me/923303696062"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Made by Muhammad Asif — WhatsApp +92 330 3696062"
+        className="font-label text-[10px] font-semibold uppercase tracking-[0.16em] text-[#a3a3a3] transition-colors hover:text-black"
+      >
+        Made by Muhammad Asif
+      </a>
+      <span className="block max-w-0 overflow-hidden whitespace-nowrap text-[11px] font-medium text-black opacity-0 transition-all duration-300 group-hover:max-w-[14rem] group-hover:opacity-100">
+        WhatsApp · +92 330 3696062
+      </span>
+    </div>
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,16 +33,29 @@ export default function RegisterPage() {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const password = String(form.get("password") ?? "");
+    const confirmation = String(form.get("password_confirmation") ?? "");
+
+    if (password !== confirmation) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 8 || password.length > 12) {
+      setError("Password must be 8–12 characters.");
+      return;
+    }
+
     setLoading(true);
     setError("");
-    const form = new FormData(e.currentTarget);
+    clearSession();
     try {
-      const res = await api<{ token: string; tenant: { slug: string } }>("/api/auth/register", {
+      const res = await api<{ token: string; tenant: { slug: string }; verification_required?: boolean }>("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(Object.fromEntries(form.entries())),
       });
       setSession(res.token, res.tenant.slug);
-      router.replace("/dashboard");
+      router.replace(res.verification_required ? "/verify-email" : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -30,55 +64,95 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10">
-      <form onSubmit={onSubmit} className="w-full max-w-xl space-y-4 rounded-xl bg-white border border-black/[0.06] p-8 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-        <h1 className="text-2xl font-semibold">Create tenant</h1>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label>Company name</label>
-            <input name="tenant_name" required />
+    <div className="flex min-h-screen flex-col bg-[#fafafa]">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-5 md:px-10">
+        <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#767676] transition-colors hover:text-black font-label">
+          <span aria-hidden>←</span>
+          Back
+        </Link>
+        <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
+          PRAL Digital Invoicing System
+        </span>
+      </div>
+      <div className="relative flex flex-1 items-start justify-center px-4 pb-20 pt-2">
+        <Credit />
+        <form onSubmit={onSubmit} className="auth-shadow w-full max-w-xl space-y-5 border border-[#e5e5e5] bg-white p-8 md:p-10">
+          <div className="pb-1 text-center">
+            <h1 className="text-xl font-semibold uppercase tracking-[0.06em] text-black font-label md:text-2xl md:tracking-[0.08em]">
+              PRAL Digital Invoicing System
+            </h1>
+            <p className="mt-3 text-sm text-[#767676]">Create your workspace to start invoicing.</p>
           </div>
-          <div>
-            <label>Tenant slug</label>
-            <input name="tenant_slug" placeholder="maktech" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="tenant_name">Company name</label>
+              <input id="tenant_name" name="tenant_name" required autoComplete="organization" />
+            </div>
+            <div>
+              <label htmlFor="tenant_slug">Username</label>
+              <input
+                id="tenant_slug"
+                name="tenant_slug"
+                placeholder="maktech"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              <p className="mt-1 text-xs text-[#767676]">You&apos;ll sign in with this username.</p>
+            </div>
+            <div>
+              <label htmlFor="name">Your name</label>
+              <input id="name" name="name" required autoComplete="name" />
+            </div>
+            <div>
+              <label htmlFor="email">Email</label>
+              <input id="email" name="email" type="email" required autoComplete="email" />
+              <p className="mt-1 text-xs text-[#767676]">One account per email address.</p>
+            </div>
+            <div className="md:col-span-2">
+              <PasswordField id="password" name="password" required />
+            </div>
+            <div className="md:col-span-2">
+              <PasswordField
+                id="password_confirmation"
+                name="password_confirmation"
+                label="Confirm password"
+                required
+                showGenerate={false}
+                hint="Re-enter your password. Must match the password above."
+              />
+            </div>
+            <div>
+              <label htmlFor="seller_ntn_cnic">Seller NTN/CNIC</label>
+              <input id="seller_ntn_cnic" name="seller_ntn_cnic" />
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="seller_business_name">Seller business name</label>
+              <input id="seller_business_name" name="seller_business_name" />
+            </div>
+            <div>
+              <label htmlFor="seller_province">Seller province</label>
+              <select id="seller_province" name="seller_province" defaultValue="">
+                <option value="">Select province</option>
+                {PAKISTAN_PROVINCES.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="seller_address">Seller address</label>
+              <input id="seller_address" name="seller_address" />
+            </div>
           </div>
-          <div>
-            <label>Your name</label>
-            <input name="name" required />
-          </div>
-          <div>
-            <label>Email</label>
-            <input name="email" type="email" required />
-          </div>
-          <div>
-            <label>Password</label>
-            <input name="password" type="password" required minLength={8} />
-          </div>
-          <div>
-            <label>Seller NTN/CNIC</label>
-            <input name="seller_ntn_cnic" />
-          </div>
-          <div className="md:col-span-2">
-            <label>Seller business name</label>
-            <input name="seller_business_name" />
-          </div>
-          <div>
-            <label>Seller province</label>
-            <input name="seller_province" />
-          </div>
-          <div>
-            <label>Seller address</label>
-            <input name="seller_address" />
-          </div>
-        </div>
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button className="bg-win-600 text-white" disabled={loading}>
-          {loading ? "Creating..." : "Create account"}
-        </button>
-        <p className="text-sm text-slate-500">
-          Already registered? <Link className="text-win-600" href="/login">Sign in</Link>
-        </p>
-      </form>
+          {error && <p className="text-sm text-black" role="alert">{error}</p>}
+          <button className="w-full bg-black text-white transition-colors hover:bg-[#262626]" disabled={loading}>
+            {loading ? "Creating..." : "Create account"}
+          </button>
+          <p className="text-sm text-[#767676]">
+            Already registered? <Link className="text-black underline underline-offset-4" href="/login">Sign in</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

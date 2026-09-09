@@ -6,8 +6,8 @@ import { api } from "@/lib/api";
 import { AdminSubscriptionRow, Paginated, fmtDate, money } from "@/lib/admin";
 import { formatStatus, statusStyles } from "@/lib/status";
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 const filters = ["", "active", "pending", "trial", "grace_period", "expired"];
 
 export default function AdminSubscriptionsPage() {
@@ -38,15 +38,16 @@ export default function AdminSubscriptionsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">Subscriptions</h1>
-        <p className="text-sm text-slate-500">Seller SaaS plans — assign and review, without opening their invoicing workspace.</p>
+        <p className="eyebrow mb-2">Finance</p>
+        <h1 className="text-3xl font-medium tracking-tight">Subscriptions</h1>
+        <p className="mt-1 text-sm text-[#767676]">Seller SaaS plans — assign and review, without opening their invoicing workspace.</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap border border-[#e5e5e5] w-fit">
         {filters.map((f) => (
           <button
             key={f || "all"}
-            className={`rounded-md px-3 py-1.5 text-sm ${status === f ? "bg-win-600 text-white" : "bg-black/[0.06] text-slate-700"}`}
+            className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider font-label ${status === f ? "bg-black text-white" : "bg-white text-[#525252]"}`}
             onClick={() => { setStatus(f); load(f, 1); }}
           >
             {f === "" ? "All" : formatStatus(f)}
@@ -76,7 +77,7 @@ export default function AdminSubscriptionsPage() {
               <tr key={s.id}>
                 <td className="py-2.5 pr-3">
                   {s.tenant ? (
-                    <Link className="font-medium text-win-600" href={`/admin/tenants/${s.tenant.id}`}>{s.tenant.name}</Link>
+                    <Link className="font-medium text-black underline underline-offset-4" href={`/admin/tenants/${s.tenant.id}`}>{s.tenant.name}</Link>
                   ) : "—"}
                 </td>
                 <td className="py-2.5 pr-3 text-slate-700">{s.plan?.name ?? "—"}</td>

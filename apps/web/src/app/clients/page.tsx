@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
+import SearchInput from "@/components/SearchInput";
 import { api } from "@/lib/api";
 import { Client, clientDisplayName, clientTaxNo } from "@/lib/clients";
 
@@ -49,58 +50,57 @@ export default function ClientsPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Clients</h1>
-        <Link href="/clients/create" className="rounded-md bg-win-600 px-4 py-2 text-sm text-white">
-          Add client
-        </Link>
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex overflow-hidden rounded-md border border-slate-200">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              className={`px-4 py-2 text-sm ${filter === t.key ? "bg-win-600 text-white" : "bg-white text-slate-600"}`}
-              onClick={() => setFilter(t.key)}
-            >
-              {t.label}
-            </button>
-          ))}
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow mb-2">Directory</p>
+          <h1 className="text-3xl font-medium tracking-tight">Clients</h1>
         </div>
-        <input
-          placeholder="Search name, tax no, email…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <SearchInput value={search} onChange={setSearch} placeholder="Search name, tax no, email…" className="w-full sm:w-80" />
+          <Link href="/clients/create" className="btn-primary">
+            Add client
+          </Link>
+        </div>
       </div>
 
-      {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
+      <div className="mb-4 flex overflow-hidden border border-[#e5e5e5]">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider font-label ${filter === t.key ? "bg-black text-white" : "bg-white text-[#525252]"}`}
+            onClick={() => setFilter(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-      <div className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+      {error && <p className="mb-4 text-sm text-black" role="alert">{error}</p>}
+
+      <div className="border border-[#e5e5e5] bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-slate-500">
+            <thead className="text-left text-[#767676]">
               <tr>
-                <th className="py-2">Client</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Tax no</th>
-                <th>Invoices</th>
-                <th>Created</th>
-                <th className="text-right">Actions</th>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Client</th>
+                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Email</th>
+                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Phone</th>
+                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Tax no</th>
+                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Invoices</th>
+                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Created</th>
+                <th className="text-right font-label text-[11px] font-semibold uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
               {(rows || []).map((c) => (
                 <tr key={c.id} className="border-t align-top">
                   <td className="py-2 pr-4">
-                    <Link href={`/clients/${c.id}`} className="font-medium text-win-600">
+                    <Link href={`/clients/${c.id}`} className="font-medium text-black underline underline-offset-4">
                       {clientDisplayName(c)}
                     </Link>
                     <span className="block text-xs text-slate-400">{c.name !== clientDisplayName(c) ? c.name : ""}</span>
                     {!c.is_active && (
-                      <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-500">
+                      <span className="mt-1 inline-block border border-[#e5e5e5] bg-[#f5f5f5] px-2 py-0.5 text-[11px] text-[#525252]">
                         Archived
                       </span>
                     )}
@@ -112,14 +112,14 @@ export default function ClientsPage() {
                   <td className="py-2 pr-4">{c.created_at ? c.created_at.slice(0, 10) : "—"}</td>
                   <td className="py-2">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/clients/${c.id}`} className="rounded-md bg-slate-100 px-2 py-1 text-xs">
+                      <Link href={`/clients/${c.id}`} className="border border-[#e5e5e5] px-2 py-1 text-xs">
                         View
                       </Link>
-                      <Link href={`/clients/${c.id}/edit`} className="rounded-md bg-slate-100 px-2 py-1 text-xs">
+                      <Link href={`/clients/${c.id}/edit`} className="border border-[#e5e5e5] px-2 py-1 text-xs">
                         Edit
                       </Link>
                       <button
-                        className={`rounded-md px-2 py-1 text-xs ${c.is_active ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}
+                        className="border border-black px-2 py-1 text-xs text-black"
                         onClick={() => toggleActive(c)}
                         disabled={busy === c.id}
                       >

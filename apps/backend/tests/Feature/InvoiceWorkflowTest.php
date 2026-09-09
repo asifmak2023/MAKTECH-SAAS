@@ -21,6 +21,7 @@ class InvoiceWorkflowTest extends TestCase
             'name' => 'Admin',
             'email' => 'admin@test.local',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'seller_ntn_cnic' => '0782562',
             'seller_business_name' => 'Maktech Traders',
             'seller_province' => 'Sindh',

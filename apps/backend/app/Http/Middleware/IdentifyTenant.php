@@ -12,6 +12,12 @@ class IdentifyTenant
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('api/auth/register')) {
+            TenantContext::forget();
+
+            return $next($request);
+        }
+
         $tenant = $this->resolveTenant($request);
 
         if ($tenant) {

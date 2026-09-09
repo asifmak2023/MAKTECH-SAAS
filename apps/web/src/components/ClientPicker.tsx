@@ -93,7 +93,7 @@ export default function ClientPicker({
               <button
                 key={c.id}
                 type="button"
-                className="block w-full border-b border-slate-100 px-3 py-2 text-left last:border-0 hover:bg-win-50"
+                className="block w-full border-b border-[#e5e5e5] px-3 py-2 text-left last:border-0 hover:bg-[#f5f5f5]"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   onPick(c);

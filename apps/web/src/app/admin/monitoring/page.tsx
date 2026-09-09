@@ -21,8 +21,8 @@ type Dashboard = {
   finance: { pending_manual_payments: number; open_orders: number };
 };
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 
 export default function AdminMonitoringPage() {
   const [data, setData] = useState<Dashboard | null>(null);
@@ -44,8 +44,9 @@ export default function AdminMonitoringPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Monitoring</h1>
-        <p className="text-sm text-slate-500">PRAL health, submission errors, and platform incidents — not a seller invoice list.</p>
+        <p className="eyebrow mb-2">Health</p>
+        <h1 className="text-3xl font-medium tracking-tight">Monitoring</h1>
+        <p className="mt-1 text-sm text-[#767676]">PRAL health, submission errors, and platform incidents — not a seller invoice list.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -74,7 +75,7 @@ export default function AdminMonitoringPage() {
       <section className={card}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">PRAL and error events</h2>
-          <Link className="text-sm text-win-600" href="/admin/support">Open support</Link>
+          <Link className="text-sm text-black underline underline-offset-4" href="/admin/support">Open support</Link>
         </div>
         {failures.length === 0 && <p className="text-sm text-slate-400">No recent failures.</p>}
         <ul className="divide-y divide-slate-100">
@@ -85,7 +86,7 @@ export default function AdminMonitoringPage() {
                   <span className={pill(item.type)}>{item.type}</span>
                   <span className={pill(item.status ?? "failed")}>{formatStatus(item.event)}</span>
                   {item.tenant && (
-                    <Link className="font-medium text-win-600" href={`/admin/tenants/${item.tenant.id}`}>{item.tenant.name}</Link>
+                    <Link className="font-medium text-black underline underline-offset-4" href={`/admin/tenants/${item.tenant.id}`}>{item.tenant.name}</Link>
                   )}
                 </div>
                 <p className="mt-1 text-slate-600">{item.message}</p>

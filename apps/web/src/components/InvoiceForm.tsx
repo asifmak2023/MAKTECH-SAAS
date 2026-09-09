@@ -196,7 +196,7 @@ export default function InvoiceForm({
           Only draft, rejected or failed invoices can be edited. This invoice is currently {invoice?.status}.
         </p>
       )}
-      <section className="grid gap-4 rounded-xl bg-white border border-black/[0.06] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)] md:grid-cols-3">
+      <section className="grid gap-4 border border-[#e5e5e5] bg-white p-5 md:grid-cols-3">
         <div>
           <label>Invoice type</label>
           <select name="invoice_type" defaultValue={invoice?.invoice_type ?? "Sale Invoice"}>
@@ -223,7 +223,7 @@ export default function InvoiceForm({
         </div>
       </section>
 
-      <section className="rounded-xl bg-white border border-black/[0.06] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+      <section className="border border-[#e5e5e5] bg-white p-5">
         <div className="mb-4 max-w-xl">
           <ClientPicker client={client} onPick={onPickClient} />
         </div>
@@ -293,10 +293,10 @@ export default function InvoiceForm({
         </div>
       </section>
 
-      <section className="rounded-xl bg-white border border-black/[0.06] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+      <section className="border border-[#e5e5e5] bg-white p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Line items</h2>
-          <button type="button" className="bg-slate-100" onClick={() => setItems((p) => [...p, emptyItem()])}>
+          <button type="button" className="btn-ghost" onClick={() => setItems((p) => [...p, emptyItem()])}>
             Add item
           </button>
         </div>
@@ -364,7 +364,7 @@ export default function InvoiceForm({
       </section>
 
       {error && <p className="text-sm text-rose-600">{error}</p>}
-      <button className="bg-win-600 text-white" disabled={loading || locked}>
+      <button className="bg-black text-white" disabled={loading || locked}>
         {loading ? "Saving..." : editing ? "Save changes" : "Save draft"}
       </button>
     </form>

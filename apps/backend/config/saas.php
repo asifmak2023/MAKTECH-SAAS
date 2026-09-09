@@ -14,7 +14,7 @@ return [
 
     'currency' => env('SAAS_CURRENCY', 'PKR'),
 
-    'platform_name' => env('APP_NAME', 'PRAL Digital Invoicing'),
+    'platform_name' => env('APP_NAME', 'PRAL Digital Invoicing System'),
 
     'support_email' => env('SAAS_SUPPORT_EMAIL', 'support@example.com'),
 
@@ -65,6 +65,11 @@ return [
     */
     'web' => [
         'app_url' => rtrim((string) env('WEB_APP_URL', env('APP_URL', 'http://localhost')), '/'),
+    ],
+
+    'auth' => [
+        'require_email_verification' => filter_var(env('SAAS_REQUIRE_EMAIL_VERIFICATION', true), FILTER_VALIDATE_BOOLEAN),
+        'verification_expire_minutes' => (int) env('SAAS_EMAIL_VERIFICATION_EXPIRE', 60),
     ],
 
     'payments' => [

@@ -41,7 +41,7 @@ class NotificationService
         $delivered = false;
 
         if ($tenant->owner_user_id) {
-            $owner = User::query()->find($tenant->owner_user_id);
+            $owner = User::withoutGlobalScopes()->find($tenant->owner_user_id);
             if ($owner) {
                 $this->toUser($owner, $type, $title, $body, $data, false);
                 $delivered = true;

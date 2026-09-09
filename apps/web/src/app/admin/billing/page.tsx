@@ -5,8 +5,8 @@ import { api } from "@/lib/api";
 import { Paginated, BillingOrder, BillingPayment, BillingInvoice, fmtWhen, money } from "@/lib/admin";
 import { statusStyles, formatStatus } from "@/lib/status";
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 
 type Tab = "orders" | "payments" | "invoices";
 
@@ -83,17 +83,18 @@ export default function AdminBillingPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">Payments</h1>
-        <p className="text-sm text-slate-500">SaaS subscription and package payments from sellers — not B-to-C invoices.</p>
+        <p className="eyebrow mb-2">Finance</p>
+        <h1 className="text-3xl font-medium tracking-tight">Payments</h1>
+        <p className="mt-1 text-sm text-[#767676]">SaaS subscription and package payments from sellers — not B-to-C invoices.</p>
       </div>
 
-      <div className="flex gap-1 rounded-[10px] bg-black/[0.035] p-1 text-sm w-fit">
+      <div className="flex w-fit border border-[#e5e5e5] text-sm">
         {(["orders", "payments", "invoices"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`rounded-[7px] px-3 py-1.5 capitalize transition-all ${
-              tab === t ? "bg-white font-semibold text-win-700 shadow-sm" : "text-slate-600 hover:bg-white/70"
+            className={`px-3 py-1.5 capitalize ${
+              tab === t ? "bg-black text-white" : "bg-white text-[#525252]"
             }`}
           >
             {t === "invoices" ? "SaaS invoices" : t}
@@ -143,7 +144,7 @@ export default function AdminBillingPage() {
                     <td className="py-2 pr-3"><span className={pill(o.status)}>{formatStatus(o.status)}</span></td>
                     <td className="py-2 text-right">
                       {o.status === "paid" && (
-                        <button className="rounded-md bg-rose-600 px-2 py-1 text-xs text-white" onClick={() => refund(o)}>
+                        <button className="border border-black px-2 py-1 text-xs text-black" onClick={() => refund(o)}>
                           Refund
                         </button>
                       )}
@@ -188,12 +189,12 @@ export default function AdminBillingPage() {
                     <td className="py-2 pr-3"><span className={pill(p.status)}>{formatStatus(p.status)}</span></td>
                     <td className="py-2 text-right">
                       {p.status === "processing" && (
-                        <button className="mr-1 rounded-md bg-emerald-600 px-2 py-1 text-xs text-white" onClick={() => paymentAction(p, "confirm")}>
+                        <button className="mr-1 bg-black px-2 py-1 text-xs text-white" onClick={() => paymentAction(p, "confirm")}>
                           Confirm
                         </button>
                       )}
                       {(p.status === "pending" || p.status === "processing") && (
-                        <button className="rounded-md bg-rose-600 px-2 py-1 text-xs text-white" onClick={() => paymentAction(p, "fail")}>
+                        <button className="border border-black px-2 py-1 text-xs text-black" onClick={() => paymentAction(p, "fail")}>
                           Fail
                         </button>
                       )}

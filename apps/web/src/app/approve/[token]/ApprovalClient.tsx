@@ -55,12 +55,12 @@ export default function ApprovalClient({ token }: { token: string }) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <div className="rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-win-600">PRAL Digital Invoicing</p>
-        <h1 className="mt-2 text-2xl font-semibold">Invoice from {invoice.seller_business_name}</h1>
-        <p className="text-sm text-slate-500">Buyer: {invoice.buyer_business_name}</p>
+      <div className="border border-[#e5e5e5] bg-white p-6">
+        <p className="eyebrow">PRAL Digital Invoicing System</p>
+        <h1 className="mt-2 text-3xl font-medium tracking-tight">Invoice from {invoice.seller_business_name}</h1>
+        <p className="text-sm text-[#767676]">Buyer: {invoice.buyer_business_name}</p>
         <p className="mt-2">
-          <span className={`rounded-full px-3 py-1 text-sm ${statusStyles[invoice.status] || ""}`}>
+          <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`}>
             {formatStatus(invoice.status)}
           </span>
         </p>
@@ -76,7 +76,7 @@ export default function ApprovalClient({ token }: { token: string }) {
             </li>
           ))}
         </ul>
-        <a className="mt-4 inline-block text-sm text-win-600" href={`/api/public/invoices/${token}/pdf`}>
+        <a className="mt-4 inline-block text-sm text-black underline underline-offset-4" href={`/api/public/invoices/${token}/pdf`}>
           Download PDF
         </a>
         {message && <p className="mt-4 text-sm text-emerald-700">{message}</p>}
@@ -85,10 +85,10 @@ export default function ApprovalClient({ token }: { token: string }) {
           <div className="mt-6 space-y-3">
             <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Rejection note (optional)" />
             <div className="flex gap-3">
-              <button className="bg-emerald-700 text-white" onClick={() => decide("approve")}>
+              <button className="bg-black text-white" onClick={() => decide("approve")}>
                 Approve
               </button>
-              <button className="bg-rose-600 text-white" onClick={() => decide("reject")}>
+              <button className="border border-black text-black" onClick={() => decide("reject")}>
                 Reject
               </button>
             </div>

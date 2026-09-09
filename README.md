@@ -1,4 +1,4 @@
-# PRAL Digital Invoicing (Maktech)
+# PRAL Digital Invoicing System
 
 Multi-tenant sales invoicing for Pakistan FBR / PRAL Digital Invoicing.
 
@@ -36,7 +36,9 @@ QUEUE_CONNECTION=database
 CACHE_STORE=database
 ```
 
-`WEB_APP_URL` is the public origin of the Next.js app. Raast/1LINK **return**, **cancel**, and **webhook** URLs are built from it. Change it whenever the public host changes — no code edits.
+`WEB_APP_URL` is the public origin of the Next.js app. Raast/1LINK **return**, **cancel**, and **webhook** URLs, plus email-verification links, are built from it. Change it whenever the public host changes — no code edits.
+
+New sellers must verify email before using the workspace (`/verify-email`). Seeded and admin-created accounts are pre-verified. Set `SAAS_REQUIRE_EMAIL_VERIFICATION=false` only for local/dev. Configure `MAIL_*` so verification mail is delivered.
 
 Optional Raast / 1LINK merchant credentials (never commit real values; leave blank for sandbox):
 
@@ -166,7 +168,7 @@ cd apps/backend
 php artisan test
 ```
 
-Feature suites cover registration + free allowance, package purchase, Raast sandbox subscribe-then-confirm, live self-complete rejection, webhook settlement + signature failure, admin gateway credential encryption, entitlement charging, overage cap at Rs.10, platform-admin guards, refunds, and scheduled maintenance.
+Feature suites cover registration + free allowance, email verification, package purchase, Raast sandbox subscribe-then-confirm, live self-complete rejection, webhook settlement + signature failure, admin gateway credential encryption, entitlement charging, overage cap at Rs.10, platform-admin guards, refunds, and scheduled maintenance.
 
 ## Production (native VPS, MySQL)
 

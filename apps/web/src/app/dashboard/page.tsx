@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 import InvoiceRowActions from "@/components/InvoiceRowActions";
+import SearchInput from "@/components/SearchInput";
 import { api } from "@/lib/api";
 import { formatStatus, money, statusStyles } from "@/lib/status";
 
@@ -28,8 +29,6 @@ type InvoiceRow = {
 };
 
 type Onboarding = {
-  active_mode: string;
-  environments: Record<string, { status: string; configured: boolean; tested: boolean; failed: boolean }>;
   onboarding: {
     seller_profile_complete: boolean;
     sandbox_configured: boolean;
@@ -76,7 +75,7 @@ export default function DashboardPage() {
 
   const list = searching ? results : stats?.recent;
 
-  const cards = [
+  const cards: Array<[string, number | undefined]> = [
     ["Draft", stats?.draft],
     ["Pending", stats?.pending_approval],
     ["Approved", stats?.approved],
@@ -85,113 +84,106 @@ export default function DashboardPage() {
     ["Clients", stats?.customers],
   ];
 
+  const pendingSetup =
+    onb && !onb.onboarding.sandbox_tested
+      ? !onb.onboarding.seller_profile_complete
+        ? "Add your seller NTN/CNIC and business name"
+        : !onb.onboarding.sandbox_configured
+          ? "Add a sandbox token to start validating invoices"
+          : "Run the token test and scenario suite"
+      : null;
+
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <Link href="/invoices/create" className="rounded-md bg-win-600 px-4 py-2 text-sm text-white">
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-2">Workspace</p>
+          <h1 className="text-3xl font-medium tracking-tight">Dashboard</h1>
+        </div>
+        <Link href="/invoices/create" className="btn-primary">
           Create invoice
         </Link>
       </div>
-      {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
 
-      {onb && !onb.onboarding.sandbox_tested && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <div>
-            <p className="text-sm font-semibold text-amber-900">Finish your FBR setup before sending invoices</p>
-            <p className="text-sm text-amber-800">
-              {!onb.onboarding.seller_profile_complete
-                ? "Add your seller NTN/CNIC and business name."
-                : !onb.onboarding.sandbox_configured
-                  ? "Add a sandbox token so invoices can be validated."
-                  : "Run the token test and scenario suite to confirm your token works."}
-            </p>
+      {error && <p className="mb-4 text-sm text-black" role="alert">{error}</p>}
+
+      <div className="grid gap-px border border-[#e5e5e5] bg-[#e5e5e5] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        {cards.map(([label, value]) => (
+          <div key={label} className="bg-white p-5">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">{label}</p>
+            <p className="mt-2 text-2xl font-semibold tabular-nums">{value ?? 0}</p>
           </div>
-          <Link href="/settings/fbr" className="rounded-md bg-win-600 px-4 py-2 text-sm font-medium text-white">
-            {!onb.onboarding.seller_profile_complete ? "Complete profile" : "Open FBR setup"}
+        ))}
+      </div>
+
+      {onb && pendingSetup && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-[#e5e5e5] bg-[#f5f5f5] px-4 py-3">
+          <p className="text-sm text-[#262626]">
+            <span className="font-medium text-black">Finish FBR setup.</span> {pendingSetup}.
+          </p>
+          <Link href="/settings/fbr" className="btn-ghost">
+            FBR setup
           </Link>
         </div>
       )}
 
-      {onb && onb.onboarding.sandbox_tested && !onb.onboarding.production_active && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-          <div>
-            <p className="text-sm font-semibold text-sky-900">
-              Sandbox is verified{onb.onboarding.production_configured ? " — ready to go live" : ""}
-            </p>
-            <p className="text-sm text-sky-800">
-              {onb.onboarding.can_activate_production
-                ? "Activate production to submit real invoices, or keep testing in sandbox."
-                : "Add your production token, then activate production when ready."}
-            </p>
-          </div>
-          <Link href="/settings/fbr" className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white">
+      {onb && !pendingSetup && onb.onboarding.sandbox_tested && !onb.onboarding.production_active && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-black bg-white px-4 py-3">
+          <p className="text-sm text-[#262626]">
+            <span className="font-medium text-black">Sandbox verified.</span> Ready to activate production.
+          </p>
+          <Link href="/settings/fbr" className="btn-ghost">
             Go live
           </Link>
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-        {cards.map(([label, value]) => (
-          <div key={String(label)} className="rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-            <p className="text-xs uppercase text-slate-500">{label}</p>
-            <p className="mt-2 text-2xl font-semibold">{value ?? 0}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-8 rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-semibold">{searching ? "Search results" : "Recent invoices"}</h2>
-          <div className="relative w-full max-w-xs">
-            <svg viewBox="0 0 24 24" fill="none" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search all invoices…"
-              className="pl-9"
-            />
-          </div>
+      <div className="mt-8 border border-[#e5e5e5] bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e5e5] px-6 py-4">
+          <h2 className="text-sm font-medium">{searching ? "Search results" : "Recent invoices"}</h2>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search all invoices…" className="w-full max-w-xs" />
         </div>
         {searching && results === null ? (
-          <p className="py-4 text-sm text-slate-500">Searching…</p>
+          <p className="px-6 py-4 text-sm text-[#767676]">Searching…</p>
         ) : list && list.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead className="text-left text-slate-500">
-              <tr>
-                <th className="py-2">Buyer</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th className="text-right">Total</th>
-                <th className="text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((inv) => (
-                <tr key={inv.id} className="border-t">
-                  <td className="py-2">
-                    <Link className="text-win-600" href={`/invoices/${inv.id}`}>
-                      {inv.buyer_business_name}
-                    </Link>
-                  </td>
-                  <td>{inv.invoice_date?.slice(0, 10)}</td>
-                  <td>
-                    <span className={`rounded-full px-2 py-1 text-xs ${statusStyles[inv.status] || ""}`}>
-                      {formatStatus(inv.status)}
-                    </span>
-                  </td>
-                  <td className="text-right">PKR {money(inv.grand_total)}</td>
-                  <td className="text-right">
-                    <InvoiceRowActions invoice={{ id: inv.id, status: inv.status }} onDeleted={() => (searching ? load() : undefined)} />
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-[#e5e5e5] bg-[#fafafa] text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">
+                  <th className="px-6 py-3.5 font-semibold">Invoice</th>
+                  <th className="px-6 py-3.5 font-semibold">Buyer</th>
+                  <th className="px-6 py-3.5 font-semibold">Date</th>
+                  <th className="px-6 py-3.5 font-semibold">Status</th>
+                  <th className="px-6 py-3.5 text-right font-semibold">Total</th>
+                  <th className="px-6 py-3.5 text-right font-semibold">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {list.map((inv) => (
+                  <tr key={inv.id} className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa]">
+                    <td className="px-6 py-4 font-medium tabular-nums text-black">#{inv.id}</td>
+                    <td className="px-6 py-4">
+                      <Link className="font-medium text-black underline underline-offset-4" href={`/invoices/${inv.id}`}>
+                        {inv.buyer_business_name}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 tabular-nums text-[#525252]">{inv.invoice_date?.slice(0, 10)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[inv.status] || ""}`}>
+                        {formatStatus(inv.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right font-semibold tabular-nums">PKR {money(inv.grand_total)}</td>
+                    <td className="px-6 py-4 text-right">
+                      <InvoiceRowActions invoice={{ id: inv.id, status: inv.status }} onDeleted={() => (searching ? undefined : load())} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="py-4 text-sm text-slate-500">
+          <p className="px-6 py-8 text-sm text-[#767676]">
             {searching ? `No invoices match “${query.trim()}”.` : stats ? "No invoices yet." : "Loading…"}
           </p>
         )}

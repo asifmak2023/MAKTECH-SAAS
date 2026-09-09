@@ -38,6 +38,7 @@ class RaastSandboxSubscriptionTest extends TestCase
             'name' => 'Owner',
             'email' => $email,
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'seller_ntn_cnic' => '1234567',
             'seller_business_name' => ucfirst($slug),
             'seller_province' => 'Sindh',

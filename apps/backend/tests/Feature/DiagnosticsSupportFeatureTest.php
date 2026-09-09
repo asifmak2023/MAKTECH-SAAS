@@ -46,6 +46,7 @@ class DiagnosticsSupportFeatureTest extends TestCase
             'name' => 'Owner',
             'email' => $email,
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'seller_ntn_cnic' => $seller,
             'seller_business_name' => 'ACME TRADERS',
             'seller_province' => 'Sindh',
@@ -135,7 +136,13 @@ class DiagnosticsSupportFeatureTest extends TestCase
     public function test_scenario_runner_carries_sellers_profile_and_captures_item_errors(): void
     {
         $reg = $this->registerTenant('acme', '9876543');
+        $h = $this->headers($reg['token'], 'acme');
         $tenant = Tenant::where('slug', 'acme')->first();
+
+        $this->api('PUT', '/api/settings/fbr/sandbox', $h, [
+            'token' => 'sandbox-token-abc',
+            'base_url' => 'https://gw.fbr.gov.pk',
+        ])->assertOk();
 
         Http::fake([
             '*' => Http::response(['validationResponse' => ['statusCode' => '01', 'status' => 'Invalid', 'errorCode' => null, 'error' => '',

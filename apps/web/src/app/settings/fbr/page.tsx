@@ -54,10 +54,11 @@ type ScenarioResult = {
   error?: string;
 };
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const okPill = "inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700";
-const badPill = "inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700";
-const mutedPill = "inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600";
+const card = "border border-[#e5e5e5] bg-white p-4";
+const okPill = "inline-flex bg-black px-2 py-0.5 text-xs text-white";
+const badPill = "inline-flex border border-black px-2 py-0.5 text-xs text-black";
+const mutedPill = "inline-flex border border-[#e5e5e5] bg-[#f5f5f5] px-2 py-0.5 text-xs text-[#525252]";
+const DEFAULT_WHITELIST_IP = "161.97.107.236";
 
 export default function FbrSetupPage() {
   const [data, setData] = useState<FbrShow | null>(null);
@@ -95,12 +96,15 @@ export default function FbrSetupPage() {
     <AppShell>
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <Link className="text-sm text-win-600" href="/settings">← Settings</Link>
-        <h1 className="text-2xl font-semibold">FBR digital invoicing setup</h1>
-        <p className="text-sm text-slate-500">
+        <Link className="text-sm text-black underline underline-offset-4" href="/settings">← Settings</Link>
+        <p className="eyebrow mt-4 mb-2">Integration</p>
+        <h1 className="text-3xl font-medium tracking-tight">FBR digital invoicing setup</h1>
+        <p className="mt-1 text-sm text-[#767676]">
           Configure and test your Pakistan Revenue Automation Limited (PRAL) credentials. Sandbox first, then activate production.
         </p>
       </div>
+
+      <IpWhitelistBanner />
 
       {notice && <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{notice}</p>}
       {error && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
@@ -140,6 +144,38 @@ export default function FbrSetupPage() {
       </details>
     </div>
     </AppShell>
+  );
+}
+
+function IpWhitelistBanner() {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(DEFAULT_WHITELIST_IP);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard unavailable — user can copy manually */
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 border border-black bg-white px-4 py-3">
+      <div className="min-w-0">
+        <p className="font-label text-[11px] uppercase tracking-[0.14em] text-[#525252]">PRAL IP allowlist</p>
+        <p className="mt-1 text-sm leading-relaxed text-[#525252]">
+          Public outbound IP of this server. Give this to PRAL in IRIS → Digital Invoicing so gateway calls from your workspace are
+          allowlisted.
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <code className="border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1.5 text-sm tabular-nums">{DEFAULT_WHITELIST_IP}</code>
+        <button type="button" className="btn-ghost" onClick={copy}>
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -185,7 +221,7 @@ function Guide({ kind }: { kind: "sandbox" | "general" }) {
           </li>
           <li>
             Log in to the FBR <strong>IRIS</strong> portal at{" "}
-            <a className="font-medium text-win-600 underline" href="https://iris.fbr.gov.pk" target="_blank" rel="noreferrer">
+            <a className="font-medium text-black underline underline-offset-4" href="https://iris.fbr.gov.pk" target="_blank" rel="noreferrer">
               iris.fbr.gov.pk
             </a>{" "}
             with your NTN credentials and open <strong>Registration → Digital Invoicing</strong> to start the taxpayer registration flow.
@@ -218,7 +254,7 @@ function Guide({ kind }: { kind: "sandbox" | "general" }) {
       </div>
 
       <div>
-        <p className="mb-1.5 text-[13px] font-semibold text-win-700">3 · Production token (live)</p>
+        <p className="mb-1.5 text-[13px] font-semibold text-black">3 · Production token (live)</p>
         <ol className="list-decimal space-y-1.5 pl-5 text-[13px] leading-relaxed">
           <li>
             Complete sandbox onboarding first — FBR/PRAL normally clears the sandbox <strong>scenario suite</strong> before a production
@@ -340,7 +376,7 @@ function EnvPanel({
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const body: Record<string, string> = {};
-    for (const key of ["base_url", "validate_endpoint", "submit_endpoint"]) {
+    for (const key of ["base_url", "validate_endpoint", "submit_endpoint", "whitelist_ip"]) {
       const v = String(f.get(key) ?? "").trim();
       if (v) body[key] = v;
     }
@@ -386,6 +422,9 @@ function EnvPanel({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="font-semibold text-slate-800">{title}</h2>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {mode === "production" ? "Live credentials — submissions post to PRAL." : "Testing credentials — invoices are never posted."}
+          </p>
           <div className="mt-1 flex items-center gap-2">
             <span className={env.configured ? okPill : mutedPill}>{env.configured ? "Configured" : "Not configured"}</span>
             {env.tested && <span className={okPill}>Token tested</span>}
@@ -407,8 +446,21 @@ function EnvPanel({
             <input name="base_url" defaultValue={cfg.base_url ?? "https://gw.fbr.gov.pk"} placeholder="https://gw.fbr.gov.pk" />
           </div>
           <div>
-            <label>Token {cfg.token ? "(leave blank to keep current)" : ""}</label>
-            <input name="token" type="password" autoComplete="off" placeholder={cfg.token ? "••••••••" : "Paste token"} />
+            <label>Token {env.has_token ? "(leave blank to keep current)" : ""}</label>
+            <input name="token" type="password" autoComplete="off" placeholder={env.has_token ? "••••••••" : "Paste token"} />
+            <p className="mt-1 text-xs text-[#525252]">Encrypted at rest — never shown again after saving.</p>
+          </div>
+          <div className="md:col-span-2">
+            <label>Whitelist IP</label>
+            <input
+              name="whitelist_ip"
+              autoComplete="off"
+              defaultValue={cfg.whitelist_ip || DEFAULT_WHITELIST_IP}
+              placeholder={DEFAULT_WHITELIST_IP}
+            />
+            <p className="mt-1 text-xs text-[#525252]">
+              Public outbound IP of this server. Provide it in IRIS → Digital Invoicing when PRAL asks for your IP to allowlist.
+            </p>
           </div>
           <div>
             <label>Validate endpoint</label>
@@ -419,7 +471,7 @@ function EnvPanel({
             <input name="submit_endpoint" defaultValue={cfg.submit_endpoint ?? ""} placeholder={`/di_data/v1/di/postinvoicedata${mode === "sandbox" ? "_sb" : ""}`} />
           </div>
           <div className="md:col-span-2">
-            <button className="bg-win-600 text-white" disabled={saving}>{saving ? "Saving…" : `Save ${title} configuration`}</button>
+            <button className="bg-black text-white" disabled={saving}>{saving ? "Saving…" : `Save ${title} configuration`}</button>
           </div>
         </form>
       ) : (
@@ -583,7 +635,7 @@ function SuitePanel({
           </p>
         </div>
         <button
-          className="inline-flex items-center gap-2 rounded-md bg-win-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-win-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 bg-black px-3.5 py-1.5 text-white hover:bg-[#262626]"
           onClick={runSuite}
           disabled={running || selected.length === 0}
         >
@@ -614,7 +666,7 @@ function SuitePanel({
           <div className="mt-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] text-slate-400">Uncheck fixtures you do not want sent to the sandbox.</p>
-              <button type="button" onClick={toggleAll} className="text-xs font-medium text-win-600 underline">
+              <button type="button" onClick={toggleAll} className="text-xs font-medium text-black underline underline-offset-4">
                 {allSelected ? "Clear all" : "Select all"}
               </button>
             </div>
@@ -783,7 +835,7 @@ function ProductionPanel({
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const body: Record<string, string> = {};
-    for (const key of ["base_url", "validate_endpoint", "submit_endpoint"]) {
+    for (const key of ["base_url", "validate_endpoint", "submit_endpoint", "whitelist_ip"]) {
       const v = String(f.get(key) ?? "").trim();
       if (v) body[key] = v;
     }
@@ -846,10 +898,13 @@ function ProductionPanel({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="font-semibold text-slate-800">Production</h2>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Live credentials — submissions post to PRAL. Tokens are encrypted and never displayed again.
+            </p>
             <div className="mt-1 flex items-center gap-2">
               <span className={prod?.configured ? okPill : mutedPill}>{prod?.configured ? "Configured" : "Not configured"}</span>
               {prod?.tested && <span className={okPill}>Token tested</span>}
-              {ob.production_active && <span className="inline-flex rounded-full bg-win-600 px-2 py-0.5 text-xs text-white">Active environment</span>}
+              {ob.production_active && <span className="inline-flex bg-black px-2 py-0.5 text-xs text-white">Active environment</span>}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -880,8 +935,20 @@ function ProductionPanel({
           <input name="base_url" defaultValue={prodCfg.base_url ?? "https://gw.fbr.gov.pk"} placeholder="https://gw.fbr.gov.pk" />
         </div>
         <div>
-          <label>Token {prodCfg.token ? "(leave blank to keep current)" : ""}</label>
-          <input name="token" type="password" autoComplete="off" placeholder={prodCfg.token ? "••••••••" : "Paste production token"} />
+          <label>Token {prod?.has_token ? "(leave blank to keep current)" : ""}</label>
+          <input name="token" type="password" autoComplete="off" placeholder={prod?.has_token ? "••••••••" : "Paste production token"} />
+        </div>
+        <div className="md:col-span-2">
+          <label>Whitelist IP</label>
+          <input
+            name="whitelist_ip"
+            autoComplete="off"
+            defaultValue={prodCfg.whitelist_ip || DEFAULT_WHITELIST_IP}
+            placeholder={DEFAULT_WHITELIST_IP}
+          />
+          <p className="mt-1 text-xs text-[#525252]">
+            Public outbound IP of this server. Provide it in IRIS → Digital Invoicing when PRAL asks for your IP to allowlist.
+          </p>
         </div>
         <div>
           <label>Validate endpoint</label>
@@ -892,7 +959,7 @@ function ProductionPanel({
           <input name="submit_endpoint" defaultValue={prodCfg.submit_endpoint ?? ""} placeholder="/di_data/v1/di/postinvoicedata" />
         </div>
         <div className="md:col-span-2">
-          <button className="bg-win-600 text-white" disabled={saving || activating}>{saving ? "Saving…" : "Save production configuration"}</button>
+          <button className="bg-black text-white" disabled={saving || activating}>{saving ? "Saving…" : "Save production configuration"}</button>
         </div>
       </form>
 

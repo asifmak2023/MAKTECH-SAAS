@@ -37,9 +37,12 @@ export default function EditClientPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Edit client</h1>
-        <Link href={`/clients/${client.id}`} className="rounded-md bg-slate-100 px-4 py-2 text-sm">
+      <div className="mb-8 flex items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow mb-2">Directory</p>
+          <h1 className="text-3xl font-medium tracking-tight">Edit client</h1>
+        </div>
+        <Link href={`/clients/${client.id}`} className="btn-ghost">
           Back to client
         </Link>
       </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { api } from "@/lib/api";
 import { fmtWhen } from "@/lib/admin";
+import { provinceOptions } from "@/lib/provinces";
 
 type Tenant = {
   name: string;
@@ -75,7 +76,7 @@ function TenantForm({ tenant, onSaved }: { tenant: Tenant; onSaved: (t: Tenant) 
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid max-w-2xl gap-4 rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+    <form onSubmit={onSubmit} className="grid max-w-2xl gap-4 border border-[#e5e5e5] bg-white p-6">
       <h2 className="text-lg font-semibold">Business profile</h2>
       <div>
         <label>Company name</label>
@@ -91,7 +92,12 @@ function TenantForm({ tenant, onSaved }: { tenant: Tenant; onSaved: (t: Tenant) 
       </div>
       <div>
         <label>Province</label>
-        <input name="seller_province" defaultValue={tenant.seller_province} />
+        <select name="seller_province" defaultValue={tenant.seller_province || ""}>
+          <option value="">Select province</option>
+          {provinceOptions(tenant.seller_province).map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
       </div>
       <div>
         <label>Address</label>
@@ -111,7 +117,7 @@ function TenantForm({ tenant, onSaved }: { tenant: Tenant; onSaved: (t: Tenant) 
       </label>
       {message && <p className="text-sm text-emerald-700">{message}</p>}
       {error && <p className="text-sm text-rose-600">{error}</p>}
-      <button className="w-fit bg-win-600 text-white">Save</button>
+      <button className="w-fit bg-black text-white">Save</button>
     </form>
   );
 }
@@ -128,7 +134,7 @@ function FbrSettingsCard() {
 
   if (!data) {
     return (
-      <div className="max-w-2xl rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+      <div className="max-w-2xl border border-[#e5e5e5] bg-white p-6">
         <p className="text-sm">{error || "Loading FBR settings..."}</p>
       </div>
     );
@@ -140,14 +146,14 @@ function FbrSettingsCard() {
 
   const badge = (done: boolean) =>
     done
-      ? "bg-emerald-100 text-emerald-800"
-      : "bg-amber-100 text-amber-800";
+      ? "status-emerald rounded-full px-2 py-0.5 text-xs font-medium"
+      : "status-amber rounded-full px-2 py-0.5 text-xs font-medium";
 
   return (
-    <div className="grid max-w-2xl gap-4 rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+    <div className="grid max-w-2xl gap-4 border border-[#e5e5e5] bg-white p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">FBR / PRAL integration</h2>
-        <Link href="/settings/fbr" className="rounded-md bg-win-600 px-3 py-1.5 text-sm text-white">
+        <Link href="/settings/fbr" className="bg-black px-3 py-1.5 text-white">
           Open FBR setup
         </Link>
       </div>
@@ -179,6 +185,12 @@ function FbrSettingsCard() {
           </div>
           <ul className="mt-3 space-y-1 text-sm text-slate-600">
             <li>
+              Production token:{" "}
+              <span className={production?.has_token ? "font-medium text-emerald-700" : "text-slate-500"}>
+                {production?.has_token ? "set" : "not set"}
+              </span>
+            </li>
+            <li>
               Active environment:{" "}
               <span className={ob.production_active ? "font-medium text-emerald-700" : "text-slate-500"}>
                 {ob.production_active ? "yes" : "no"}
@@ -203,7 +215,10 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-6 text-2xl font-semibold">Settings</h1>
+      <div className="mb-8">
+        <p className="eyebrow mb-2">Account</p>
+        <h1 className="text-3xl font-medium tracking-tight">Settings</h1>
+      </div>
       {!tenant ? (
         <p>{error || "Loading..."}</p>
       ) : (

@@ -6,9 +6,10 @@ import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { TenantDetail, FbrIntegrationRow, PlanBrief, fmtWhen, fmtDate } from "@/lib/admin";
 import { statusStyles, formatStatus, money } from "@/lib/status";
+import { provinceOptions } from "@/lib/provinces";
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 const statuses = ["pending", "trial", "active", "past_due", "grace_period", "suspended", "cancelled"];
 
 export default function AdminTenantDetailPage() {
@@ -56,8 +57,9 @@ export default function AdminTenantDetailPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <Link className="text-sm text-win-600" href="/admin/tenants">← All sellers</Link>
-          <h1 className="text-2xl font-semibold">{t.name} <span className="text-slate-400">/{t.slug}</span></h1>
+          <Link className="text-sm text-black underline underline-offset-4" href="/admin/tenants">← All sellers</Link>
+          <p className="eyebrow mt-4 mb-2">Directory</p>
+          <h1 className="text-3xl font-medium tracking-tight">{t.name} <span className="text-[#767676]">/{t.slug}</span></h1>
           {t.legal_name && <p className="text-sm text-slate-500">{t.legal_name} · seller profile (no invoices or clients)</p>}
         </div>
         <span className={pill(t.status)}>{formatStatus(t.status)}</span>
@@ -89,7 +91,7 @@ export default function AdminTenantDetailPage() {
               <label>Note</label>
               <input name="note" placeholder="optional" />
             </div>
-            <button className="bg-win-600 text-white" disabled={saving}>Apply</button>
+            <button className="bg-black text-white" disabled={saving}>Apply</button>
           </form>
         </div>
 
@@ -155,7 +157,7 @@ export default function AdminTenantDetailPage() {
               <option value="yearly">Yearly</option>
             </select>
           </div>
-          <button className="bg-win-600 text-white" disabled={saving}>Assign</button>
+          <button className="bg-black text-white" disabled={saving}>Assign</button>
         </form>
 
         <div className="mt-4 grid gap-4 md:grid-cols-3">
@@ -213,7 +215,15 @@ export default function AdminTenantDetailPage() {
           <div><label>Registration type</label><input name="registration_type" defaultValue={t.registration_type ?? ""} /></div>
           <div><label>Seller NTN / CNIC</label><input name="seller_ntn_cnic" defaultValue={t.seller_ntn_cnic ?? ""} /></div>
           <div><label>Business name</label><input name="seller_business_name" defaultValue={t.seller_business_name ?? ""} /></div>
-          <div><label>Province</label><input name="seller_province" defaultValue={t.seller_province ?? ""} /></div>
+          <div>
+            <label>Province</label>
+            <select name="seller_province" defaultValue={t.seller_province ?? ""}>
+              <option value="">Select province</option>
+              {provinceOptions(t.seller_province).map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
           <div><label>City</label><input name="city" defaultValue={t.city ?? ""} /></div>
           <div className="md:col-span-2"><label>Address</label><input name="seller_address" defaultValue={t.seller_address ?? ""} /></div>
           <div><label>Seller email</label><input name="seller_email" type="email" defaultValue={t.seller_email ?? ""} /></div>
@@ -226,7 +236,7 @@ export default function AdminTenantDetailPage() {
             </label>
           </div>
           <div className="flex items-end justify-end md:col-span-2">
-            <button className="bg-win-600 text-white" disabled={saving}>Save profile</button>
+            <button className="bg-black text-white" disabled={saving}>Save profile</button>
           </div>
         </form>
       </section>
@@ -250,13 +260,13 @@ export default function AdminTenantDetailPage() {
               <label>Reason</label>
               <input name="description" placeholder="optional" />
             </div>
-            <button className="bg-win-600 text-white" disabled={saving}>Adjust</button>
+            <button className="bg-black text-white" disabled={saving}>Adjust</button>
           </form>
         </div>
         <p className="mt-2 text-sm text-slate-500">Current free invoice credits (billing credits account) are managed by the tenant&apos;s billing subscription.</p>
       </section>
 
-      <FbrOverrideSection id={id} rows={t.fbrIntegrations} onSaved={reload} />
+      <FbrOverrideSection id={id} rows={t.fbr_integrations ?? []} onSaved={reload} />
 
       <section className={card}>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Subscription history</h2>
@@ -317,7 +327,7 @@ function FbrOverrideSection({
   const [err, setErr] = useState("");
 
   const modes: Array<"sandbox" | "production"> = ["sandbox", "production"];
-  const rowFor = (mode: string) => rows.find((r) => r.mode === mode);
+  const rowFor = (mode: string) => (rows ?? []).find((r) => r.mode === mode);
 
   async function save(mode: string, f: FormData) {
     setBusy(mode);
@@ -381,7 +391,7 @@ function FbrOverrideSection({
                   <label>Token {row?.config?.token && "(blank keeps current)"}</label>
                   <input name="token" type="password" placeholder={row?.config?.token ? "••••••••" : "Paste token"} />
                 </div>
-                <button className="w-full bg-win-600 text-white" disabled={busy === mode}>
+                <button className="w-full bg-black text-white" disabled={busy === mode}>
                   {busy === mode ? "Saving..." : `Save ${mode} credentials`}
                 </button>
                 {row?.last_tested_at && (

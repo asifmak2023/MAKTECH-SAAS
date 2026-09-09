@@ -69,7 +69,7 @@ export type TenantDetail = TenantRow & {
   users: Array<{ id: number; name: string; email: string; role: string; is_active: boolean }>;
   subscriptions: TenantSubscription[];
   activeSubscription: TenantSubscription | null;
-  fbrIntegrations: FbrIntegrationRow[];
+  fbr_integrations: FbrIntegrationRow[];
   invoices_count: number;
   customers_count: number;
   products_count: number;

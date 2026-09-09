@@ -4,16 +4,14 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Client } from "@/lib/clients";
-
-const PROVINCES = ["Sindh", "Punjab", "Khyber Pakhtunkhwa", "Balochistan"];
+import { PAKISTAN_PROVINCES, provinceOptions } from "@/lib/provinces";
 
 export default function ClientForm({ client }: { client?: Client | null }) {
   const router = useRouter();
   const editing = Boolean(client?.id);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const provinces =
-    client?.province && !PROVINCES.includes(client.province) ? [client.province, ...PROVINCES] : PROVINCES;
+  const provinces = provinceOptions(client?.province);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -48,7 +46,7 @@ export default function ClientForm({ client }: { client?: Client | null }) {
 
   return (
     <form onSubmit={onSubmit} className="max-w-3xl space-y-6">
-      <section className="grid gap-4 rounded-xl bg-white border border-black/[0.06] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)] md:grid-cols-2">
+      <section className="grid gap-4 border border-[#e5e5e5] bg-white p-5 md:grid-cols-2">
         <div>
           <label>Business name</label>
           <input name="business_name" required defaultValue={client?.business_name || ""} />
@@ -82,7 +80,7 @@ export default function ClientForm({ client }: { client?: Client | null }) {
         </div>
         <div>
           <label>Province</label>
-          <select name="province" defaultValue={client?.province || PROVINCES[0]}>
+          <select name="province" defaultValue={client?.province || PAKISTAN_PROVINCES[0]}>
             {provinces.map((p) => (
               <option key={p}>{p}</option>
             ))}
@@ -103,7 +101,7 @@ export default function ClientForm({ client }: { client?: Client | null }) {
       </section>
 
       {error && <p className="text-sm text-rose-600">{error}</p>}
-      <button className="bg-win-600 text-white" disabled={loading}>
+      <button className="bg-black text-white" disabled={loading}>
         {loading ? "Saving..." : editing ? "Save changes" : "Save client"}
       </button>
     </form>

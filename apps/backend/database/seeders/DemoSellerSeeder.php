@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
 use App\Models\TenantSubscription;
+use App\Models\User;
 use App\Services\TenantService;
 use Illuminate\Database\Seeder;
 
@@ -70,6 +71,13 @@ class DemoSellerSeeder extends Seeder
         $tenant = Tenant::query()->where('slug', $seller['slug'])->first();
 
         if ($tenant) {
+            if ($tenant->owner_user_id) {
+                User::withoutGlobalScopes()
+                    ->whereKey($tenant->owner_user_id)
+                    ->whereNull('email_verified_at')
+                    ->update(['email_verified_at' => now()]);
+            }
+
             return [$tenant, false];
         }
 
@@ -88,6 +96,7 @@ class DemoSellerSeeder extends Seeder
             'name' => $seller['name'].' Admin',
             'email' => $seller['email'],
             'password' => 'password',
+            'email_verified' => true,
         ]);
 
         $service->bootstrapTenant($tenant);

@@ -47,8 +47,13 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Maktech Admin',
                 'password' => 'password',
                 'role' => 'admin',
+                'email_verified_at' => now(),
             ]
         );
+
+        if (! $user->email_verified_at) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
 
         RoleService::ensureDefaults();
 

@@ -52,7 +52,7 @@ type CompleteResult = {
 type Phase = "form" | "pending_payment" | "done" | "cancelled";
 
 const pill = (status: string) => (
-  <span className="inline-block rounded-full bg-sky-100 px-2 py-1 text-xs text-sky-800">{formatStatus(status)}</span>
+  <span className="inline-flex border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-xs font-medium text-[#262626]">{formatStatus(status)}</span>
 );
 
 export default function SubscribePage() {
@@ -158,14 +158,15 @@ export default function SubscribePage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Subscribe to a plan</h1>
-          <p className="text-sm text-slate-500">Choose a plan, pay through Raast (P2M) and it activates immediately.</p>
+          <p className="eyebrow mb-2">Account</p>
+          <h1 className="text-3xl font-medium tracking-tight">Subscribe to a plan</h1>
+          <p className="mt-1 text-sm text-[#767676]">Choose a plan, pay through Raast (P2M) and it activates immediately.</p>
         </div>
         <button
           onClick={() => router.push("/billing")}
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+          className="btn-ghost"
         >
           Back to billing
         </button>
@@ -188,7 +189,7 @@ export default function SubscribePage() {
       {!catalog ? (
         <p className="text-sm text-slate-500">Loading plans...</p>
       ) : phase === "done" ? (
-        <div className="max-w-lg rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
           <p className="text-lg font-semibold text-emerald-700">Subscription active</p>
           <p className="mt-1 text-sm text-slate-600">
             {result?.subscription?.plan?.name || plan?.name || "Your plan"} is now active
@@ -197,7 +198,7 @@ export default function SubscribePage() {
           <div className="mt-4 flex gap-2">
             <button
               onClick={() => router.push("/billing")}
-              className="rounded-md bg-win-600 px-4 py-2 text-sm text-white"
+              className="bg-black px-4 py-2 text-white"
             >
               Go to billing
             </button>
@@ -213,7 +214,7 @@ export default function SubscribePage() {
           </div>
         </div>
       ) : phase === "cancelled" ? (
-        <div className="max-w-lg rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
           <p className="text-lg font-semibold text-slate-700">Order cancelled</p>
           <p className="mt-1 text-sm text-slate-600">No payment was taken and your current plan is unchanged.</p>
           <button
@@ -221,13 +222,13 @@ export default function SubscribePage() {
               setPhase("form");
               setResult(null);
             }}
-            className="mt-4 rounded-md bg-win-600 px-4 py-2 text-sm text-white"
+            className="mt-4 bg-black px-4 py-2 text-white"
           >
             Back to plans
           </button>
         </div>
       ) : phase === "pending_payment" && result ? (
-        <div className="max-w-lg rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
           <div className="flex items-center justify-between">
             <p className="font-semibold">{result.gateway?.name || gateway?.name || gatewayCode}</p>
             {pill(result.order.status)}
@@ -263,7 +264,7 @@ export default function SubscribePage() {
             <button
               disabled={busy !== null}
               onClick={completePayment}
-              className="rounded-md bg-win-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+              className="bg-black px-4 py-2 text-white disabled:opacity-50"
             >
               {busy ? "Processing..." : `Confirm payment of ${money(result.order.total_amount)} ${currency}`}
             </button>
@@ -277,14 +278,14 @@ export default function SubscribePage() {
           </div>
         </div>
       ) : (
-        <div className="max-w-2xl rounded-xl bg-white border border-black/[0.06] p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+        <div className="max-w-2xl border border-[#e5e5e5] bg-white p-6">
           <p className="mb-3 text-xs text-slate-500">Select the plan you want (replaces your current plan once paid):</p>
           <div className="space-y-2">
             {plans.map((p) => (
               <label
                 key={p.id}
                 className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 ${
-                  plan?.id === p.id ? "border-win-600 bg-win-600/5" : "border-slate-200"
+                  plan?.id === p.id ? "border-black bg-[#f5f5f5]" : "border-[#e5e5e5]"
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -293,7 +294,7 @@ export default function SubscribePage() {
                     name="plan"
                     checked={plan?.id === p.id}
                     onChange={() => setPlanId(p.id)}
-                    className="accent-win-600"
+                    className="accent-black"
                   />
                   <span>
                     <span className="block font-medium">{p.name}</span>
@@ -313,13 +314,13 @@ export default function SubscribePage() {
 
           <div className="mt-4">
             <p className="mb-1 text-xs uppercase text-slate-500">Billing interval</p>
-            <div className="inline-flex overflow-hidden rounded-md border border-slate-200">
+            <div className="inline-flex overflow-hidden border border-[#e5e5e5]">
               {(["monthly", "yearly"] as const).map((iv) => (
                 <button
                   key={iv}
                   onClick={() => setInterval(iv)}
-                  className={`px-4 py-2 text-sm capitalize ${
-                    interval === iv ? "bg-win-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50"
+                  className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider font-label ${
+                    interval === iv ? "bg-black text-white" : "bg-white text-[#525252]"
                   }`}
                 >
                   {iv}
@@ -338,7 +339,7 @@ export default function SubscribePage() {
                   <label
                     key={g.code}
                     className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 ${
-                      gatewayCode === g.code ? "border-win-600 bg-win-600/5" : "border-slate-200"
+                      gatewayCode === g.code ? "border-black bg-[#f5f5f5]" : "border-[#e5e5e5]"
                     }`}
                   >
                     <span className="flex items-center gap-3">
@@ -347,7 +348,7 @@ export default function SubscribePage() {
                         name="gateway"
                         checked={gatewayCode === g.code}
                         onChange={() => setGatewayCode(g.code)}
-                        className="accent-win-600"
+                        className="accent-black"
                       />
                       <span className="font-medium">{g.name}</span>
                       {g.sandbox && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-700">sandbox</span>}
@@ -369,7 +370,7 @@ export default function SubscribePage() {
           <button
             disabled={busy !== null || !plan || !gatewayCode}
             onClick={subscribe}
-            className="mt-4 w-full rounded-md bg-win-600 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+            className="mt-4 w-full bg-black text-white"
           >
             {busy ? "Processing..." : `Pay ${money(amount)} ${currency} via ${gateway?.name || "gateway"}`}
           </button>

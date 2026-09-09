@@ -108,6 +108,7 @@ class FbrIntegrationController extends Controller
             'token' => ['nullable', 'string', 'max:500'],
             'validate_endpoint' => ['nullable', 'string', 'max:500'],
             'submit_endpoint' => ['nullable', 'string', 'max:500'],
+            'whitelist_ip' => ['nullable', 'string', 'max:45'],
         ]);
 
         if (isset($data['integrator'])) {
@@ -124,7 +125,7 @@ class FbrIntegrationController extends Controller
         );
         $config = $row->configArray();
 
-        foreach (['base_url', 'token', 'validate_endpoint', 'submit_endpoint'] as $key) {
+        foreach (['base_url', 'token', 'validate_endpoint', 'submit_endpoint', 'whitelist_ip'] as $key) {
             if (array_key_exists($key, $data) && $data[$key] !== null) {
                 $config[$key] = $data[$key];
             }

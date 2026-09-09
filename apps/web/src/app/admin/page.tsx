@@ -49,8 +49,8 @@ type Dashboard = {
   recent_payments: BillingPayment[];
 };
 
-const card = "rounded-xl bg-white border border-black/[0.06] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]";
-const pill = (s: string) => `rounded-full px-2 py-1 text-xs ${statusStyles[s] || "bg-slate-100 text-slate-600"}`;
+const card = "border border-[#e5e5e5] bg-white p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
 
 export default function AdminOverviewPage() {
   const [data, setData] = useState<Dashboard | null>(null);
@@ -76,10 +76,11 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Platform operations !</h1>
-          <p className="text-sm text-slate-500">Sellers, subscriptions, payments, PRAL health, and support — not seller invoicing.</p>
+          <p className="eyebrow mb-2">Console</p>
+          <h1 className="text-3xl font-medium tracking-tight">Platform operations</h1>
+          <p className="text-sm text-[#767676]">Sellers, subscriptions, payments, PRAL health, and support — not seller invoicing.</p>
         </div>
-        <Link href="/admin/tenants/new" className="rounded-md bg-win-600 px-4 py-2 text-sm font-medium text-white">
+        <Link href="/admin/tenants/new" className="btn-primary">
           Add seller
         </Link>
       </div>
@@ -87,7 +88,7 @@ export default function AdminOverviewPage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Sellers</h2>
-          <Link className="text-sm text-win-600" href="/admin/tenants">View sellers</Link>
+          <Link className="text-sm text-black underline underline-offset-4" href="/admin/tenants">View sellers</Link>
         </div>
         <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
           {[
@@ -98,7 +99,7 @@ export default function AdminOverviewPage() {
             ["Past due", sellers.past_due, "text-orange-600"],
             ["Grace", sellers.grace, "text-amber-600"],
             ["Suspended", sellers.suspended, "text-rose-600"],
-            ["New today", "new_today" in sellers ? sellers.new_today : 0, "text-win-700"],
+            ["New today", "new_today" in sellers ? sellers.new_today : 0, "text-black"],
           ].map(([label, value, color]) => (
             <div key={label as string} className={card}>
               <p className="text-xs text-slate-500">{label}</p>
@@ -131,7 +132,7 @@ export default function AdminOverviewPage() {
         <section className={card}>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Subscriptions</h2>
-            <Link className="text-sm text-win-600" href="/admin/subscriptions">Manage</Link>
+            <Link className="text-sm text-black underline underline-offset-4" href="/admin/subscriptions">Manage</Link>
           </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <p>Active <span className="float-right font-semibold">{data.subscriptions.active}</span></p>
@@ -151,7 +152,7 @@ export default function AdminOverviewPage() {
         <section className={card}>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">PRAL health</h2>
-            <Link className="text-sm text-win-600" href="/admin/monitoring">Monitoring</Link>
+            <Link className="text-sm text-black underline underline-offset-4" href="/admin/monitoring">Monitoring</Link>
           </div>
           <div className="space-y-2 text-sm">
             <p>Sandbox <span className={`float-right font-medium ${pill(data.pral.sandbox_status)}`}>{formatStatus(data.pral.sandbox_status)}</span></p>
@@ -165,7 +166,7 @@ export default function AdminOverviewPage() {
         <section className={card}>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Support & errors</h2>
-            <Link className="text-sm text-win-600" href="/admin/support">Inbox</Link>
+            <Link className="text-sm text-black underline underline-offset-4" href="/admin/support">Inbox</Link>
           </div>
           <div className="space-y-2 text-sm">
             <p>Open tickets <span className="float-right font-semibold">{data.support.open}</span></p>
@@ -207,7 +208,7 @@ export default function AdminOverviewPage() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Recent SaaS orders</h2>
-            <Link className="text-sm text-win-600" href="/admin/billing">View payments</Link>
+            <Link className="text-sm text-black underline underline-offset-4" href="/admin/billing">View payments</Link>
           </div>
           <div className={card}>
             {data.recent_orders.length === 0 && <p className="text-sm text-slate-400">No orders yet.</p>}
@@ -231,7 +232,7 @@ export default function AdminOverviewPage() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Recent SaaS payments</h2>
-            <Link className="text-sm text-win-600" href="/admin/billing">View payments</Link>
+            <Link className="text-sm text-black underline underline-offset-4" href="/admin/billing">View payments</Link>
           </div>
           <div className={card}>
             {data.recent_payments.length === 0 && <p className="text-sm text-slate-400">No payments yet.</p>}

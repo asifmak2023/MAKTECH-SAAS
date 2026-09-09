@@ -33,11 +33,15 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('email/verify', [AuthController::class, 'verifyEmail'])->middleware('throttle:12,1');
+    Route::post('password/forgot', [AuthController::class, 'sendPasswordResetLink'])->middleware('throttle:3,1');
+    Route::post('password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::post('auth/email/resend', [AuthController::class, 'resendVerification'])->middleware('throttle:6,1');
 });
 
 Route::get('catalog', [CatalogController::class, 'index']);
@@ -60,7 +64,7 @@ Route::prefix('public')->group(function () {
 | Authenticated tenant area
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum', 'seller', 'tenant.required'])->group(function () {
+Route::middleware(['auth:sanctum', 'seller', 'verified', 'tenant.required'])->group(function () {
     Route::post('auth/push-token', [AuthController::class, 'savePushToken']);
 
     Route::get('dashboard', [InvoiceController::class, 'stats']);

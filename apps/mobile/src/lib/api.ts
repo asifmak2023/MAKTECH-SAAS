@@ -16,6 +16,16 @@ export function apiBase() {
   return "http://127.0.0.1:8000";
 }
 
+export function webAppUrl() {
+  if (process.env.EXPO_PUBLIC_WEB_URL) {
+    return process.env.EXPO_PUBLIC_WEB_URL.replace(/\/$/, "");
+  }
+  if (Platform.OS === "android") {
+    return "http://10.0.2.2:3000";
+  }
+  return "http://localhost:3000";
+}
+
 export function setSession(token: string, tenant: string) {
   memoryToken = token;
   memoryTenant = tenant;

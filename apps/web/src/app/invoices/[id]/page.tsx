@@ -99,20 +99,21 @@ export default function InvoiceDetailPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">{invoice.buyer_business_name}</h1>
-          <p className="text-sm text-slate-500">{invoice.invoice_type} · {invoice.invoice_date?.slice(0, 10)}</p>
+          <p className="eyebrow mb-2">Invoice</p>
+          <h1 className="text-3xl font-medium tracking-tight">{invoice.buyer_business_name}</h1>
+          <p className="mt-1 text-sm text-[#767676]">{invoice.invoice_type} · {invoice.invoice_date?.slice(0, 10)}</p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-sm ${statusStyles[invoice.status] || ""}`}>
+        <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`}>
           {formatStatus(invoice.status)}
         </span>
       </div>
 
       {invoice.customer && (
-        <p className="mb-4 text-sm text-slate-500">
+        <p className="mb-4 text-sm text-[#767676]">
           Client:{" "}
-          <Link href={`/clients/${invoice.customer.id}`} className="font-medium text-win-600">
+          <Link href={`/clients/${invoice.customer.id}`} className="font-medium text-black underline underline-offset-4">
             {clientDisplayName(invoice.customer)}
           </Link>
         </p>
@@ -124,27 +125,27 @@ export default function InvoiceDetailPage() {
         </p>
       )}
       {invoice.last_error && <p className="mb-4 rounded-md bg-rose-50 p-3 text-sm text-rose-700">{invoice.last_error}</p>}
-      {message && <p className="mb-4 rounded-md bg-win-50 p-3 text-sm text-win-800">{message}</p>}
+      {message && <p className="mb-4 rounded-md border border-[#e5e5e5] bg-[#f5f5f5] p-3 text-sm text-black">{message}</p>}
       {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
 
       <div className="mb-6 flex flex-wrap gap-3">
         {invoice.status === "draft" && (
-          <button className="bg-win-600 text-white" onClick={() => action("send-for-approval", "Sent for buyer approval")}>
+          <button className="bg-black text-white" onClick={() => action("send-for-approval", "Sent for buyer approval")}>
             Send for approval
           </button>
         )}
         {(invoice.status === "approved" || invoice.status === "failed") && (
-          <button className="bg-win-600 text-white" onClick={() => action("submit", "Submitted to PRAL")}>
+          <button className="bg-black text-white" onClick={() => action("submit", "Submitted to PRAL")}>
             Submit to PRAL
           </button>
         )}
         {["draft", "failed", "rejected"].includes(invoice.status) && (
           <>
-            <Link className="rounded-md bg-slate-100 px-4 py-2 text-sm" href={`/invoices/${invoice.id}/edit`}>
+            <Link className="btn-ghost" href={`/invoices/${invoice.id}/edit`}>
               Edit
             </Link>
             <button
-              className="rounded-md bg-rose-50 px-4 py-2 text-sm text-rose-700"
+              className="border border-black px-4 py-2 text-black"
               onClick={onDelete}
               disabled={deleting}
             >
@@ -153,7 +154,7 @@ export default function InvoiceDetailPage() {
           </>
         )}
         <a
-          className="rounded-md bg-slate-100 px-4 py-2 text-sm"
+          className="btn-ghost"
           href={`/api/invoices/${invoice.id}/pdf`}
           onClick={(e) => {
             e.preventDefault();
@@ -172,12 +173,12 @@ export default function InvoiceDetailPage() {
         >
           Download PDF
         </a>
-        <Link className="rounded-md bg-slate-100 px-4 py-2 text-sm" href={`/approve/${invoice.approval_token}`}>
+        <Link className="btn-ghost" href={`/approve/${invoice.approval_token}`}>
           Public approval link
         </Link>
       </div>
 
-      <div className="rounded-xl bg-white border border-black/[0.06] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_-12px_rgba(0,0,0,0.14)]">
+      <div className="border border-[#e5e5e5] bg-white p-5">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-500">
