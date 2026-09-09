@@ -1,6 +1,6 @@
-# PRAL Digital Invoicing System
+# FBR Digital Invoicing System
 
-Multi-tenant sales invoicing for Pakistan FBR / PRAL Digital Invoicing.
+Multi-tenant sales invoicing for the Pakistan FBR Digital Invoicing programme (invoices are posted through the PRAL gateway).
 
 Sellers (role B) raise invoices, buyers (role C) approve them, and the platform (role A) bills tenants in PKR. Subscriptions activate only after payment clears.
 
@@ -39,6 +39,22 @@ CACHE_STORE=database
 `WEB_APP_URL` is the public origin of the Next.js app. Raast/1LINK **return**, **cancel**, and **webhook** URLs, plus email-verification links, are built from it. Change it whenever the public host changes — no code edits.
 
 New sellers must verify email before using the workspace (`/verify-email`). Seeded and admin-created accounts are pre-verified. Set `SAAS_REQUIRE_EMAIL_VERIFICATION=false` only for local/dev. Configure `MAIL_*` so verification mail is delivered.
+
+Optional **Sign in with Google** (Login / Register show a Google button only when enabled):
+
+```
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_ENABLED=true
+```
+
+Create the OAuth client under Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web), and add exactly one Authorized redirect URI:
+
+```
+http://localhost:8000/api/auth/google/callback
+```
+
+(Use your deployed backend origin in production.) Google sign-in matches the account by email and marks it verified; a brand-new email automatically provisions a workspace whose username/tenant slug comes from the email local part.
 
 Optional Raast / 1LINK merchant credentials (never commit real values; leave blank for sandbox):
 
