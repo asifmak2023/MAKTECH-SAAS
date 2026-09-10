@@ -1,77 +1,161 @@
 import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { Redirect, useRootNavigationState } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Linking from "expo-linking";
-import { api, setSession, webAppUrl } from "../src/lib/api";
+import { api, getToken, setSession, webAppUrl } from "../src/lib/api";
+import { useTheme } from "../src/lib/ThemeContext";
+import { fonts } from "../src/lib/theme";
+import { AlertBanner, Button, Field } from "../src/ui/primitives";
 
 export default function Login() {
-  const router = useRouter();
+  const navigation = useRootNavigationState();
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [signedIn, setSignedIn] = useState(Boolean(getToken()));
 
   async function submit() {
+    setError("");
+    setLoading(true);
     try {
-      const res = await api<{ token: string; tenant: { slug: string } | null }>("/api/auth/login", {
+      const res = await api<{
+        token: string;
+        tenant: { slug: string } | null;
+        is_platform_admin?: boolean;
+        account_kind?: string;
+      }>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ username, password }),
       });
-      setSession(res.token, res.tenant?.slug ?? "");
-      router.replace("/");
+      const isAdmin = res.account_kind === "platform_admin" || Boolean(res.is_platform_admin);
+      setSession(res.token, isAdmin ? "" : (res.tenant?.slug ?? ""));
+      setSignedIn(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
   }
 
+  if (!navigation?.key) return null;
+  if (signedIn) return <Redirect href="/dashboard" />;
+
   return (
-    <View className="flex-1 justify-center bg-white px-6">
-      <Text className="mb-1 text-center text-xl font-bold uppercase tracking-widest">FBR Digital Invoicing System</Text>
-      <Text className="mb-8 text-center text-sm text-neutral-500">Sign in to your workspace.</Text>
-
-      <Text className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Username</Text>
-      <TextInput
-        className="mb-4 border border-neutral-300 px-3 py-3 text-neutral-900"
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Your workspace username"
-        autoCapitalize="none"
-        autoCorrect={false}
-        autoComplete="username"
-        placeholderTextColor="#a3a3a3"
-      />
-
-      <Text className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Password</Text>
-      <TextInput
-        className="mb-3 border border-neutral-300 px-3 py-3 text-neutral-900"
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Your password"
-        secureTextEntry
-        autoComplete="password"
-        placeholderTextColor="#a3a3a3"
-        onSubmitEditing={submit}
-      />
-
-      {error ? <Text className="mb-3 text-sm text-black">{error}</Text> : null}
-
-      <Pressable className="items-center bg-black py-3" onPress={submit}>
-        <Text className="text-sm font-semibold uppercase tracking-wider text-white">Sign in</Text>
-      </Pressable>
-
-      <View className="mt-6 items-center">
-        <Text className="text-sm text-neutral-500">
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.authPage }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingTop: Math.max(insets.top, 16),
+        paddingBottom: Math.max(insets.bottom, 24),
+        paddingHorizontal: 16,
+        justifyContent: "center",
+      }}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text
+        style={{
+          textAlign: "center",
+          fontFamily: fonts.label,
+          fontSize: 11,
+          fontWeight: "600",
+          letterSpacing: 1.54,
+          textTransform: "uppercase",
+          color: colors.textMuted,
+          marginBottom: 24,
+        }}
+      >
+        FBR Digital Invoicing System
+      </Text>
+      <View
+        style={{
+          borderWidth: 1,
+          borderColor: colors.stroke,
+          backgroundColor: colors.surface,
+          padding: 24,
+          maxWidth: 440,
+          width: "100%",
+          alignSelf: "center",
+        }}
+      >
+        <Text
+          style={{
+            textAlign: "center",
+            fontFamily: fonts.label,
+            fontSize: 20,
+            fontWeight: "600",
+            letterSpacing: 1.2,
+            textTransform: "uppercase",
+            color: colors.foreground,
+          }}
+        >
+          FBR Digital Invoicing System
+        </Text>
+        <Text
+          style={{
+            textAlign: "center",
+            marginTop: 12,
+            marginBottom: 20,
+            fontFamily: fonts.body,
+            fontSize: 14,
+            color: colors.textMuted,
+          }}
+        >
+          Sign in to your workspace.
+        </Text>
+        <Field
+          label="Username"
+          value={username}
+          onChangeText={setUsername}
+          placeholder="Your workspace username"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="username"
+        />
+        <View>
+          <Field
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Your password"
+            secureTextEntry={!showPassword}
+            autoComplete="password"
+            onSubmitEditing={submit}
+          />
+          <Pressable
+            onPress={() => setShowPassword((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+            style={{ position: "absolute", right: 8, bottom: 26, minHeight: 44, justifyContent: "center", paddingHorizontal: 8 }}
+          >
+            <Text style={{ fontFamily: fonts.label, fontSize: 11, fontWeight: "600", letterSpacing: 1, textTransform: "uppercase", color: colors.textMuted }}>
+              {showPassword ? "Hide" : "Show"}
+            </Text>
+          </Pressable>
+        </View>
+        {error ? <AlertBanner tone="err" text={error} /> : null}
+        <Button label={loading ? "Signing in..." : "Sign in"} onPress={submit} loading={loading} disabled={loading} />
+        <Text style={{ marginTop: 20, fontFamily: fonts.body, fontSize: 14, color: colors.textMuted, lineHeight: 22 }}>
           New seller?{" "}
           <Text
-            className="font-semibold text-neutral-900 underline"
+            style={{ color: colors.foreground, textDecorationLine: "underline" }}
             onPress={() => Linking.openURL(`${webAppUrl()}/register`)}
           >
             Create account
           </Text>
+          {" · "}
+          <Text
+            style={{ color: colors.foreground, textDecorationLine: "underline" }}
+            onPress={() => Linking.openURL(`${webAppUrl()}/forgot-password`)}
+          >
+            Forgot your password?
+          </Text>
         </Text>
-        <Pressable className="mt-3" onPress={() => Linking.openURL(`${webAppUrl()}/forgot-password`)}>
-          <Text className="text-sm text-neutral-500 underline">Forgot your password?</Text>
-        </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }

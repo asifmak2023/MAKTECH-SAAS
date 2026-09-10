@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "FBR Invoicing",
+    "name": "FBR Digital Invoicing System",
     "slug": "pral-invoicing",
     "scheme": "pral",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "backgroundColor": "#0f766e"
+      "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
@@ -16,12 +16,16 @@
     "android": {
       "package": "com.maktech.pral",
       "adaptiveIcon": {
-        "backgroundColor": "#0f766e"
+        "backgroundColor": "#ffffff"
       }
     },
     "plugins": [
       "expo-router",
       "expo-notifications"
-    ]
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
   }
 }
