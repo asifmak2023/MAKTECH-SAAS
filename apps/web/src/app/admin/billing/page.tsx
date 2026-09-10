@@ -80,6 +80,93 @@ export default function AdminBillingPage() {
     }
   }
 
+  function generateReceipt(order: BillingOrder) {
+    const receiptWindow = window.open('', '_blank');
+    if (!receiptWindow) {
+      alert('Please allow popups to generate receipt');
+      return;
+    }
+
+    const receiptContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Receipt - ${order.order_number}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+        .header h1 { margin: 0; color: #333; }
+        .header p { color: #666; margin: 5px 0; }
+        .receipt-details { margin: 20px 0; }
+        .receipt-details table { width: 100%; border-collapse: collapse; }
+        .receipt-details th, .receipt-details td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        .receipt-details th { background-color: #f5f5f5; font-weight: bold; }
+        .total-row { font-weight: bold; background-color: #f9f9f9; }
+        .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
+        .status { padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+        .status.paid { background-color: #d4edda; color: #155724; }
+        .status.pending { background-color: #fff3cd; color: #856404; }
+        @media print { body { margin: 0; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ORDER RECEIPT</h1>
+        <p>FBR Digital Invoicing System</p>
+        <p>${new Date().toLocaleDateString()}</p>
+    </div>
+    
+    <div class="receipt-details">
+        <table>
+            <tr>
+                <th>Order Number</th>
+                <td>${order.order_number}</td>
+            </tr>
+            <tr>
+                <th>Order Type</th>
+                <td>${formatStatus(order.order_type)}</td>
+            </tr>
+            <tr>
+                <th>Tenant</th>
+                <td>${order.tenant?.name || 'N/A'}</td>
+            </tr>
+            <tr>
+                <th>Order Date</th>
+                <td>${fmtWhen(order.created_at)}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td><span class="status ${order.status}">${formatStatus(order.status)}</span></td>
+            </tr>
+            <tr>
+                <th>Reference</th>
+                <td>${order.reference || 'N/A'}</td>
+            </tr>
+            <tr class="total-row">
+                <th>Total Amount</th>
+                <td>PKR ${money(order.total_amount)}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="footer">
+        <p>This is an official receipt from the FBR Digital Invoicing System</p>
+        <p>For inquiries, contact support</p>
+        <p>Generated: ${new Date().toLocaleString()}</p>
+    </div>
+    
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>`;
+
+    receiptWindow.document.write(receiptContent);
+    receiptWindow.document.close();
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -143,6 +230,9 @@ export default function AdminBillingPage() {
                     <td className="py-2 pr-3 text-slate-600">{o.paid_at ? fmtWhen(o.paid_at) : "—"}</td>
                     <td className="py-2 pr-3"><span className={pill(o.status)}>{formatStatus(o.status)}</span></td>
                     <td className="py-2 text-right">
+                      <button className="mr-1 border border-black px-2 py-1 text-xs text-black" onClick={() => generateReceipt(o)}>
+                        Receipt
+                      </button>
                       {o.status === "paid" && (
                         <button className="border border-black px-2 py-1 text-xs text-black" onClick={() => refund(o)}>
                           Refund

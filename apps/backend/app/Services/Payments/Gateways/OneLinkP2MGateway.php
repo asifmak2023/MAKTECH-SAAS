@@ -9,13 +9,12 @@ use App\Services\Payments\AbstractPaymentGateway;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class RaastGateway extends AbstractPaymentGateway
+class OneLinkP2MGateway extends AbstractPaymentGateway
 {
     /**
      * Resolve 1LINK merchant credentials. Values saved from the admin console
      * (encrypted in the `payment_gateways` table) take priority; the .env
-     * credentials (RAST_API_KEY / RAST_APP_SECRET) are only the fallback so a
-     * brand-new deployment works before the admin fills the dashboard form.
+     * credentials are only the fallback.
      */
     public function configure(PaymentGateway $model): void
     {
@@ -37,9 +36,7 @@ class RaastGateway extends AbstractPaymentGateway
     }
 
     /**
-     * The sandbox environment simulates the Raast P2M hosted checkout, so it
-     * does not require live merchant credentials. Live mode still demands a
-     * configured merchant (merchant_id / api_key / etc.).
+     * The sandbox environment does not require live merchant credentials.
      */
     protected function requiredKeys(): array
     {
@@ -51,7 +48,7 @@ class RaastGateway extends AbstractPaymentGateway
     }
 
     /**
-     * Initiate a Raast P2M payment using Request to Pay (RTP) via 1Link Direct
+     * Initiate a 1Link P2M payment using various methods (QR, RTP, etc.)
      */
     public function purchase(BillingOrder $order, Payment $payment, array $options = []): array
     {
@@ -64,22 +61,29 @@ class RaastGateway extends AbstractPaymentGateway
         $merchantId = $this->config['merchant_id'] ?? null;
         $apiKey = $this->config['api_key'] ?? null;
         $apiSecret = $this->config['api_secret'] ?? null;
+        $paymentMethod = $options['payment_method'] ?? 'rtp'; // rtp, qr, alias, iban
 
-        if (!$merchantId || !$apiKey) {
-            return $this->manualResult($this->reference(), [
-                'error' => 'Missing merchant_id or api_key configuration',
-                'required_fields' => ['merchant_id', 'api_key'],
-            ]);
+        // Sandbox mode - simulate payment
+        if ($this->model->is_sandbox) {
+            return [
+                'status' => 'pending',
+                'redirect_url' => null,
+                'provider_reference' => $this->reference(),
+                'manual' => true,
+                'raw' => [
+                    'simulated' => true,
+                    'mode' => 'sandbox',
+                    'payment_method' => $paymentMethod,
+                    'merchant_id' => $merchantId,
+                    'amount' => $payment->amount,
+                    'currency' => $payment->currency,
+                ],
+            ];
         }
 
-        // Make actual API call to 1Link P2M API
+        // Live mode - make actual API call based on payment method
         try {
-            $response = Http::withHeaders([
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer '.$apiKey,
-                'X-Merchant-Id' => $merchantId,
-            ])->post($endpoint.'/rtpNowMerchant', [
+            $response = $this->makeApiCall($endpoint, $paymentMethod, [
                 'merchantId' => $merchantId,
                 'requestId' => $payment->idempotency_key,
                 'amount' => (string) $payment->amount,
@@ -89,57 +93,87 @@ class RaastGateway extends AbstractPaymentGateway
                 'customerMobile' => $options['customer_mobile'] ?? null,
                 'returnUrl' => $options['return_url'] ?? null,
                 'webhookUrl' => $options['webhook_url'] ?? null,
-            ]);
+                'iban' => $this->config['iban'] ?? null,
+                'alias' => $this->config['alias'] ?? null,
+            ], $apiKey, $merchantId);
 
             if ($response->successful()) {
                 $data = $response->json();
 
                 return [
                     'status' => 'pending',
-                    'redirect_url' => $data['paymentUrl'] ?? $data['payment_url'] ?? null,
-                    'provider_reference' => $data['transactionId'] ?? $data['transaction_id'] ?? $this->reference(),
+                    'redirect_url' => $data['paymentUrl'] ?? $data['qrCode'] ?? null,
+                    'provider_reference' => $data['transactionId'] ?? $data['requestId'] ?? $this->reference(),
                     'manual' => false,
                     'raw' => $data,
                 ];
             }
 
-            // API call failed - fall back to manual mode
-            Log::error('Raast API Error', [
+            // API call failed
+            Log::error('1Link P2M API Error', [
                 'status' => $response->status(),
                 'body' => $response->body(),
                 'payment_id' => $payment->id,
-                'mode' => $this->model->is_sandbox ? 'sandbox' : 'live',
-                'endpoint' => $endpoint,
+                'payment_method' => $paymentMethod,
             ]);
 
             return $this->manualResult($this->reference(), [
                 'error' => 'API call failed',
                 'status' => $response->status(),
                 'response' => $response->body(),
-                'mode' => $this->model->is_sandbox ? 'sandbox' : 'live',
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Raast Gateway Exception', [
+            Log::error('1Link P2M Gateway Exception', [
                 'message' => $e->getMessage(),
                 'payment_id' => $payment->id,
-                'mode' => $this->model->is_sandbox ? 'sandbox' : 'live',
-                'endpoint' => $endpoint,
+                'payment_method' => $paymentMethod,
             ]);
 
             return $this->manualResult($this->reference(), [
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-                'mode' => $this->model->is_sandbox ? 'sandbox' : 'live',
             ]);
         }
     }
 
     /**
-     * Sandbox callbacks are simulated and carry no HMAC, so they are accepted
-     * as-is to let the full webhook flow be exercised. Live Raast P2M
-     * notifications are 1LINK-signed; that signature verification must be
-     * wired here against the real initiation API before taking live payments.
+     * Make API call based on payment method
+     */
+    protected function makeApiCall(string $endpoint, string $paymentMethod, array $data, string $apiKey, string $merchantId)
+    {
+        $headers = [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.$apiKey,
+            'X-merchant-id' => $merchantId,
+        ];
+
+        switch ($paymentMethod) {
+            case 'qr':
+                return Http::withHeaders($headers)
+                    ->post($endpoint.'/generateDQRCMerchant', $data);
+
+            case 'rtp':
+                return Http::withHeaders($headers)
+                    ->post($endpoint.'/rtpNowMerchant', $data);
+
+            case 'rtp_later':
+                return Http::withHeaders($headers)
+                    ->post($endpoint.'/rtpLaterMerchant', $data);
+
+            case 'alias':
+                return Http::withHeaders($headers)
+                    ->post($endpoint.'/preRTPAliasInquiryMerchant', $data);
+
+            default:
+                return Http::withHeaders($headers)
+                    ->post($endpoint.'/rtpNowMerchant', $data);
+        }
+    }
+
+    /**
+     * Verify webhook signature from 1Link P2M
      */
     public function verifyWebhookSignature(array $headers, array $payload): bool
     {
@@ -147,7 +181,7 @@ class RaastGateway extends AbstractPaymentGateway
             return true;
         }
 
-        // Implement 1Link signature verification for production
+        // Implement 1Link signature verification
         $signature = $headers['X-Signature'] ?? $headers['x-signature'] ?? null;
         $timestamp = $headers['X-Timestamp'] ?? $headers['x-timestamp'] ?? null;
         $apiSecret = $this->config['api_secret'] ?? null;
@@ -156,7 +190,7 @@ class RaastGateway extends AbstractPaymentGateway
             return false;
         }
 
-        // Create expected signature
+        // Create expected signature using HMAC-SHA256
         $expectedSignature = hash_hmac('sha256', $timestamp.json_encode($payload), $apiSecret);
 
         return hash_equals($expectedSignature, $signature);

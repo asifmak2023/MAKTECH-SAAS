@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PlatformBootstrapSeeder::class,
+            AdminAccountSeeder::class,
             CatalogSeeder::class,
         ]);
 
