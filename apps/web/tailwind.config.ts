@@ -40,14 +40,14 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['"DM Sans"', "system-ui", "sans-serif"],
-        display: ['"DM Sans"', "system-ui", "sans-serif"],
-        label: ['"Space Grotesk"', "system-ui", "sans-serif"],
-        mono: ['"DM Sans"', "ui-monospace", "monospace"],
+        sans: ['"Roboto"', "system-ui", "sans-serif"],
+        display: ['"Roboto"', "system-ui", "sans-serif"],
+        label: ['"Roboto"', "system-ui", "sans-serif"],
+        mono: ['"Roboto"', "ui-monospace", "monospace"],
       },
       letterSpacing: {
-        label: "0.12em",
-        eyebrow: "0.18em",
+        label: "0.5px",
+        eyebrow: "0.5px",
       },
       maxWidth: {
         editorial: "1440px",

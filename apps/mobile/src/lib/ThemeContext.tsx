@@ -34,7 +34,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   dark: false,
   colors: colorsFor("fbr", "light"),
   fonts: PALETTES[0].fonts,
-  radius: 0,
+  radius: 12,
   toggle: () => undefined,
   setTheme: () => undefined,
   setPalette: () => undefined,

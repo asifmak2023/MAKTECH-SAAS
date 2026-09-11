@@ -53,7 +53,7 @@ export default function ThemePicker() {
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        className="theme-picker-trigger grid h-11 w-11 place-items-center border border-[#e5e5e5] text-[#262626] hover:border-black"
+        className="theme-picker-trigger grid h-11 w-11 place-items-center text-[#262626] hover:bg-[#f3edf7]"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -67,9 +67,9 @@ export default function ThemePicker() {
         <div
           role="dialog"
           aria-label="Appearance"
-          className="theme-picker-menu absolute right-0 z-50 mt-2 w-[min(18.5rem,calc(100vw-1.5rem))] border border-[#e5e5e5] bg-white p-3 shadow-none"
+          className="theme-picker-menu absolute right-0 z-50 mt-2 w-[min(18.5rem,calc(100vw-1.5rem))] p-3"
         >
-          <p className="mb-2 font-label text-[11px] font-semibold uppercase tracking-[0.14em] text-[#767676]">
+          <p className="mb-2 font-label text-[12px] font-medium tracking-[0.4px] text-[#767676]">
             Appearance
           </p>
           <div className="flex flex-col gap-1">
@@ -84,17 +84,17 @@ export default function ThemePicker() {
                     setPalette(item.id);
                     setDark(isDarkDocument());
                   }}
-                  className={`flex min-h-11 items-center gap-3 px-2 text-left normal-case tracking-normal ${
-                    active ? "bg-[#f5f5f5] text-black" : "text-[#262626] hover:bg-[#fafafa]"
+                  className={`flex min-h-12 items-center gap-3 rounded-full px-3 text-left normal-case tracking-normal ${
+                    active ? "bg-[#e6e1e5] text-black" : "text-[#262626] hover:bg-[#f3edf7]"
                   }`}
                   aria-pressed={active}
                 >
                   <PaletteMark id={item.id} size={18} />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[12px] font-semibold uppercase tracking-[0.1em] font-label">
+                    <span className="block text-[13px] font-medium font-label">
                       {item.label}
                     </span>
-                    <span className="block text-[11px] font-normal normal-case tracking-normal text-[#767676]">
+                    <span className="block text-[12px] font-normal normal-case tracking-normal text-[#767676]">
                       {item.hint}
                     </span>
                   </span>
@@ -103,11 +103,11 @@ export default function ThemePicker() {
             })}
           </div>
           {canToggleMode && (
-            <div className="mt-3 flex gap-2 border-t border-[#e5e5e5] pt-3">
+            <div className="mt-3 flex gap-2 pt-3">
               <button
                 type="button"
-                className={`min-h-11 flex-1 border px-3 text-[11px] font-semibold uppercase tracking-[0.12em] font-label ${
-                  !dark ? "border-black bg-black text-white" : "border-[#e5e5e5] text-[#262626]"
+                className={`min-h-11 flex-1 rounded-full px-3 text-[12px] font-medium tracking-[0.4px] font-label ${
+                  !dark ? "bg-black text-white" : "bg-[#f3edf7] text-[#262626]"
                 }`}
                 onClick={() => {
                   applyTheme(false);
@@ -119,8 +119,8 @@ export default function ThemePicker() {
               </button>
               <button
                 type="button"
-                className={`min-h-11 flex-1 border px-3 text-[11px] font-semibold uppercase tracking-[0.12em] font-label ${
-                  dark ? "border-black bg-black text-white" : "border-[#e5e5e5] text-[#262626]"
+                className={`min-h-11 flex-1 rounded-full px-3 text-[12px] font-medium tracking-[0.4px] font-label ${
+                  dark ? "bg-black text-white" : "bg-[#f3edf7] text-[#262626]"
                 }`}
                 onClick={() => {
                   applyTheme(true);

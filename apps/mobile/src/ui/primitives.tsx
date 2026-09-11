@@ -21,8 +21,8 @@ export function Eyebrow({ children }: { children: ReactNode }) {
       style={{
         fontFamily: fonts.label,
         fontSize: 11,
-        fontWeight: "600",
-        letterSpacing: 1.98,
+        fontWeight: "500",
+        letterSpacing: 0.5,
         textTransform: "uppercase",
         color: colors.textMuted,
       }}
@@ -39,8 +39,8 @@ export function PageTitle({ children }: { children: ReactNode }) {
       style={{
         fontFamily: fonts.body,
         fontSize: 28,
-        fontWeight: "500",
-        letterSpacing: -0.4,
+        fontWeight: "400",
+        letterSpacing: 0,
         color: colors.foreground,
         flexShrink: 1,
       }}
@@ -65,10 +65,9 @@ export function FieldLabel({ children }: { children: ReactNode }) {
     <Text
       style={{
         fontFamily: fonts.label,
-        fontSize: 11,
-        fontWeight: "600",
-        letterSpacing: 1.32,
-        textTransform: "uppercase",
+        fontSize: 12,
+        fontWeight: "500",
+        letterSpacing: 0.4,
         color: colors.textMuted,
         marginBottom: 6,
       }}
@@ -93,16 +92,16 @@ export function Field({
         onChangeText={onChangeText}
         placeholderTextColor={colors.textMuted}
         style={{
-          minHeight: 48,
+          minHeight: 56,
           borderWidth: 1,
           borderColor: colors.stroke,
           backgroundColor: colors.surface,
           color: colors.foreground,
-          paddingHorizontal: 12,
+          paddingHorizontal: 16,
           paddingVertical: 12,
           fontSize: 16,
           fontFamily: fonts.body,
-          borderRadius: colors.radius,
+          borderRadius: 4,
         }}
         {...rest}
       />
@@ -116,11 +115,15 @@ export function Card({ children, style }: { children: ReactNode; style?: ViewSty
     <View
       style={[
         {
-          borderWidth: 1,
-          borderColor: colors.stroke,
+          borderWidth: 0,
           backgroundColor: colors.surface,
           padding: 16,
-          borderRadius: colors.radius,
+          borderRadius: 12,
+          shadowColor: colors.foreground,
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+          shadowOffset: { width: 0, height: 1 },
+          elevation: 1,
         },
         style,
       ]}
@@ -165,15 +168,16 @@ export function Button({
       style={({ pressed }) => [
         {
           minHeight: 48,
-          paddingHorizontal: 16,
+          paddingHorizontal: 24,
           paddingVertical: 12,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: bg,
           borderWidth: 1,
           borderColor: border,
-          borderRadius: colors.radius,
-          opacity: busy ? 0.5 : pressed ? 0.82 : 1,
+          borderRadius: colors.radiusBtn,
+          opacity: busy ? 0.38 : 1,
+          transform: [{ scale: pressed && !busy ? 0.98 : 1 }],
         },
         style,
       ]}
@@ -184,10 +188,9 @@ export function Button({
         <Text
           style={{
             fontFamily: fonts.label,
-            fontSize: 12,
-            fontWeight: "600",
-            letterSpacing: 1.2,
-            textTransform: "uppercase",
+            fontSize: 14,
+            fontWeight: "500",
+            letterSpacing: 0.1,
             color: fg,
           }}
         >
@@ -213,7 +216,7 @@ export function StatusChip({ status, label }: { status: string; label?: string }
         backgroundColor: tone.bg,
         borderWidth: 1,
         borderColor: tone.border,
-        borderRadius: Math.min(8, colors.radius || 0),
+        borderRadius: 8,
         maxWidth: "100%",
       }}
     >
@@ -251,7 +254,7 @@ export function AlertBanner({
           ? { bg: dark ? "rgba(244,63,94,0.16)" : "#fff1f2", fg: dark ? "#fda4af" : "#be123c" }
           : { bg: colors.accentSoft, fg: colors.foreground };
   return (
-    <View style={{ backgroundColor: pal.bg, borderWidth: 1, borderColor: colors.stroke, padding: 12, marginBottom: 12, borderRadius: colors.radius }}>
+    <View style={{ backgroundColor: pal.bg, padding: 16, marginBottom: 12, borderRadius: 12 }}>
       <Text style={{ fontFamily: fonts.body, fontSize: 14, color: pal.fg }}>{text}</Text>
     </View>
   );
@@ -269,9 +272,38 @@ export function EmptyState({ text }: { text: string }) {
 export function LoadingBlock({ label = "Loading workspace..." }: { label?: string }) {
   const { colors } = useTheme();
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 40, backgroundColor: colors.page }}>
-      <ActivityIndicator color={colors.foreground} />
-      <Text style={{ marginTop: 12, fontFamily: fonts.body, fontSize: 14, color: colors.textMuted }}>{label}</Text>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, paddingVertical: 40, backgroundColor: colors.page }}>
+      <View style={{ width: 120, flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        {Array.from({ length: 9 }, (_, i) => (
+          <Pressable
+            key={i}
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+            style={({ pressed }) => ({
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: pressed ? colors.accent : colors.stroke,
+              backgroundColor: pressed ? colors.accent : colors.surface,
+              opacity: pressed ? 1 : 0.45 + ((i % 3) + Math.floor(i / 3)) * 0.08,
+            })}
+          />
+        ))}
+      </View>
+      <Text
+        style={{
+          marginTop: 16,
+          fontFamily: fonts.label,
+          fontSize: 12,
+          fontWeight: "500",
+          letterSpacing: 0.5,
+          textTransform: "uppercase",
+          color: colors.textMuted,
+        }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -301,15 +333,17 @@ export function Segmented({
               justifyContent: "center",
               backgroundColor: active ? colors.accent : colors.surface,
               paddingVertical: 10,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: active ? colors.accent : colors.stroke,
             }}
           >
             <Text
               style={{
                 fontFamily: fonts.label,
-                fontSize: 11,
-                fontWeight: "600",
-                letterSpacing: 1.1,
-                textTransform: "uppercase",
+                fontSize: 12,
+                fontWeight: "500",
+                letterSpacing: 0.5,
                 color: active ? colors.onAccent : colors.textSecondary,
               }}
             >
@@ -351,7 +385,7 @@ export function SelectField({
                 borderWidth: 1,
                 borderColor: active ? colors.accent : colors.stroke,
                 backgroundColor: active ? colors.accent : colors.surface,
-                borderRadius: colors.radius,
+                borderRadius: 20,
               }}
             >
               <Text

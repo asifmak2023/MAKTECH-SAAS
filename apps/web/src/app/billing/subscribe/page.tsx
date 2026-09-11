@@ -53,7 +53,7 @@ type CompleteResult = {
 type Phase = "form" | "pending_payment" | "done" | "cancelled";
 
 const pill = (status: string) => (
-  <span className="inline-flex border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-xs font-medium text-[#262626]">{formatStatus(status)}</span>
+  <span className="status-sky">{formatStatus(status)}</span>
 );
 
 export default function SubscribePage() {
@@ -194,7 +194,7 @@ export default function SubscribePage() {
       {!catalog ? (
         <p className="text-sm text-slate-500">Loading plans...</p>
       ) : phase === "done" ? (
-        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
+        <div className="card-plain max-w-lg p-6">
           <p className="text-lg font-semibold text-emerald-700">Subscription active</p>
           <p className="mt-1 text-sm text-slate-600">
             {result?.subscription?.plan?.name || plan?.name || "Your plan"} is now active
@@ -203,7 +203,7 @@ export default function SubscribePage() {
           <div className="mt-4 flex gap-2">
             <button
               onClick={() => router.push("/billing")}
-              className="bg-black px-4 py-2 text-white"
+              className="btn-primary"
             >
               Go to billing
             </button>
@@ -219,7 +219,7 @@ export default function SubscribePage() {
           </div>
         </div>
       ) : phase === "cancelled" ? (
-        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
+        <div className="card-plain max-w-lg p-6">
           <p className="text-lg font-semibold text-slate-700">Order cancelled</p>
           <p className="mt-1 text-sm text-slate-600">No payment was taken and your current plan is unchanged.</p>
           <button
@@ -227,13 +227,13 @@ export default function SubscribePage() {
               setPhase("form");
               setResult(null);
             }}
-            className="mt-4 bg-black px-4 py-2 text-white"
+            className="btn-primary mt-4"
           >
             Back to plans
           </button>
         </div>
       ) : phase === "pending_payment" && result ? (
-        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
+        <div className="card-plain max-w-lg p-6">
           <div className="flex items-center justify-between">
             <p className="font-semibold">{result.gateway?.name || gateway?.name || gatewayCode}</p>
             {pill(result.order.status)}
@@ -293,7 +293,7 @@ export default function SubscribePage() {
           </div>
         </div>
       ) : (
-        <div className="max-w-2xl border border-[#e5e5e5] bg-white p-6">
+        <div className="card-plain max-w-2xl p-6">
           <p className="mb-3 text-xs text-slate-500">Select the plan you want (replaces your current plan once paid):</p>
           <div className="space-y-2">
             {plans.map((p) => (
@@ -387,7 +387,7 @@ export default function SubscribePage() {
           <button
             disabled={busy !== null || !plan || !gatewayCode}
             onClick={subscribe}
-            className="mt-4 w-full bg-black text-white"
+            className="btn-primary mt-4 w-full"
           >
             {busy ? "Processing..." : `Pay ${money(amount)} ${currency} via ${gateway?.name || "gateway"}`}
           </button>

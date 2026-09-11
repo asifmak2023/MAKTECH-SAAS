@@ -70,7 +70,7 @@ export default function ClientDetailPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${c.is_active ? "bg-black text-white" : "border border-[#e5e5e5] bg-[#f5f5f5] text-[#525252]"}`}>
+          <span className={c.is_active ? "status-emerald" : "status-sky"}>
             {c.is_active ? "Active" : "Archived"}
           </span>
           <Link href={`/clients/${c.id}/edit`} className="btn-ghost">
@@ -88,7 +88,7 @@ export default function ClientDetailPage() {
 
       {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
 
-      <div className="mb-6 grid gap-4 border border-[#e5e5e5] bg-white p-5 md:grid-cols-3">
+      <div className="card-plain mb-6 grid gap-4 p-5 md:grid-cols-3">
         <div>
           <p className="text-xs uppercase text-slate-400">Email</p>
           <p className="mt-1 text-sm">{c.email || "—"}</p>
@@ -118,7 +118,7 @@ export default function ClientDetailPage() {
         </Link>
       </div>
 
-      <div className="border border-[#e5e5e5] bg-white p-4">
+      <div className="card-plain p-4">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-slate-500">

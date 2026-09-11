@@ -63,7 +63,7 @@ export default function SupportWidget() {
   return (
     <div ref={panelRef} className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
       {open && (
-        <div className="w-[19rem] max-w-[calc(100vw-2.5rem)] border border-[#e5e5e5] bg-white p-5">
+        <div className="w-[19rem] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-white p-5 shadow-md">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="eyebrow">Help</p>
@@ -86,11 +86,11 @@ export default function SupportWidget() {
               : "Questions about invoicing, PRAL, billing or your account — we're here to help."}
           </p>
           <div className="mt-4 space-y-2">
-            <Link href={centre} className="block w-full bg-black px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#262626]">
+            <Link href={centre} className="btn-primary block w-full text-center">
               Open support centre
             </Link>
             {!isAdminArea && (
-              <Link href="/support" className="block w-full border border-black px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-black hover:bg-[#fafafa]">
+              <Link href="/support" className="btn-secondary block w-full text-center">
                 Start a new request
               </Link>
             )}
@@ -104,7 +104,7 @@ export default function SupportWidget() {
         aria-expanded={open}
         aria-label="Support"
         title="Support"
-        className="grid h-11 w-11 place-items-center bg-black text-white hover:bg-[#262626]"
+        className="grid h-14 w-14 place-items-center rounded-2xl bg-black text-white shadow-md hover:bg-[#262626]"
       >
         <SupportIcon />
       </button>

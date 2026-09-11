@@ -46,7 +46,7 @@ export default function ClientForm({ client }: { client?: Client | null }) {
 
   return (
     <form onSubmit={onSubmit} className="max-w-3xl space-y-6">
-      <section className="grid gap-4 border border-[#e5e5e5] bg-white p-5 md:grid-cols-2">
+      <section className="card-plain grid gap-4 p-5 md:grid-cols-2">
         <div>
           <label>Business name</label>
           <input name="business_name" required defaultValue={client?.business_name || ""} />

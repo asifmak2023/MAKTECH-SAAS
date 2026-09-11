@@ -5,8 +5,8 @@ import { api } from "@/lib/api";
 import { Paginated, BillingOrder, BillingPayment, BillingInvoice, fmtWhen, money } from "@/lib/admin";
 import { statusStyles, formatStatus } from "@/lib/status";
 
-const card = "border border-[#e5e5e5] bg-white p-4";
-const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
+const card = "card-plain p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "status-sky"}`;
 
 type Tab = "orders" | "payments" | "invoices";
 
@@ -175,7 +175,7 @@ export default function AdminBillingPage() {
         <p className="mt-1 text-sm text-[#767676]">SaaS subscription and package payments from sellers — not B-to-C invoices.</p>
       </div>
 
-      <div className="flex w-fit border border-[#e5e5e5] text-sm">
+      <div className="flex w-fit gap-1 text-sm">
         {(["orders", "payments", "invoices"] as Tab[]).map((t) => (
           <button
             key={t}

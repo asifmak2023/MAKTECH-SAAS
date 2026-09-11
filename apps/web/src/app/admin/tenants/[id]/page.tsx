@@ -8,8 +8,8 @@ import { TenantDetail, FbrIntegrationRow, PlanBrief, fmtWhen, fmtDate } from "@/
 import { statusStyles, formatStatus, money } from "@/lib/status";
 import { provinceOptions } from "@/lib/provinces";
 
-const card = "border border-[#e5e5e5] bg-white p-4";
-const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
+const card = "card-plain p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "status-sky"}`;
 const statuses = ["pending", "trial", "active", "past_due", "grace_period", "suspended", "cancelled"];
 
 export default function AdminTenantDetailPage() {
@@ -392,7 +392,7 @@ function FbrOverrideSection({
                   <input name="token" type="password" placeholder={row?.config?.token ? "••••••••" : "Paste token"} />
                   <p className="mt-1 text-xs text-slate-400">A key can be bound to one account only — assigning a token already used by another tenant is rejected.</p>
                 </div>
-                <button className="w-full bg-black text-white" disabled={busy === mode}>
+                <button className="btn-primary w-full" disabled={busy === mode}>
                   {busy === mode ? "Saving..." : `Save ${mode} credentials`}
                 </button>
                 {row?.last_tested_at && (

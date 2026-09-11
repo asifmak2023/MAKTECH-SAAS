@@ -107,17 +107,17 @@ export default function DashboardPage() {
 
       {error && <p className="mb-4 text-sm text-black" role="alert">{error}</p>}
 
-      <div className="grid gap-px border border-[#e5e5e5] bg-[#e5e5e5] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {cards.map(([label, value]) => (
-          <div key={label} className="bg-white p-5">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">{label}</p>
-            <p className="mt-2 text-2xl font-semibold tabular-nums">{value ?? 0}</p>
+          <div key={label} className="card-plain p-5">
+            <p className="text-[12px] font-medium tracking-[0.4px] text-[#767676] font-label">{label}</p>
+            <p className="mt-2 text-2xl font-normal tabular-nums">{value ?? 0}</p>
           </div>
         ))}
       </div>
 
       {onb && pendingSetup && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-[#e5e5e5] bg-[#f5f5f5] px-4 py-3">
+        <div className="card-plain mt-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <p className="text-sm text-[#262626]">
             <span className="font-medium text-black">Finish FBR setup.</span> {pendingSetup}.
           </p>
@@ -128,7 +128,7 @@ export default function DashboardPage() {
       )}
 
       {onb && !pendingSetup && onb.onboarding.sandbox_tested && !onb.onboarding.production_active && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-black bg-white px-4 py-3">
+        <div className="card-plain mt-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <p className="text-sm text-[#262626]">
             <span className="font-medium text-black">Sandbox verified.</span> Ready to activate production.
           </p>
@@ -138,8 +138,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="mt-8 border border-[#e5e5e5] bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e5e5] px-6 py-4">
+      <div className="card-plain mt-8 overflow-hidden p-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           <h2 className="text-sm font-medium">{searching ? "Search results" : "Recent invoices"}</h2>
           <SearchInput value={query} onChange={setQuery} placeholder="Search all invoices…" className="w-full max-w-xs" />
         </div>
@@ -149,7 +149,7 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-[#e5e5e5] bg-[#fafafa] text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">
+                    <tr className="text-[12px] font-medium tracking-[0.4px] text-[#767676] font-label">
                   <th className="px-6 py-3.5 font-semibold">Invoice</th>
                   <th className="px-6 py-3.5 font-semibold">Buyer</th>
                   <th className="px-6 py-3.5 font-semibold">Date</th>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {list.map((inv) => (
-                  <tr key={inv.id} className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa]">
+                  <tr key={inv.id}>
                     <td className="px-6 py-4 font-medium tabular-nums text-black">#{inv.id}</td>
                     <td className="px-6 py-4">
                       <Link className="font-medium text-black underline underline-offset-4" href={`/invoices/${inv.id}`}>

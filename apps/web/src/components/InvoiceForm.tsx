@@ -196,7 +196,7 @@ export default function InvoiceForm({
           Only draft, rejected or failed invoices can be edited. This invoice is currently {invoice?.status}.
         </p>
       )}
-      <section className="grid gap-4 border border-[#e5e5e5] bg-white p-5 md:grid-cols-3">
+      <section className="card-plain grid gap-4 p-5 md:grid-cols-3">
         <div>
           <label>Invoice type</label>
           <select name="invoice_type" defaultValue={invoice?.invoice_type ?? "Sale Invoice"}>
@@ -223,7 +223,7 @@ export default function InvoiceForm({
         </div>
       </section>
 
-      <section className="border border-[#e5e5e5] bg-white p-5">
+      <section className="card-plain p-5">
         <div className="mb-4 max-w-xl">
           <ClientPicker client={client} onPick={onPickClient} />
         </div>
@@ -293,7 +293,7 @@ export default function InvoiceForm({
         </div>
       </section>
 
-      <section className="border border-[#e5e5e5] bg-white p-5">
+      <section className="card-plain p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Line items</h2>
           <button type="button" className="btn-ghost" onClick={() => setItems((p) => [...p, emptyItem()])}>

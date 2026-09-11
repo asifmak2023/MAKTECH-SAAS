@@ -105,7 +105,7 @@ export default function InvoiceDetailPage() {
           <h1 className="text-3xl font-medium tracking-tight">{invoice.buyer_business_name}</h1>
           <p className="mt-1 text-sm text-[#767676]">{invoice.invoice_type} · {invoice.invoice_date?.slice(0, 10)}</p>
         </div>
-        <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`}>
+        <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] || "status-sky"}`}>
           {formatStatus(invoice.status)}
         </span>
       </div>
@@ -178,7 +178,7 @@ export default function InvoiceDetailPage() {
         </Link>
       </div>
 
-      <div className="border border-[#e5e5e5] bg-white p-5">
+      <div className="card-plain p-5">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-500">

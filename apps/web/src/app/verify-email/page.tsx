@@ -84,8 +84,8 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md space-y-5 border border-[#e5e5e5] bg-white p-8">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="auth-shadow w-full max-w-md space-y-5 p-8">
         <div className="pb-1 text-center">
           <div className="space-y-1">
             <p className="eyebrow">FBR Digital Invoicing System</p>
@@ -94,13 +94,13 @@ export default function VerifyEmailPage() {
         </div>
         <p className="text-sm leading-relaxed text-[#525252]">{message}</p>
         {status === "ok" && (
-          <button className="w-full bg-black text-white hover:bg-[#262626]" onClick={() => router.replace(getToken() ? "/dashboard" : "/login")}>
+          <button className="btn-primary w-full" onClick={() => router.replace(getToken() ? "/dashboard" : "/login")}>
             {getToken() ? "Continue" : "Sign in"}
           </button>
         )}
         {(status === "need" || status === "err") && getToken() && (
           <form onSubmit={resend}>
-            <button className="w-full bg-black text-white hover:bg-[#262626]" disabled={sending}>
+            <button className="btn-primary w-full" disabled={sending}>
               {sending ? "Sending..." : status === "err" ? "Request a new link" : "Resend verification email"}
             </button>
           </form>

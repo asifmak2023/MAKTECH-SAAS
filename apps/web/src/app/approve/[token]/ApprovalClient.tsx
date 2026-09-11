@@ -55,12 +55,12 @@ export default function ApprovalClient({ token }: { token: string }) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <div className="border border-[#e5e5e5] bg-white p-6">
+      <div className="card-plain p-6">
         <p className="eyebrow">FBR Digital Invoicing System</p>
         <h1 className="mt-2 text-3xl font-medium tracking-tight">Invoice from {invoice.seller_business_name}</h1>
         <p className="text-sm text-[#767676]">Buyer: {invoice.buyer_business_name}</p>
         <p className="mt-2">
-          <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`}>
+          <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] || "status-sky"}`}>
             {formatStatus(invoice.status)}
           </span>
         </p>

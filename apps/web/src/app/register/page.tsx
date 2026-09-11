@@ -47,23 +47,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#fafafa]">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-5 md:px-10">
-        <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#767676] transition-colors hover:text-black font-label">
+    <div className="flex min-h-screen flex-col">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4 md:px-10">
+        <Link href="/" className="inline-flex h-10 items-center gap-2 rounded-full px-3 text-[14px] font-medium text-[#767676] hover:bg-white font-label">
           <span aria-hidden>←</span>
           Back
         </Link>
         <div className="flex items-center gap-3">
-          <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
+          <span className="hidden text-[14px] font-medium tracking-[0.15px] text-[#767676] sm:inline font-label">
             FBR Digital Invoicing System
           </span>
           <ThemePicker />
         </div>
       </div>
       <div className="relative flex flex-1 items-start justify-center px-4 pb-20 pt-2">
-        <form onSubmit={onSubmit} className="auth-shadow w-full max-w-xl space-y-5 border border-[#e5e5e5] bg-white p-8 md:p-10">
+        <form onSubmit={onSubmit} className="auth-shadow w-full max-w-xl space-y-5 p-8 md:p-10">
           <div className="pb-1 text-center">
-            <h1 className="text-xl font-semibold uppercase tracking-[0.06em] text-black font-label md:text-2xl md:tracking-[0.08em]">
+            <h1 className="text-2xl font-normal tracking-tight text-black font-label md:text-3xl">
               FBR Digital Invoicing System
             </h1>
             <p className="mt-3 text-sm text-[#767676]">Create your workspace to start invoicing.</p>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
             </div>
           </div>
           {error && <p className="text-sm text-black" role="alert">{error}</p>}
-          <button className="w-full bg-black text-white transition-colors hover:bg-[#262626]" disabled={loading}>
+          <button className="btn-primary w-full" disabled={loading}>
             {loading ? "Creating..." : "Create account"}
           </button>
           <GoogleSignInButton onError={setError} />

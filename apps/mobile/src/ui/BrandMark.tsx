@@ -17,10 +17,10 @@ export default function BrandMark({ size = 36 }: { size?: number }) {
     ? "#ffffff"
     : asifent
       ? dark
-        ? "#2b2b2b"
+        ? "#1e2022"
         : "#ffffff"
       : "#ffffff";
-  const borderColor = glacier ? "rgba(125,211,252,0.35)" : asifent ? "#0067c0" : "transparent";
+  const borderColor = glacier ? "rgba(125,211,252,0.35)" : asifent ? "#0061A4" : "transparent";
 
   return (
     <View

@@ -63,8 +63,8 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md space-y-5 border border-[#e5e5e5] bg-white p-8">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="auth-shadow w-full max-w-md space-y-5 p-8">
         <div className="pb-1 text-center">
           <div className="space-y-1">
             <p className="eyebrow">FBR Digital Invoicing System</p>
@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
             <p className="text-sm leading-relaxed text-[#525252]" role="status">
               Your password has been reset. Sign in with your new password.
             </p>
-            <button className="w-full bg-black text-white hover:bg-[#262626]" onClick={() => router.replace("/login")}>
+            <button className="btn-primary w-full" onClick={() => router.replace("/login")}>
               Sign in
             </button>
           </>
@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
               hint="Re-enter the same password."
             />
             {error && <p className="text-sm text-black" role="alert">{error}</p>}
-            <button className="w-full bg-black text-white hover:bg-[#262626]" disabled={loading}>
+            <button className="btn-primary w-full" disabled={loading}>
               {loading ? "Resetting..." : "Reset password"}
             </button>
           </form>

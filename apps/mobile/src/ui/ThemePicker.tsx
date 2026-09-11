@@ -25,9 +25,9 @@ export default function ThemePicker() {
           height: 44,
           alignItems: "center",
           justifyContent: "center",
-          borderWidth: 1,
-          borderColor: colors.stroke,
-          borderRadius: colors.radius,
+          borderWidth: 0,
+          borderRadius: 999,
+          backgroundColor: colors.accentSoft,
         }}
       >
         <PaletteMark id={palette} size={16} />
@@ -41,22 +41,22 @@ export default function ThemePicker() {
               maxWidth: Math.min(width, 430),
               alignSelf: "flex-end",
               backgroundColor: colors.surface,
-              borderTopWidth: 1,
-              borderLeftWidth: 1,
-              borderColor: colors.stroke,
+              borderTopWidth: 0,
+              borderLeftWidth: 0,
               paddingTop: 12,
               paddingBottom: Math.max(insets.bottom, 16),
               paddingHorizontal: 16,
-              borderTopLeftRadius: Math.max(colors.radius, 8),
+              borderTopLeftRadius: 28,
+              borderTopRightRadius: 28,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
               <Text
                 style={{
                   fontFamily: fonts.label,
-                  fontSize: 11,
-                  fontWeight: "600",
-                  letterSpacing: 1.6,
+                  fontSize: 12,
+                  fontWeight: "500",
+                  letterSpacing: 0.5,
                   textTransform: "uppercase",
                   color: colors.textMuted,
                 }}
@@ -87,7 +87,7 @@ export default function ThemePicker() {
                     gap: 12,
                     paddingHorizontal: 8,
                     backgroundColor: active ? colors.accentSoft : "transparent",
-                    borderRadius: colors.radius,
+                    borderRadius: 999,
                   }}
                 >
                   <PaletteMark id={item.id} size={18} />
@@ -95,10 +95,9 @@ export default function ThemePicker() {
                     <Text
                       style={{
                         fontFamily: fonts.label,
-                        fontSize: 12,
-                        fontWeight: "600",
-                        letterSpacing: 1.1,
-                        textTransform: "uppercase",
+                        fontSize: 13,
+                        fontWeight: "500",
+                        letterSpacing: 0.15,
                         color: colors.foreground,
                       }}
                     >
@@ -123,17 +122,17 @@ export default function ThemePicker() {
                     borderWidth: 1,
                     borderColor: theme !== "dark" ? colors.accent : colors.stroke,
                     backgroundColor: theme !== "dark" ? colors.accent : "transparent",
-                    borderRadius: colors.radius,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontFamily: fonts.label,
-                      fontSize: 11,
-                      fontWeight: "600",
-                      letterSpacing: 1.2,
-                      textTransform: "uppercase",
-                      color: theme !== "dark" ? colors.onAccent : colors.foreground,
+                      borderRadius: 20,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: fonts.label,
+                        fontSize: 12,
+                        fontWeight: "500",
+                        letterSpacing: 0.5,
+                        textTransform: "uppercase",
+                        color: theme !== "dark" ? colors.onAccent : colors.foreground,
                     }}
                   >
                     Light
@@ -151,17 +150,17 @@ export default function ThemePicker() {
                     borderWidth: 1,
                     borderColor: theme === "dark" ? colors.accent : colors.stroke,
                     backgroundColor: theme === "dark" ? colors.accent : "transparent",
-                    borderRadius: colors.radius,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontFamily: fonts.label,
-                      fontSize: 11,
-                      fontWeight: "600",
-                      letterSpacing: 1.2,
-                      textTransform: "uppercase",
-                      color: theme === "dark" ? colors.onAccent : colors.foreground,
+                      borderRadius: 20,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: fonts.label,
+                        fontSize: 12,
+                        fontWeight: "500",
+                        letterSpacing: 0.5,
+                        textTransform: "uppercase",
+                        color: theme === "dark" ? colors.onAccent : colors.foreground,
                     }}
                   >
                     Dark

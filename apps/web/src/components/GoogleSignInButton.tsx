@@ -56,7 +56,7 @@ export default function GoogleSignInButton({ onError }: Props) {
         onClick={start}
         disabled={loading}
         aria-label="Continue with Google"
-        className="flex w-full cursor-pointer items-center justify-center gap-3 border border-[#e5e5e5] bg-white px-4 py-3 text-sm text-[#1a1a1a] transition-colors hover:border-black hover:bg-[#fafafa] disabled:cursor-wait disabled:opacity-60"
+        className="btn-secondary flex w-full cursor-pointer items-center justify-center gap-3 disabled:cursor-wait"
       >
         <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />

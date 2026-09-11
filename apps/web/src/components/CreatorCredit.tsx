@@ -10,7 +10,7 @@ export default function CreatorCredit() {
         target="_blank"
         rel="noreferrer"
         aria-label="Credits to Muhammad Asif — WhatsApp +92 330 3696062"
-        className="font-label text-[10px] font-semibold uppercase tracking-[0.16em] text-[#a3a3a3] transition-colors hover:text-black"
+        className="font-label text-[11px] font-medium tracking-[0.4px] text-[#a3a3a3] transition-colors hover:text-black"
       >
         Credits to Muhammad Asif
       </a>

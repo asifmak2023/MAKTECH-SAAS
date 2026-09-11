@@ -17,10 +17,10 @@ export type PaletteMeta = {
 };
 
 export const PALETTES: PaletteMeta[] = [
-  { id: "fbr", label: "FBR Mono", hint: "Current product chrome", swatch: "#000000", modes: ["light", "dark"] },
-  { id: "asifent", label: "Asifent", hint: "Fluent blue workspace", swatch: "#0067c0", modes: ["light", "dark"] },
-  { id: "editorial", label: "Editorial", hint: "Financial precision", swatch: "#005da7", modes: ["light"] },
-  { id: "glacier", label: "Glacier", hint: "Frozen glass dark", swatch: "#7dd3fc", modes: ["dark"] },
+  { id: "fbr", label: "FBR Mono", hint: "Material 3 neutral", swatch: "#1C1B1F", modes: ["light", "dark"] },
+  { id: "asifent", label: "Asifent", hint: "Material 3 blue", swatch: "#0061A4", modes: ["light", "dark"] },
+  { id: "editorial", label: "Editorial", hint: "Material 3 financial", swatch: "#005FAF", modes: ["light"] },
+  { id: "glacier", label: "Glacier", hint: "Material 3 frost", swatch: "#7DD3FC", modes: ["dark"] },
 ];
 
 const PALETTE_IDS: PaletteId[] = PALETTES.map((p) => p.id);

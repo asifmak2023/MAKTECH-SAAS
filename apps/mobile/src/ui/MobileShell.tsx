@@ -97,9 +97,13 @@ export default function MobileShell({ children }: { children: ReactNode }) {
       <View
         style={{
           paddingTop: Math.max(insets.top, 10),
-          borderBottomWidth: 1,
-          borderBottomColor: colors.stroke,
+          borderBottomWidth: 0,
           backgroundColor: colors.surface,
+          shadowColor: colors.foreground,
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+          shadowOffset: { width: 0, height: 1 },
+          elevation: 1,
         }}
       >
         <View
@@ -124,10 +128,9 @@ export default function MobileShell({ children }: { children: ReactNode }) {
               numberOfLines={1}
               style={{
                 fontFamily: fonts.label,
-                fontSize: 11,
-                fontWeight: "600",
-                letterSpacing: 1.4,
-                textTransform: "uppercase",
+                fontSize: 12,
+                fontWeight: "500",
+                letterSpacing: 0.4,
                 color: colors.textMuted,
                 flexShrink: 1,
               }}
@@ -147,9 +150,9 @@ export default function MobileShell({ children }: { children: ReactNode }) {
                 height: 44,
                 alignItems: "center",
                 justifyContent: "center",
-                borderWidth: 1,
-                borderColor: colors.stroke,
-                borderRadius: colors.radius,
+                borderWidth: 0,
+                borderRadius: 999,
+                backgroundColor: colors.accentSoft,
               }}
             >
               <IconMenu color={colors.foreground} />
@@ -177,8 +180,9 @@ export default function MobileShell({ children }: { children: ReactNode }) {
             style={{
               width: Math.min(320, Math.max(260, width * 0.82)),
               backgroundColor: colors.surface,
-              borderLeftWidth: 1,
-              borderLeftColor: colors.stroke,
+              borderLeftWidth: 0,
+              borderTopLeftRadius: 28,
+              borderBottomLeftRadius: 28,
               paddingTop: Math.max(insets.top, 12),
               paddingBottom: Math.max(insets.bottom, 16),
             }}
@@ -187,9 +191,9 @@ export default function MobileShell({ children }: { children: ReactNode }) {
               <Text
                 style={{
                   fontFamily: fonts.label,
-                  fontSize: 11,
-                  fontWeight: "600",
-                  letterSpacing: 1.8,
+                  fontSize: 12,
+                  fontWeight: "500",
+                  letterSpacing: 0.5,
                   textTransform: "uppercase",
                   color: colors.textMuted,
                 }}
@@ -224,19 +228,18 @@ export default function MobileShell({ children }: { children: ReactNode }) {
                     gap: 12,
                     paddingHorizontal: 16,
                     backgroundColor: active ? colors.accentSoft : "transparent",
-                    borderLeftWidth: 2,
-                    borderLeftColor: active ? colors.foreground : "transparent",
+                    borderRadius: 999,
+                    marginHorizontal: 8,
                   }}
                 >
                   <item.Icon color={color} />
                   <Text
                     style={{
-                      fontFamily: fonts.label,
-                      fontSize: 12,
-                      fontWeight: "600",
-                      letterSpacing: 1.2,
-                      textTransform: "uppercase",
-                      color,
+                    fontFamily: fonts.label,
+                    fontSize: 14,
+                    fontWeight: "500",
+                    letterSpacing: 0.1,
+                    color,
                     }}
                   >
                     {item.label}
@@ -255,10 +258,9 @@ export default function MobileShell({ children }: { children: ReactNode }) {
               <Text
                 style={{
                   fontFamily: fonts.label,
-                  fontSize: 12,
-                  fontWeight: "600",
-                  letterSpacing: 1.2,
-                  textTransform: "uppercase",
+                  fontSize: 14,
+                  fontWeight: "500",
+                  letterSpacing: 0.1,
                   color: colors.textMuted,
                 }}
               >

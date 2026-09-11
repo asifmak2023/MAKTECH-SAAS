@@ -49,7 +49,7 @@ export default function ErrorDialog({
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Link
             href="/support"
-            className="border border-[#e5e5e5] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black font-label"
+            className="btn-ghost px-4 py-2 text-xs font-medium font-label"
             onClick={onClose}
           >
             Contact support

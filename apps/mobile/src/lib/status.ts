@@ -76,8 +76,8 @@ export function statusChip(status: string, dark: boolean, palette: PaletteId = "
 
   if (palette === "asifent" && ["paid", "active", "resolved"].includes(status)) {
     return dark
-      ? { bg: "#4c9aff", fg: "#0b1220", border: "#4c9aff", dot: "#0b1220" }
-      : { bg: "#0067c0", fg: "#ffffff", border: "#0067c0", dot: "#ffffff" };
+      ? { bg: "#9ECAFF", fg: "#003258", border: "#9ECAFF", dot: "#003258" }
+      : { bg: "#0061A4", fg: "#ffffff", border: "#0061A4", dot: "#ffffff" };
   }
 
   return tone;

@@ -63,11 +63,11 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1">
+      <div className="mb-4 flex flex-wrap gap-2">
         {tabs.map((t) => (
           <button
             key={t.key}
-            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider font-label ${filter === t.key ? "bg-black text-white" : "bg-transparent text-[#525252]"}`}
+            className={`px-4 py-2 text-xs font-medium tracking-[0.4px] font-label ${filter === t.key ? "bg-black text-white" : "bg-transparent text-[#525252]"}`}
             onClick={() => setFilter(t.key)}
           >
             {t.label}
@@ -77,49 +77,114 @@ export default function ClientsPage() {
 
       {error && <p className="mb-4 text-sm text-black" role="alert">{error}</p>}
 
-      <div className="border border-[#e5e5e5] bg-white">
+      <div className="space-y-3 md:hidden">
+        {(rows || []).map((c, index) => (
+          <article key={c.id} className="card-plain p-4">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#767676] font-label">#{index + 1}</p>
+                <Link href={`/clients/${c.id}`} className="mt-1 block break-words font-medium text-black underline underline-offset-4">
+                  {clientDisplayName(c)}
+                </Link>
+                {c.name !== clientDisplayName(c) ? <p className="mt-1 break-words text-xs text-slate-400">{c.name}</p> : null}
+                {!c.is_active && (
+                  <span className="status-sky mt-2">
+                    Archived
+                  </span>
+                )}
+              </div>
+            </div>
+            <dl className="grid grid-cols-1 gap-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#767676]">Email</dt>
+                <dd className="min-w-0 break-all text-right">{c.email || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#767676]">Phone</dt>
+                <dd className="min-w-0 break-all text-right">{c.phone || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#767676]">Tax no</dt>
+                <dd className="min-w-0 break-all text-right">{clientTaxNo(c) || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#767676]">Invoices</dt>
+                <dd>{c.invoices_count ?? 0}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#767676]">Created</dt>
+                <dd>{c.created_at ? c.created_at.slice(0, 10) : "—"}</dd>
+              </div>
+            </dl>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <Link href={`/clients/${c.id}`} className="btn-ghost inline-flex min-h-11 items-center justify-center px-2 text-xs">
+                View
+              </Link>
+              <Link href={`/clients/${c.id}/edit`} className="btn-ghost inline-flex min-h-11 items-center justify-center px-2 text-xs">
+                Edit
+              </Link>
+              <button
+                className="btn-secondary inline-flex min-h-11 items-center justify-center px-2 text-xs"
+                onClick={() => toggleActive(c)}
+                disabled={busy === c.id}
+              >
+                {c.is_active ? "Archive" : "Restore"}
+              </button>
+            </div>
+          </article>
+        ))}
+        {rows && rows.length === 0 && (
+          <p className="card-plain px-4 py-8 text-center text-sm text-slate-400">
+            {filter === "active" && !search ? "No clients yet — add your first buyer." : "No clients match."}
+          </p>
+        )}
+      </div>
+
+      <div className="card-plain hidden overflow-hidden p-0 md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-[#767676]">
               <tr>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">#</th>
                 <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Client</th>
-                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Email</th>
-                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Phone</th>
-                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Tax no</th>
-                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Invoices</th>
-                <th className="font-label text-[11px] font-semibold uppercase tracking-wider">Created</th>
-                <th className="text-right font-label text-[11px] font-semibold uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Email</th>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Phone</th>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Tax no</th>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Invoices</th>
+                <th className="px-4 py-3 font-label text-[11px] font-semibold uppercase tracking-wider">Created</th>
+                <th className="px-4 py-3 text-right font-label text-[11px] font-semibold uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {(rows || []).map((c) => (
+              {(rows || []).map((c, index) => (
                 <tr key={c.id} className="border-t align-top">
-                  <td className="py-2 pr-4">
+                  <td className="px-4 py-3 tabular-nums text-[#767676]">{index + 1}</td>
+                  <td className="px-4 py-3">
                     <Link href={`/clients/${c.id}`} className="font-medium text-black underline underline-offset-4">
                       {clientDisplayName(c)}
                     </Link>
                     <span className="block text-xs text-slate-400">{c.name !== clientDisplayName(c) ? c.name : ""}</span>
                     {!c.is_active && (
-                      <span className="mt-1 inline-block border border-[#e5e5e5] bg-[#f5f5f5] px-2 py-0.5 text-[11px] text-[#525252]">
+                      <span className="status-sky mt-1">
                         Archived
                       </span>
                     )}
                   </td>
-                  <td className="py-2 pr-4">{c.email || "—"}</td>
-                  <td className="py-2 pr-4">{c.phone || "—"}</td>
-                  <td className="py-2 pr-4">{clientTaxNo(c) || "—"}</td>
-                  <td className="py-2 pr-4">{c.invoices_count ?? 0}</td>
-                  <td className="py-2 pr-4">{c.created_at ? c.created_at.slice(0, 10) : "—"}</td>
-                  <td className="py-2">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link href={`/clients/${c.id}`} className="border border-[#e5e5e5] px-2 py-1 text-xs">
+                  <td className="px-4 py-3">{c.email || "—"}</td>
+                  <td className="px-4 py-3">{c.phone || "—"}</td>
+                  <td className="px-4 py-3">{clientTaxNo(c) || "—"}</td>
+                  <td className="px-4 py-3">{c.invoices_count ?? 0}</td>
+                  <td className="px-4 py-3">{c.created_at ? c.created_at.slice(0, 10) : "—"}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-nowrap items-center justify-end gap-2">
+                      <Link href={`/clients/${c.id}`} className="btn-ghost inline-flex shrink-0 px-2 py-1 text-xs">
                         View
                       </Link>
-                      <Link href={`/clients/${c.id}/edit`} className="border border-[#e5e5e5] px-2 py-1 text-xs">
+                      <Link href={`/clients/${c.id}/edit`} className="btn-ghost inline-flex shrink-0 px-2 py-1 text-xs">
                         Edit
                       </Link>
                       <button
-                        className="border border-black px-2 py-1 text-xs text-black"
+                        className="btn-secondary inline-flex shrink-0 px-2 py-1 text-xs"
                         onClick={() => toggleActive(c)}
                         disabled={busy === c.id}
                       >
@@ -131,7 +196,7 @@ export default function ClientsPage() {
               ))}
               {rows && rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
                     {filter === "active" && !search ? "No clients yet — add your first buyer." : "No clients match."}
                   </td>
                 </tr>

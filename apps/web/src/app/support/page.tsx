@@ -27,8 +27,8 @@ type Message = {
   sender?: { id: number; name: string; email: string } | null;
 };
 
-const card = "border border-[#e5e5e5] bg-white p-4";
-const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
+const card = "card-plain p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "status-sky"}`;
 const filters = ["", "open", "in_progress", "resolved"] as const;
 
 export default function SupportPage() {

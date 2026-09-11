@@ -26,7 +26,7 @@ type Order = {
 };
 
 const pill = (status: string) => (
-  <span className="inline-flex border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-xs font-medium text-[#262626]">{formatStatus(status)}</span>
+  <span className="status-sky">{formatStatus(status)}</span>
 );
 
 const TERMINAL = new Set(["paid", "cancelled", "refunded", "expired", "failed"]);
@@ -91,7 +91,7 @@ function ReturnContent() {
       </div>
 
       {!getToken() ? (
-        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
+        <div className="card-plain max-w-lg p-6">
           <p className="font-semibold">You need to sign in to view this payment.</p>
           <p className="mt-1 text-sm text-slate-600">
             {payment?.provider_reference ? `Transaction reference: ${payment.provider_reference}. ` : ""}
@@ -99,7 +99,7 @@ function ReturnContent() {
           </p>
           <button
             onClick={() => router.push("/login")}
-            className="mt-4 bg-black px-4 py-2 text-white"
+            className="btn-primary mt-4"
           >
             Sign in
           </button>
@@ -107,7 +107,7 @@ function ReturnContent() {
       ) : loading ? (
         <p className="text-sm text-slate-500">Checking payment status...</p>
       ) : (
-        <div className="max-w-lg border border-[#e5e5e5] bg-white p-6">
+        <div className="card-plain max-w-lg p-6">
           {notice && (
             <div
               className={`mb-4 rounded-lg px-4 py-3 text-sm ${

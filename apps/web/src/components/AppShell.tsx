@@ -4,16 +4,27 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
+import PageLoader from "@/components/PageLoader";
 import ThemePicker from "@/components/ThemePicker";
+import {
+  IconBilling,
+  IconClients,
+  IconDashboard,
+  IconInvoices,
+  IconLogout,
+  IconMenu,
+  IconPlus,
+  IconSettings,
+} from "@/components/icons";
 import { api, clearSession, getToken } from "@/lib/api";
 
 const nav = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/invoices", label: "Invoices" },
-  { href: "/clients", label: "Clients" },
-  { href: "/invoices/create", label: "New invoice" },
-  { href: "/billing", label: "Billing" },
-  { href: "/settings", label: "Settings" },
+  { href: "/dashboard", label: "Dashboard", Icon: IconDashboard },
+  { href: "/invoices", label: "Invoices", Icon: IconInvoices },
+  { href: "/clients", label: "Clients", Icon: IconClients },
+  { href: "/invoices/create", label: "New invoice", Icon: IconPlus },
+  { href: "/billing", label: "Billing", Icon: IconBilling },
+  { href: "/settings", label: "Settings", Icon: IconSettings },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -48,7 +59,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   if (!ready) {
-    return <div className="p-10 text-sm text-[#767676]">Loading workspace...</div>;
+    return <PageLoader label="Loading workspace..." />;
   }
 
   const isActive = (href: string) =>
@@ -63,24 +74,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-[#e5e5e5] bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 md:px-10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-2 md:px-10">
           <div className="flex min-w-0 items-center gap-4">
             <Link href="/dashboard">
               <BrandMark />
             </Link>
-            <span className="hidden truncate text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
+            <span className="hidden truncate text-[12px] font-medium tracking-[0.4px] text-[#767676] sm:inline font-label">
               {name}
             </span>
           </div>
-          <nav className="hidden items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.12em] lg:flex font-label">
+          <nav className="hidden items-center gap-1 text-[12px] font-medium tracking-[0.4px] lg:flex font-label">
             {nav.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={active ? "text-black underline underline-offset-4" : "text-[#767676] hover:text-black"}
+                  className={`nav-chip inline-flex h-10 items-center gap-1.5 px-3 ${active ? "nav-chip-active" : ""}`}
                 >
+                  <item.Icon className="h-4 w-4" />
                   {item.label}
                 </Link>
               );
@@ -89,42 +101,49 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <ThemePicker />
             <button
-              className="hidden border border-[#e5e5e5] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#262626] hover:border-black sm:inline-flex font-label"
+              className="btn-ghost hidden h-10 px-4 text-[12px] font-medium tracking-[0.4px] sm:inline-flex items-center gap-1.5 font-label"
               onClick={() => {
                 api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
                 clearSession();
                 router.replace("/login");
               }}
             >
+              <IconLogout className="h-4 w-4" />
               Log out
             </button>
             <button
-              className="grid h-11 w-11 place-items-center border border-[#e5e5e5] lg:hidden"
+              className="grid h-11 w-11 place-items-center rounded-full hover:bg-[#f3edf7] lg:hidden"
               onClick={() => setOpen((v) => !v)}
               aria-label="Open menu"
               aria-expanded={open}
             >
-              <span className="block h-px w-4 bg-black" />
-              <span className="mt-1 block h-px w-4 bg-black" />
+              <IconMenu className="h-4 w-4" />
             </button>
           </div>
         </div>
         {open && (
-          <nav className="border-t border-[#e5e5e5] px-6 py-4 lg:hidden">
-            <div className="flex flex-col gap-3 text-[11px] font-semibold uppercase tracking-[0.12em] font-label">
+          <nav className="px-6 py-4 lg:hidden">
+            <div className="flex flex-col gap-1 text-[12px] font-medium tracking-[0.4px] font-label">
               {nav.map((item) => (
-                <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={isActive(item.href) ? "text-black" : "text-[#767676]"}>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`nav-chip inline-flex min-h-12 items-center gap-2 px-3 ${isActive(item.href) ? "nav-chip-active" : ""}`}
+                >
+                  <item.Icon className="h-4 w-4" />
                   {item.label}
                 </Link>
               ))}
               <button
-                className="text-left text-[#767676]"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full px-3 text-left text-[#767676]"
                 onClick={() => {
                   api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
                   clearSession();
                   router.replace("/login");
                 }}
               >
+                <IconLogout className="h-4 w-4" />
                 Log out
               </button>
             </div>

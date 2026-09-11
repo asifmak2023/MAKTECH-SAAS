@@ -44,10 +44,10 @@ export default function InvoicesPage() {
           </Link>
         </div>
       </div>
-      <div className="overflow-x-auto border border-[#e5e5e5] bg-white">
+      <div className="card-plain overflow-x-auto p-0">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-[#e5e5e5] bg-[#fafafa] text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">
+            <tr className="text-[12px] font-medium tracking-[0.4px] text-[#767676] font-label">
               <th className="px-6 py-3.5 font-semibold">Buyer</th>
               <th className="px-6 py-3.5 font-semibold">Date</th>
               <th className="px-6 py-3.5 font-semibold">Status</th>
@@ -57,7 +57,7 @@ export default function InvoicesPage() {
           </thead>
           <tbody>
             {rows.map((inv) => (
-              <tr key={inv.id} className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa]">
+              <tr key={inv.id}>
                 <td className="px-6 py-4">
                   <Link className="font-medium text-black underline underline-offset-4" href={`/invoices/${inv.id}`}>
                     {inv.buyer_business_name}

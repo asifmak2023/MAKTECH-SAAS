@@ -36,9 +36,9 @@ function GoogleCallbackContent() {
 
   if (status === "working") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#fafafa] px-4">
-        <div className="w-full max-w-sm border border-[#e5e5e5] bg-white p-8 text-center">
-          <p className="font-label text-sm uppercase tracking-[0.14em] text-black">Completing sign-in…</p>
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="auth-shadow w-full max-w-sm p-8 text-center">
+          <p className="font-label text-sm font-medium tracking-[0.15px] text-black">Completing sign-in…</p>
           <p className="mt-3 text-sm text-[#767676]">Finalizing your Google session.</p>
         </div>
       </div>
@@ -46,13 +46,13 @@ function GoogleCallbackContent() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#fafafa] px-4">
-      <div className="w-full max-w-sm border border-[#e5e5e5] bg-white p-8 text-center">
-        <p className="font-label text-sm uppercase tracking-[0.14em] text-black">Sign-in unsuccessful</p>
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="auth-shadow w-full max-w-sm p-8 text-center">
+        <p className="font-label text-sm font-medium tracking-[0.15px] text-black">Sign-in unsuccessful</p>
         <p className="mt-3 text-sm text-[#767676]" role="alert">{message}</p>
         <Link
           href="/login"
-          className="mt-6 inline-flex w-full items-center justify-center bg-black px-4 py-3 text-sm text-white transition-colors hover:bg-[#262626]"
+          className="btn-primary mt-6 w-full"
         >
           Back to sign in
         </Link>

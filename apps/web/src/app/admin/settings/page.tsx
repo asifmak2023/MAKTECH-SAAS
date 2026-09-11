@@ -26,10 +26,10 @@ type Gateway = {
 };
 
 const card =
-  "border border-[#e5e5e5] bg-white p-4";
+  "card-plain p-4";
 
 const inputCls =
-  "w-full border border-[#e5e5e5] bg-white px-3 py-2 text-sm text-black placeholder:text-[#767676] focus:border-black focus:outline-none focus:ring-0";
+  "w-full";
 
 function Toggle({ on, onClick, disabled, label }: { on: boolean; onClick: () => void; disabled?: boolean; label: string }) {
   return (

@@ -6,8 +6,8 @@ import { api } from "@/lib/api";
 import { AdminSubscriptionRow, Paginated, fmtDate, money } from "@/lib/admin";
 import { formatStatus, statusStyles } from "@/lib/status";
 
-const card = "border border-[#e5e5e5] bg-white p-4";
-const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "border border-[#e5e5e5] bg-[#f5f5f5] text-[#262626]"}`;
+const card = "card-plain p-4";
+const pill = (s: string) => `inline-flex px-2.5 py-1 text-xs font-medium ${statusStyles[s] || "status-sky"}`;
 const filters = ["", "active", "pending", "trial", "grace_period", "expired"];
 
 export default function AdminSubscriptionsPage() {

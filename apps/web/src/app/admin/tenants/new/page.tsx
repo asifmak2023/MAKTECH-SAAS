@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { PlanBrief } from "@/lib/admin";
 import { PAKISTAN_PROVINCES } from "@/lib/provinces";
 
-const card = "border border-[#e5e5e5] bg-white p-4";
+const card = "card-plain p-4";
 
 export default function AddSellerPage() {
   const router = useRouter();

@@ -54,10 +54,10 @@ type ScenarioResult = {
   error?: string;
 };
 
-const card = "border border-[#e5e5e5] bg-white p-4";
+const card = "card-plain p-4";
 const okPill = "inline-flex bg-black px-2 py-0.5 text-xs text-white";
 const badPill = "inline-flex border border-black px-2 py-0.5 text-xs text-black";
-const mutedPill = "inline-flex border border-[#e5e5e5] bg-[#f5f5f5] px-2 py-0.5 text-xs text-[#525252]";
+const mutedPill = "status-sky";
 const DEFAULT_WHITELIST_IP = "161.97.107.236";
 
 export default function FbrSetupPage() {
@@ -318,7 +318,7 @@ function WizardProgress({
 
 function ProfileStep({ done }: { done: boolean }) {
   return (
-    <section className="border border-[#e5e5e5] bg-white p-5">
+    <section className="card-plain p-5">
       <p className="font-label text-[11px] uppercase tracking-[0.14em] text-slate-400">Step 1 · Seller profile</p>
       <h2 className="mt-1 text-lg font-semibold text-slate-800">Confirm your seller details in this app</h2>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">

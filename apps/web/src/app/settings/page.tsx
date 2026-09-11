@@ -76,7 +76,7 @@ function TenantForm({ tenant, onSaved }: { tenant: Tenant; onSaved: (t: Tenant) 
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid max-w-2xl gap-4 border border-[#e5e5e5] bg-white p-6">
+    <form onSubmit={onSubmit} className="card-plain grid max-w-2xl gap-4 p-6">
       <h2 className="text-lg font-semibold">Business profile</h2>
       <div>
         <label>Company name</label>
@@ -134,7 +134,7 @@ function FbrSettingsCard() {
 
   if (!data) {
     return (
-      <div className="max-w-2xl border border-[#e5e5e5] bg-white p-6">
+      <div className="card-plain max-w-2xl p-6">
         <p className="text-sm">{error || "Loading FBR settings..."}</p>
       </div>
     );
@@ -150,7 +150,7 @@ function FbrSettingsCard() {
       : "status-amber rounded-full px-2 py-0.5 text-xs font-medium";
 
   return (
-    <div className="grid max-w-2xl gap-4 border border-[#e5e5e5] bg-white p-6">
+    <div className="card-plain grid max-w-2xl gap-4 p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">FBR / PRAL integration</h2>
         <Link href="/settings/fbr" className="bg-black px-3 py-1.5 text-white">
