@@ -63,11 +63,11 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className="mb-4 flex overflow-hidden border border-[#e5e5e5]">
+      <div className="mb-4 flex flex-wrap gap-1">
         {tabs.map((t) => (
           <button
             key={t.key}
-            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider font-label ${filter === t.key ? "bg-black text-white" : "bg-white text-[#525252]"}`}
+            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider font-label ${filter === t.key ? "bg-black text-white" : "bg-transparent text-[#525252]"}`}
             onClick={() => setFilter(t.key)}
           >
             {t.label}

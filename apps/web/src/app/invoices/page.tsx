@@ -44,7 +44,7 @@ export default function InvoicesPage() {
           </Link>
         </div>
       </div>
-      <div className="overflow-hidden border border-[#e5e5e5] bg-white">
+      <div className="overflow-x-auto border border-[#e5e5e5] bg-white">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-[#e5e5e5] bg-[#fafafa] text-[11px] uppercase tracking-[0.14em] text-[#767676] font-label">

@@ -102,6 +102,7 @@ export function Field({
           paddingVertical: 12,
           fontSize: 16,
           fontFamily: fonts.body,
+          borderRadius: colors.radius,
         }}
         {...rest}
       />
@@ -112,7 +113,18 @@ export function Field({
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
   const { colors } = useTheme();
   return (
-    <View style={[{ borderWidth: 1, borderColor: colors.stroke, backgroundColor: colors.surface, padding: 16 }, style]}>
+    <View
+      style={[
+        {
+          borderWidth: 1,
+          borderColor: colors.stroke,
+          backgroundColor: colors.surface,
+          padding: 16,
+          borderRadius: colors.radius,
+        },
+        style,
+      ]}
+    >
       {children}
     </View>
   );
@@ -160,6 +172,7 @@ export function Button({
           backgroundColor: bg,
           borderWidth: 1,
           borderColor: border,
+          borderRadius: colors.radius,
           opacity: busy ? 0.5 : pressed ? 0.82 : 1,
         },
         style,
@@ -186,8 +199,8 @@ export function Button({
 }
 
 export function StatusChip({ status, label }: { status: string; label?: string }) {
-  const { dark } = useTheme();
-  const tone = statusChip(status, dark);
+  const { dark, colors, palette } = useTheme();
+  const tone = statusChip(status, dark, palette);
   return (
     <View
       style={{
@@ -200,6 +213,7 @@ export function StatusChip({ status, label }: { status: string; label?: string }
         backgroundColor: tone.bg,
         borderWidth: 1,
         borderColor: tone.border,
+        borderRadius: Math.min(8, colors.radius || 0),
         maxWidth: "100%",
       }}
     >
@@ -237,7 +251,7 @@ export function AlertBanner({
           ? { bg: dark ? "rgba(244,63,94,0.16)" : "#fff1f2", fg: dark ? "#fda4af" : "#be123c" }
           : { bg: colors.accentSoft, fg: colors.foreground };
   return (
-    <View style={{ backgroundColor: pal.bg, borderWidth: 1, borderColor: colors.stroke, padding: 12, marginBottom: 12 }}>
+    <View style={{ backgroundColor: pal.bg, borderWidth: 1, borderColor: colors.stroke, padding: 12, marginBottom: 12, borderRadius: colors.radius }}>
       <Text style={{ fontFamily: fonts.body, fontSize: 14, color: pal.fg }}>{text}</Text>
     </View>
   );
@@ -273,7 +287,7 @@ export function Segmented({
 }) {
   const { colors } = useTheme();
   return (
-    <View style={{ flexDirection: "row", borderWidth: 1, borderColor: colors.stroke, marginBottom: 16 }}>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4, marginBottom: 16 }}>
       {options.map((opt) => {
         const active = opt.key === value;
         return (
@@ -337,6 +351,7 @@ export function SelectField({
                 borderWidth: 1,
                 borderColor: active ? colors.accent : colors.stroke,
                 backgroundColor: active ? colors.accent : colors.surface,
+                borderRadius: colors.radius,
               }}
             >
               <Text

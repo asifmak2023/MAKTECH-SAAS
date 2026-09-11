@@ -1,53 +1,105 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Colors, ThemeName, darkColors, injectBrandFonts, lightColors, persistTheme, readStoredTheme } from "./theme";
+import {
+  Colors,
+  PALETTES,
+  PaletteId,
+  ThemeName,
+  applyActiveFonts,
+  colorsFor,
+  injectBrandFonts,
+  paletteMeta,
+  persistPalette,
+  persistTheme,
+  readStoredPalette,
+  readStoredTheme,
+  resolveMode,
+} from "./theme";
 
 type ThemeContextValue = {
   theme: ThemeName;
+  palette: PaletteId;
   dark: boolean;
   colors: Colors;
+  fonts: { body: string; label: string };
+  radius: number;
   toggle: () => void;
   setTheme: (next: ThemeName) => void;
+  setPalette: (next: PaletteId) => void;
+  palettes: typeof PALETTES;
 };
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "light",
+  palette: "fbr",
   dark: false,
-  colors: lightColors,
+  colors: colorsFor("fbr", "light"),
+  fonts: PALETTES[0].fonts,
+  radius: 0,
   toggle: () => undefined,
   setTheme: () => undefined,
+  setPalette: () => undefined,
+  palettes: PALETTES,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>("light");
+  const [palette, setPaletteState] = useState<PaletteId>("fbr");
 
   useEffect(() => {
     injectBrandFonts();
-    setThemeState(readStoredTheme());
+    const storedPalette = readStoredPalette();
+    const storedTheme = resolveMode(storedPalette, readStoredTheme());
+    setPaletteState(storedPalette);
+    setThemeState(storedTheme);
+    applyActiveFonts(paletteMeta(storedPalette).fonts);
   }, []);
 
+  useEffect(() => {
+    applyActiveFonts(paletteMeta(palette).fonts);
+  }, [palette]);
+
   const setTheme = useCallback((next: ThemeName) => {
-    setThemeState(next);
-    persistTheme(next);
+    setThemeState((prevPaletteTheme) => {
+      const resolved = resolveMode(palette, next);
+      persistTheme(resolved);
+      return resolved || prevPaletteTheme;
+    });
+  }, [palette]);
+
+  const setPalette = useCallback((next: PaletteId) => {
+    setPaletteState(next);
+    persistPalette(next);
+    setThemeState((prev) => {
+      const resolved = resolveMode(next, prev);
+      persistTheme(resolved);
+      return resolved;
+    });
   }, []);
 
   const toggle = useCallback(() => {
     setThemeState((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
+      const next = resolveMode(palette, prev === "dark" ? "light" : "dark");
       persistTheme(next);
       return next;
     });
-  }, []);
+  }, [palette]);
 
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      theme,
-      dark: theme === "dark",
-      colors: theme === "dark" ? darkColors : lightColors,
+  const value = useMemo<ThemeContextValue>(() => {
+    const mode = resolveMode(palette, theme);
+    const colors = colorsFor(palette, mode);
+    return {
+      theme: mode,
+      palette,
+      dark: mode === "dark",
+      colors,
+      fonts: paletteMeta(palette).fonts,
+      radius: colors.radius,
       toggle,
       setTheme,
-    }),
-    [theme, toggle, setTheme],
-  );
+      setPalette,
+      palettes: PALETTES,
+    };
+  }, [theme, palette, toggle, setTheme, setPalette]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

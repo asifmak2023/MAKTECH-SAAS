@@ -7,6 +7,7 @@ import PasswordField from "@/components/PasswordField";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { api, clearSession, setSession } from "@/lib/api";
 import { PAKISTAN_PROVINCES } from "@/lib/provinces";
+import ThemePicker from "@/components/ThemePicker";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,9 +53,12 @@ export default function RegisterPage() {
           <span aria-hidden>←</span>
           Back
         </Link>
-        <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
-          FBR Digital Invoicing System
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
+            FBR Digital Invoicing System
+          </span>
+          <ThemePicker />
+        </div>
       </div>
       <div className="relative flex flex-1 items-start justify-center px-4 pb-20 pt-2">
         <form onSubmit={onSubmit} className="auth-shadow w-full max-w-xl space-y-5 border border-[#e5e5e5] bg-white p-8 md:p-10">

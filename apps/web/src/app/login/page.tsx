@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setSession } from "@/lib/api";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import ThemePicker from "@/components/ThemePicker";
 
 type LoginRes = {
   token: string;
@@ -54,9 +55,12 @@ export default function LoginPage() {
           <span aria-hidden>←</span>
           Back
         </Link>
-        <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
-          FBR Digital Invoicing System
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-[11px] uppercase tracking-[0.14em] text-[#767676] sm:inline font-label">
+            FBR Digital Invoicing System
+          </span>
+          <ThemePicker />
+        </div>
       </div>
       <div className="relative flex flex-1 items-center justify-center px-4 pb-16">
         <form onSubmit={onSubmit} className="auth-shadow w-full max-w-md space-y-5 border border-[#e5e5e5] bg-white p-8 md:p-10">

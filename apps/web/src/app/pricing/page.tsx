@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
+import ThemePicker from "@/components/ThemePicker";
 import { getToken } from "@/lib/api";
 
 type Plan = {
@@ -45,35 +46,38 @@ export default function PricingPage() {
   const ctaHref = authed ? "/login" : "/register";
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-[#e5e5e5] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 md:px-10 lg:px-12">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex min-w-0 items-center gap-3">
             <BrandMark />
             <span className="hidden text-[11px] uppercase tracking-[0.16em] text-[#767676] sm:inline font-label">
               FBR Digital Invoicing System
             </span>
           </Link>
-          <nav className="flex items-center gap-6 text-[11px] font-semibold uppercase tracking-[0.12em] font-label">
-            <a className="text-[#262626] hover:text-black" href="/#how-it-works">
-              How it works
-            </a>
-            <span className="border-b border-black pb-px text-black">Pricing</span>
-            {authed ? (
-              <Link className="bg-black px-5 py-2.5 text-white hover:bg-[#262626]" href="/login">
-                Open workspace
-              </Link>
-            ) : (
-              <>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <nav className="hidden items-center gap-6 text-[11px] font-semibold uppercase tracking-[0.12em] font-label sm:flex">
+              <a className="text-[#262626] hover:text-black" href="/#how-it-works">
+                How it works
+              </a>
+              <span className="border-b border-black pb-px text-black">Pricing</span>
+              {authed ? null : (
                 <Link className="text-[#262626] hover:text-black" href="/login">
                   Log in
                 </Link>
-                <Link className="bg-black px-5 py-2.5 text-white hover:bg-[#262626]" href="/register">
-                  Get started
-                </Link>
-              </>
+              )}
+            </nav>
+            <ThemePicker />
+            {authed ? (
+              <Link className="bg-black px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-[#262626] sm:px-5 font-label" href="/login">
+                Open workspace
+              </Link>
+            ) : (
+              <Link className="bg-black px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-[#262626] sm:px-5 font-label" href="/register">
+                Get started
+              </Link>
             )}
-          </nav>
+          </div>
         </div>
       </header>
 

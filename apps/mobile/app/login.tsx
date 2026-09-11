@@ -7,6 +7,7 @@ import { api, getToken, setSession, webAppUrl } from "../src/lib/api";
 import { useTheme } from "../src/lib/ThemeContext";
 import { fonts } from "../src/lib/theme";
 import { AlertBanner, Button, Field } from "../src/ui/primitives";
+import ThemePicker from "../src/ui/ThemePicker";
 
 export default function Login() {
   const navigation = useRootNavigationState();
@@ -57,6 +58,9 @@ export default function Login() {
       }}
       keyboardShouldPersistTaps="handled"
     >
+      <View style={{ position: "absolute", top: Math.max(insets.top, 8), right: 16, zIndex: 2 }}>
+        <ThemePicker />
+      </View>
       <Text
         style={{
           textAlign: "center",

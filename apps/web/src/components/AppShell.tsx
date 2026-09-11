@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
+import ThemePicker from "@/components/ThemePicker";
 import { api, clearSession, getToken } from "@/lib/api";
 
 const nav = [
@@ -20,12 +21,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [name, setName] = useState("");
-  const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const theme = document.documentElement.classList.contains("dark");
-    setDark(theme);
     if (!getToken()) {
       router.replace("/login");
       return;
@@ -49,13 +47,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       });
   }, [router]);
 
-  function toggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("pral_theme", next ? "dark" : "light");
-  }
-
   if (!ready) {
     return <div className="p-10 text-sm text-[#767676]">Loading workspace...</div>;
   }
@@ -70,7 +61,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           : pathname === href;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-[#e5e5e5] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 md:px-10">
           <div className="flex min-w-0 items-center gap-4">
@@ -96,23 +87,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
           <div className="flex items-center gap-2">
-            <button
-              className="grid h-11 w-11 place-items-center border border-[#e5e5e5] text-[#262626] hover:border-black"
-              onClick={toggleTheme}
-              title={dark ? "Switch to light theme" : "Switch to dark theme"}
-              aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-            >
-              {dark ? (
-                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <circle cx="12" cy="12" r="4.5" />
-                  <path d="M12 2.5v2.5m0 13.5v2.5M2.5 12H5m13.5 0H21.5M5.3 5.3l1.8 1.8m9.8 9.8 1.8 1.8m0-13.4-1.8 1.8m-9.8 9.8-1.8 1.8" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 14.5A8 8 0 0 1 9.5 4 7.5 7.5 0 1 0 20 14.5Z" />
-                </svg>
-              )}
-            </button>
+            <ThemePicker />
             <button
               className="hidden border border-[#e5e5e5] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#262626] hover:border-black sm:inline-flex font-label"
               onClick={() => {

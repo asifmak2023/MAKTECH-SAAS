@@ -1,4 +1,4 @@
-import { Colors } from "./theme";
+import { Colors, PaletteId } from "./theme";
 
 export function formatStatus(status: string) {
   return (status || "").replaceAll("_", " ");
@@ -18,7 +18,7 @@ export type ChipTone = {
   dot: string;
 };
 
-export function statusChip(status: string, dark: boolean): ChipTone {
+export function statusChip(status: string, dark: boolean, palette: PaletteId = "fbr"): ChipTone {
   const map: Record<string, ChipTone> = dark
     ? {
         draft: { bg: "#262626", fg: "#d4d4d4", border: "#3a3a3a", dot: "#a3a3a3" },
@@ -57,12 +57,30 @@ export function statusChip(status: string, dark: boolean): ChipTone {
         expired: { bg: "#f5f5f5", fg: "#767676", border: "#e5e5e5", dot: "#767676" },
       };
 
-  return (
-    map[status] ||
-    (dark
-      ? { bg: "#1b1b1b", fg: "#d4d4d4", border: "#262626", dot: "#a3a3a3" }
-      : { bg: "#f5f5f5", fg: "#262626", border: "#e5e5e5", dot: "#767676" })
-  );
+  const fallback = dark
+    ? { bg: "#1b1b1b", fg: "#d4d4d4", border: "#262626", dot: "#a3a3a3" }
+    : { bg: "#f5f5f5", fg: "#262626", border: "#e5e5e5", dot: "#767676" };
+  const tone = map[status] || fallback;
+
+  if (palette === "glacier") {
+    if (["paid", "active", "resolved"].includes(status)) {
+      return { bg: "rgba(125,211,252,0.22)", fg: "#e8f4ff", border: "rgba(125,211,252,0.45)", dot: "#7dd3fc" };
+    }
+    if (["unpaid", "trial", "open", "past_due"].includes(status)) {
+      return { bg: "#101726", fg: "#e8f4ff", border: "rgba(125,211,252,0.35)", dot: "#7dd3fc" };
+    }
+    if (["draft", "archived", "refunded", "cancelled", "expired"].includes(status)) {
+      return { bg: "#101726", fg: "#94a3b8", border: "rgba(125,211,252,0.18)", dot: "#94a3b8" };
+    }
+  }
+
+  if (palette === "asifent" && ["paid", "active", "resolved"].includes(status)) {
+    return dark
+      ? { bg: "#4c9aff", fg: "#0b1220", border: "#4c9aff", dot: "#0b1220" }
+      : { bg: "#0067c0", fg: "#ffffff", border: "#0067c0", dot: "#ffffff" };
+  }
+
+  return tone;
 }
 
 export function isInvoiceEditable(status: string) {

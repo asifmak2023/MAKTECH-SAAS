@@ -14,6 +14,7 @@ import { clearWorkspace, getCachedWorkspace, loadWorkspace } from "../lib/worksp
 import { useTheme } from "../lib/ThemeContext";
 import { fonts } from "../lib/theme";
 import BrandMark from "./BrandMark";
+import ThemePicker from "./ThemePicker";
 import { LoadingBlock } from "./primitives";
 import {
   IconBilling,
@@ -23,10 +24,8 @@ import {
   IconInvoices,
   IconLogout,
   IconMenu,
-  IconMoon,
   IconPlus,
   IconSettings,
-  IconSun,
 } from "./icons";
 
 const NAV = [
@@ -54,7 +53,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { colors, dark, toggle } = useTheme();
+  const { colors } = useTheme();
   const cached = getCachedWorkspace();
   const [ready, setReady] = useState(Boolean(cached));
   const [name, setName] = useState(cached?.name || "");
@@ -137,21 +136,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
             </Text>
           </Pressable>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Pressable
-              onPress={toggle}
-              accessibilityRole="button"
-              accessibilityLabel={dark ? "Switch to light theme" : "Switch to dark theme"}
-              style={{
-                width: 44,
-                height: 44,
-                alignItems: "center",
-                justifyContent: "center",
-                borderWidth: 1,
-                borderColor: colors.stroke,
-              }}
-            >
-              {dark ? <IconSun color={colors.foreground} /> : <IconMoon color={colors.foreground} />}
-            </Pressable>
+            <ThemePicker />
             <Pressable
               onPress={() => setOpen(true)}
               accessibilityRole="button"
@@ -164,6 +149,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
                 justifyContent: "center",
                 borderWidth: 1,
                 borderColor: colors.stroke,
+                borderRadius: colors.radius,
               }}
             >
               <IconMenu color={colors.foreground} />
