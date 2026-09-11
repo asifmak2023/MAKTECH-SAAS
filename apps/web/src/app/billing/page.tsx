@@ -91,6 +91,7 @@ type CheckoutResult = {
   status: string;
   manual: boolean;
   message?: string;
+  redirect_url?: string | null;
   instructions?: string[];
   payment?: { id: number; reference?: string; status: string };
   subscription?: { id: number; status: string };
@@ -158,6 +159,10 @@ export default function BillingPage() {
       setNotice(null);
       try {
         const res = await api<CheckoutResult>(endpoint, { method: "POST", body: JSON.stringify(payload) });
+        if (res.redirect_url) {
+          window.location.assign(res.redirect_url);
+          return;
+        }
         if (res.manual) {
           setNotice({
             kind: "info",

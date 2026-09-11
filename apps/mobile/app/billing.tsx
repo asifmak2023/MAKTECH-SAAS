@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 import { api } from "../src/lib/api";
 import { formatStatus, money } from "../src/lib/status";
 import { useTheme } from "../src/lib/ThemeContext";
@@ -95,11 +95,14 @@ export default function BillingPage() {
     setBusy(label);
     setNotice(null);
     try {
-      const res = await api<{ manual: boolean; message?: string; status?: string }>(endpoint, {
+      const res = await api<{ manual: boolean; message?: string; status?: string; redirect_url?: string | null }>(endpoint, {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      if (res.manual) {
+      if (res.redirect_url) {
+        await Linking.openURL(res.redirect_url);
+        setNotice({ kind: "info", text: `Continue checkout in the ${label} payment window.` });
+      } else if (res.manual) {
         setNotice({ kind: "info", text: `Payment initiated (${formatStatus(res.status || "")}). ${res.message || ""}` });
       } else {
         setNotice({ kind: "ok", text: res.message || `${label} completed successfully.` });
@@ -219,7 +222,7 @@ export default function BillingPage() {
       <View style={{ borderWidth: 1, borderColor: colors.stroke, backgroundColor: colors.surface, padding: 16, marginBottom: 16 }}>
         <Text style={{ fontFamily: fonts.body, fontSize: 16, fontWeight: "600", color: colors.foreground }}>Plans</Text>
         <Text style={{ marginTop: 4, marginBottom: 12, fontFamily: fonts.body, fontSize: 12, color: colors.textMuted }}>
-          Subscribe through the payment gateway (Raast P2M). The plan activates once payment succeeds and replaces your current plan.
+          Subscribe through the payment gateway. The plan activates once payment succeeds and replaces your current plan.
         </Text>
         {(catalog?.plans || []).map((plan) => (
           <View key={plan.id} style={{ borderWidth: 1, borderColor: colors.stroke, padding: 12, marginBottom: 10 }}>

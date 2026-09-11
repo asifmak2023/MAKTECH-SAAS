@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Exceptions\GatewayNotConfiguredException;
+use App\Models\Payment;
 use App\Models\PaymentGateway;
 use Illuminate\Support\Str;
 
@@ -67,5 +68,34 @@ abstract class AbstractPaymentGateway implements PaymentGatewayInterface
     public function verifyWebhookSignature(array $headers, array $payload): bool
     {
         return false; // gateways without webhooks verify manually
+    }
+
+    public function extractWebhookTransactionId(array $payload): ?string
+    {
+        foreach (['transaction_id', 'reference'] as $key) {
+            if (! blank($payload[$key] ?? null)) {
+                return (string) $payload[$key];
+            }
+        }
+
+        return null;
+    }
+
+    public function webhookPaymentStatus(array $payload): string
+    {
+        return 'paid';
+    }
+
+    public function hostedCheckoutUrl(Payment $payment): ?string
+    {
+        $raw = (array) $payment->raw_response;
+
+        if (blank($raw['hosted_action'] ?? null) || ! is_array($raw['hosted_fields'] ?? null)) {
+            return null;
+        }
+
+        $base = rtrim((string) config('saas.web.app_url', config('app.url')), '/');
+
+        return $base.'/api/billing/payments/hosted/'.urlencode($payment->idempotency_key);
     }
 }

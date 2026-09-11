@@ -147,6 +147,7 @@ class BillingController extends Controller
             'manual' => $result['manual'],
             'message' => $result['message'],
             'urls' => $result['urls'] ?? $this->payments->gatewayUrls($data['gateway']),
+            'redirect_url' => $result['redirect_url'] ?? null,
             'instructions' => $result['instructions'] ?? [],
         ], $result['status'] === 'paid' ? 200 : 202);
     }
@@ -173,6 +174,7 @@ class BillingController extends Controller
             'manual' => $result['manual'],
             'message' => $result['message'],
             'urls' => $result['urls'] ?? $this->payments->gatewayUrls($data['gateway']),
+            'redirect_url' => $result['redirect_url'] ?? null,
             'instructions' => $result['instructions'] ?? [],
         ], $result['status'] === 'paid' ? 200 : 202);
     }
@@ -201,6 +203,7 @@ class BillingController extends Controller
             'manual' => $result['manual'],
             'message' => $result['message'],
             'urls' => $result['urls'] ?? $this->payments->gatewayUrls($data['gateway']),
+            'redirect_url' => $result['redirect_url'] ?? null,
             'instructions' => $result['instructions'] ?? [],
         ], $result['status'] === 'paid' ? 200 : 202);
     }

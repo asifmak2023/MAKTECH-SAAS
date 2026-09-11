@@ -113,9 +113,10 @@ class PaymentService
             $order->update(['status' => BillingOrder::STATUS_PAYMENT_PROCESSING]);
 
             $adapter = $this->adapterFor($gateway);
+            $urls = $this->gatewayUrls($gateway->code, $order, $payment);
 
             try {
-                $result = $adapter->purchase($order, $payment, $options);
+                $result = $adapter->purchase($order, $payment, array_merge($urls, $options));
             } catch (\Throwable $e) {
                 $order->update(['status' => BillingOrder::STATUS_PENDING]);
                 $payment->update([
@@ -130,8 +131,13 @@ class PaymentService
 
             $payment->update([
                 'provider_reference' => $result['provider_reference'] ?? null,
+                'gateway_transaction_id' => $result['provider_reference'] ?? $payment->gateway_transaction_id,
                 'raw_response' => array_merge((array) $payment->raw_response, $result['raw'] ?? []),
             ]);
+
+            $payment = $payment->fresh();
+            $hostedUrl = method_exists($adapter, 'hostedCheckoutUrl') ? $adapter->hostedCheckoutUrl($payment) : null;
+            $redirectUrl = $result['redirect_url'] ?? $hostedUrl;
 
             if (($result['status'] ?? '') === 'paid') {
                 $payment->update([
@@ -147,9 +153,9 @@ class PaymentService
                     'gateway' => ['code' => $gateway->code, 'name' => $gateway->name, 'sandbox' => $gateway->is_sandbox],
                     'status' => 'paid',
                     'manual' => false,
-                    'redirect_url' => $result['redirect_url'] ?? null,
+                    'redirect_url' => $redirectUrl,
                     'provider_reference' => $result['provider_reference'] ?? null,
-                    'urls' => $this->gatewayUrls($gateway->code),
+                    'urls' => $urls,
                     'message' => 'Payment successful.',
                 ];
             }
@@ -162,9 +168,9 @@ class PaymentService
                 'gateway' => ['code' => $gateway->code, 'name' => $gateway->name, 'sandbox' => $gateway->is_sandbox],
                 'status' => $payment->status,
                 'manual' => (bool) ($result['manual'] ?? false),
-                'redirect_url' => $result['redirect_url'] ?? null,
+                'redirect_url' => $redirectUrl,
                 'provider_reference' => $result['provider_reference'] ?? null,
-                'urls' => $this->gatewayUrls($gateway->code),
+                'urls' => $urls,
                 'message' => $result['manual']
                     ? 'Payment instructions are attached to this order. It will be activated once verified.'
                     : 'Your payment is being processed.',
@@ -186,14 +192,29 @@ class PaymentService
      * transaction, built from the public web origin. Return/cancel are payer
      * browser redirects; webhook_url is the server-to-server notify endpoint.
      */
-    public function gatewayUrls(string $gatewayCode): array
+    public function gatewayUrls(string $gatewayCode, ?BillingOrder $order = null, ?Payment $payment = null): array
     {
         $base = $this->webAppUrl();
+        $query = array_filter([
+            'order' => $order?->id,
+            'payment' => $payment?->id,
+            'gateway' => $gatewayCode,
+        ]);
+        $providerReturn = $base.'/api/payments/return/'.$gatewayCode;
+        if ($query) {
+            $providerReturn .= '?'.http_build_query($query);
+        }
+
+        $hosted = $payment
+            ? $base.'/api/billing/payments/hosted/'.urlencode((string) $payment->idempotency_key)
+            : null;
 
         return [
             'return_url' => $base.config('saas.payments.return_path', '/billing/payments/return'),
             'cancel_url' => $base.config('saas.payments.cancel_path', '/billing'),
             'webhook_url' => $base.'/'.ltrim((string) config('saas.payments.webhook_prefix', '/api/webhooks'), '/').'/'.$gatewayCode,
+            'provider_return_url' => $providerReturn,
+            'hosted_url' => $hosted,
         ];
     }
 
@@ -261,7 +282,11 @@ class PaymentService
             throw new PaymentException('Webhook signature verification failed.', 403);
         }
 
-        $transactionId = $transactionId ?? $payload['transaction_id'] ?? $payload['reference'] ?? null;
+        $transactionId = $transactionId
+            ?? $adapter->extractWebhookTransactionId($payload)
+            ?? $payload['transaction_id']
+            ?? $payload['reference']
+            ?? null;
 
         $payment = Payment::query()
             ->where('gateway_code', $gatewayCode)
@@ -273,9 +298,28 @@ class PaymentService
             throw new PaymentException('No pending payment matches this webhook.', 404);
         }
 
+        $status = $adapter->webhookPaymentStatus($payload);
+
+        if ($status === 'pending') {
+            $payment->update([
+                'raw_response' => array_merge((array) $payment->raw_response, ['ipn' => $payload]),
+            ]);
+
+            return ['handled' => true, 'status' => 'pending', 'order' => $payment->billing_order_id];
+        }
+
+        if ($status === 'failed') {
+            $this->markPaymentFailed(
+                $payment,
+                (string) ($payload['pp_ResponseMessage'] ?? $payload['transactionStatus'] ?? $payload['message'] ?? 'Gateway declined the payment.')
+            );
+
+            return ['handled' => true, 'status' => 'failed', 'order' => $payment->billing_order_id];
+        }
+
         $this->confirmPayment($payment);
 
-        return ['handled' => true, 'order' => $payment->billing_order_id];
+        return ['handled' => true, 'status' => 'paid', 'order' => $payment->billing_order_id];
     }
 
     /**

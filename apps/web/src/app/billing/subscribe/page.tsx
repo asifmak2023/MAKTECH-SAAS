@@ -38,6 +38,7 @@ type SubscribeResult = {
   status: string;
   manual: boolean;
   message?: string;
+  redirect_url?: string | null;
   instructions?: string[];
 };
 
@@ -108,6 +109,10 @@ export default function SubscribePage() {
         method: "POST",
         body: JSON.stringify({ subscription_plan_id: plan.id, interval, gateway: gatewayCode, auto_renew: true }),
       });
+      if (res.redirect_url && !res.gateway?.sandbox) {
+        window.location.assign(res.redirect_url);
+        return;
+      }
       setResult(res);
       setPhase(res.status === "paid" ? "done" : "pending_payment");
     } catch (err) {
@@ -162,7 +167,7 @@ export default function SubscribePage() {
         <div>
           <p className="eyebrow mb-2">Account</p>
           <h1 className="text-3xl font-medium tracking-tight">Subscribe to a plan</h1>
-          <p className="mt-1 text-sm text-[#767676]">Choose a plan, pay through Raast (P2M) and it activates immediately.</p>
+          <p className="mt-1 text-sm text-[#767676]">Choose a plan, pay through the selected gateway, and it activates once payment succeeds.</p>
         </div>
         <button
           onClick={() => router.push("/billing")}
@@ -256,18 +261,28 @@ export default function SubscribePage() {
 
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
             {gateway?.sandbox
-              ? `This is a sandbox ${gateway?.name || "gateway"} checkout. No real money moves — confirm the payment to simulate a successful Raast P2M transaction.`
+              ? `This is a sandbox ${gateway?.name || "gateway"} checkout. No real money moves — confirm the payment to simulate a successful transaction.`
               : result.message || "Follow the payment instructions. Your plan activates once the payment clears."}
           </div>
 
           <div className="mt-5 flex gap-2">
-            <button
-              disabled={busy !== null}
-              onClick={completePayment}
-              className="bg-black px-4 py-2 text-white disabled:opacity-50"
-            >
-              {busy ? "Processing..." : `Confirm payment of ${money(result.order.total_amount)} ${currency}`}
-            </button>
+            {result.redirect_url && !gateway?.sandbox ? (
+              <button
+                disabled={busy !== null}
+                onClick={() => window.location.assign(result.redirect_url as string)}
+                className="bg-black px-4 py-2 text-white disabled:opacity-50"
+              >
+                Continue to {result.gateway?.name || gateway?.name || "payment"}
+              </button>
+            ) : (
+              <button
+                disabled={busy !== null}
+                onClick={completePayment}
+                className="bg-black px-4 py-2 text-white disabled:opacity-50"
+              >
+                {busy ? "Processing..." : `Confirm payment of ${money(result.order.total_amount)} ${currency}`}
+              </button>
+            )}
             <button
               disabled={busy !== null}
               onClick={cancelOrder}
@@ -354,6 +369,8 @@ export default function SubscribePage() {
                       {g.sandbox && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-700">sandbox</span>}
                     </span>
                     {g.code === "raast" && <span className="text-xs text-slate-400">Raast P2M</span>}
+                    {g.code === "jazzcash" && <span className="text-xs text-slate-400">hosted checkout</span>}
+                    {g.code === "easypaisa" && <span className="text-xs text-slate-400">hosted checkout</span>}
                   </label>
                 ))}
               </div>

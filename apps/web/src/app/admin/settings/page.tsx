@@ -80,7 +80,7 @@ function GatewayCard({
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [clearKeys, setClearKeys] = useState<Set<string>>(new Set());
 
-  const isRaast = gw.code === "raast";
+  const showsCallbacks = gw.code === "raast" || gw.code === "jazzcash" || gw.code === "easypaisa";
   const saving = busy === `gw:${gw.id}`;
 
   const patch = useCallback(
@@ -182,14 +182,16 @@ function GatewayCard({
         </div>
       </div>
 
-      {isRaast && (
+      {showsCallbacks && (
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-3 text-xs">
-          <p className="mb-2 font-semibold uppercase tracking-wide text-slate-500">Give 1LINK these callback URLs</p>
+          <p className="mb-2 font-semibold uppercase tracking-wide text-slate-500">
+            {gw.code === "raast" ? "Give 1LINK these callback URLs" : `Give ${gw.name} these callback URLs`}
+          </p>
           <dl className="space-y-1.5">
             {[
               ["Return URL (payer browser)", `${origin}/billing/payments/return`],
               ["Cancel URL (payer browser)", `${origin}/billing`],
-              ["Webhook / notify URL", `${origin}/api/webhooks/raast`],
+              ["Webhook / notify URL", `${origin}/api/webhooks/${gw.code}`],
             ].map(([label, value]) => (
               <div key={label} className="flex flex-wrap items-center justify-between gap-2">
                 <dt className="text-slate-500">{label}</dt>
@@ -286,7 +288,7 @@ function GatewayCard({
             >
               {saving ? "Saving..." : "Save configuration"}
             </button>
-            {isRaast && gw.is_sandbox && (
+            {showsCallbacks && gw.is_sandbox && (
               <span className="text-xs text-slate-400">Sandbox is active - credentials only apply once you switch to live.</span>
             )}
           </div>

@@ -55,6 +55,8 @@ Route::get('catalog', [CatalogController::class, 'index']);
 | by the adapter). Exposed by the Next.js proxy at {public_url}/api/webhooks/*.
 */
 Route::post('webhooks/{gateway}', [\App\Http\Controllers\Api\PaymentWebhookController::class, 'handle']);
+Route::match(['get', 'post'], 'payments/return/{gateway}', [\App\Http\Controllers\Api\PaymentBrowserReturnController::class, 'handle']);
+Route::get('billing/payments/hosted/{key}', [\App\Http\Controllers\Api\HostedCheckoutController::class, 'show']);
 
 Route::prefix('public')->group(function () {
     Route::get('invoices/{token}', [ApprovalController::class, 'show']);

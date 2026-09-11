@@ -30,4 +30,11 @@ interface PaymentGatewayInterface
      * Return true when the webhook payload can be trusted for this gateway.
      */
     public function verifyWebhookSignature(array $headers, array $payload): bool;
+
+    public function extractWebhookTransactionId(array $payload): ?string;
+
+    /**
+     * Map a verified IPN payload to paid, failed, or pending.
+     */
+    public function webhookPaymentStatus(array $payload): string;
 }
