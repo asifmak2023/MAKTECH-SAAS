@@ -65,7 +65,7 @@ class GatewayAdminController extends Controller
             $secret = $this->isSecretKey($key);
             $spec = $envCreds[$key] ?? null;
             $envName = is_array($spec) ? ($spec['env'] ?? null) : (is_string($spec) ? $spec : null);
-            $hasEnv = $envName ? ! blank(env($envName)) : false;
+            $hasEnv = $envName ? ! blank(is_array($spec) ? ($spec['value'] ?? null) : null) : false;
             $dbValue = $stored[$key] ?? null;
             $fromDb = ! blank($dbValue);
 

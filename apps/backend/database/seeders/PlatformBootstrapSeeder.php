@@ -61,7 +61,7 @@ class PlatformBootstrapSeeder extends Seeder
             $user = User::withoutGlobalScopes()->firstOrNew(['email' => $email]);
             $user->forceFill([
                 'name' => $user->name ?? 'Platform Admin',
-                'password' => $user->password ?? env('SAAS_PLATFORM_ADMIN_PASSWORD', 'password'),
+                'password' => $user->password ?? config('saas.platform_admin_password', 'password'),
                 'role' => $user->role ?? 'admin',
                 'is_platform_admin' => true,
                 'is_active' => true,

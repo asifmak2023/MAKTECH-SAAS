@@ -93,4 +93,39 @@ class InvoiceWorkflowTest extends TestCase
             'tenant' => 'demo',
         ])->assertOk()->assertJsonPath('tenant.slug', 'demo');
     }
+
+    public function test_authenticated_seller_cannot_switch_tenant_via_header(): void
+    {
+        $first = $this->postJson('/api/auth/register', [
+            'tenant_name' => 'Alpha Co',
+            'tenant_slug' => 'alpha-co',
+            'name' => 'Alpha',
+            'email' => 'owner@alpha.local',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'seller_ntn_cnic' => '1111111',
+            'seller_business_name' => 'Alpha Co',
+            'seller_province' => 'Sindh',
+            'seller_address' => 'Karachi',
+        ]);
+        $first->assertCreated();
+
+        $this->postJson('/api/auth/register', [
+            'tenant_name' => 'Beta Co',
+            'tenant_slug' => 'beta-co',
+            'name' => 'Beta',
+            'email' => 'owner@beta.local',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'seller_ntn_cnic' => '2222222',
+            'seller_business_name' => 'Beta Co',
+            'seller_province' => 'Sindh',
+            'seller_address' => 'Karachi',
+        ])->assertCreated();
+
+        $this->getJson('/api/invoices', [
+            'Authorization' => 'Bearer '.$first->json('token'),
+            'X-Tenant' => 'beta-co',
+        ])->assertForbidden()->assertJsonPath('code', 'tenant_mismatch');
+    }
 }

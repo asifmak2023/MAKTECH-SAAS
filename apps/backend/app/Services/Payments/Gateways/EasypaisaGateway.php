@@ -4,30 +4,10 @@ namespace App\Services\Payments\Gateways;
 
 use App\Models\BillingOrder;
 use App\Models\Payment;
-use App\Models\PaymentGateway;
 use App\Services\Payments\AbstractPaymentGateway;
 
 class EasypaisaGateway extends AbstractPaymentGateway
 {
-    public function configure(PaymentGateway $model): void
-    {
-        parent::configure($model);
-
-        foreach ((array) config("saas.payment_gateways.{$this->model->code}.env_credentials", []) as $key => $spec) {
-            if (! blank($this->config[$key] ?? null)) {
-                continue;
-            }
-
-            $envName = is_array($spec) ? ($spec['env'] ?? null) : null;
-            $envName = $envName ?: (is_string($spec) ? $spec : $key);
-            $value = env($envName);
-
-            if (! blank($value)) {
-                $this->config[$key] = $value;
-            }
-        }
-    }
-
     protected function requiredKeys(): array
     {
         if ($this->model->is_sandbox) {

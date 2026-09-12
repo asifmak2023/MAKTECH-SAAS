@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
             CatalogSeeder::class,
         ]);
 
+        if (app()->environment('production')) {
+            return;
+        }
+
         $this->seedMaktechDemo();
 
         $this->call(DemoSellerSeeder::class);

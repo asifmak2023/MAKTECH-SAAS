@@ -140,7 +140,7 @@ export default function AdminBillingPage() {
             </tr>
             <tr>
                 <th>Reference</th>
-                <td>${order.reference || 'N/A'}</td>
+                <td>${order.order_number || 'N/A'}</td>
             </tr>
             <tr class="total-row">
                 <th>Total Amount</th>

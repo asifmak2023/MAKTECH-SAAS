@@ -11,8 +11,23 @@ class EnsureTenant
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! TenantContext::id() && $request->user()?->tenant) {
-            TenantContext::set($request->user()->tenant);
+        $user = $request->user();
+        $userTenant = $user?->tenant;
+        $claimed = $request->attributes->get('claimed_tenant');
+
+        if ($user?->tenant_id && $userTenant) {
+            if ($claimed && (int) $claimed->id !== (int) $user->tenant_id) {
+                return response()->json([
+                    'message' => 'X-Tenant does not match the authenticated workspace.',
+                    'code' => 'tenant_mismatch',
+                ], 403);
+            }
+
+            TenantContext::set($userTenant);
+            $request->attributes->set('tenant', $userTenant);
+        } elseif (! TenantContext::id() && $userTenant) {
+            TenantContext::set($userTenant);
+            $request->attributes->set('tenant', $userTenant);
         }
 
         if (! TenantContext::id()) {

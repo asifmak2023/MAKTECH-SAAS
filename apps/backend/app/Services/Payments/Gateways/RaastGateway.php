@@ -4,38 +4,12 @@ namespace App\Services\Payments\Gateways;
 
 use App\Models\BillingOrder;
 use App\Models\Payment;
-use App\Models\PaymentGateway;
 use App\Services\Payments\AbstractPaymentGateway;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class RaastGateway extends AbstractPaymentGateway
 {
-    /**
-     * Resolve 1LINK merchant credentials. Values saved from the admin console
-     * (encrypted in the `payment_gateways` table) take priority; the .env
-     * credentials (RAST_API_KEY / RAST_APP_SECRET) are only the fallback so a
-     * brand-new deployment works before the admin fills the dashboard form.
-     */
-    public function configure(PaymentGateway $model): void
-    {
-        parent::configure($model);
-
-        foreach ((array) config("saas.payment_gateways.{$this->model->code}.env_credentials", []) as $key => $spec) {
-            if (! blank($this->config[$key] ?? null)) {
-                continue;
-            }
-
-            $envName = is_array($spec) ? ($spec['env'] ?? null) : null;
-            $envName = $envName ?: (is_string($spec) ? $spec : $key);
-            $value = env($envName);
-
-            if (! blank($value)) {
-                $this->config[$key] = $value;
-            }
-        }
-    }
-
     /**
      * The sandbox environment simulates the Raast P2M hosted checkout, so it
      * does not require live merchant credentials. Live mode still demands a

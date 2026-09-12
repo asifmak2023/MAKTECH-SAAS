@@ -98,11 +98,11 @@ return [
             'enabled' => (bool) env('SAAS_ENABLE_JAZZCASH_GATEWAY', false),
             'config_keys' => ['merchant_id', 'password', 'integrity_salt', 'sandbox_endpoint', 'live_endpoint'],
             'env_credentials' => [
-                'merchant_id' => ['env' => 'JAZZCASH_MERCHANT_ID'],
-                'password' => ['env' => 'JAZZCASH_PASSWORD'],
-                'integrity_salt' => ['env' => 'JAZZCASH_INTEGRITY_SALT'],
-                'sandbox_endpoint' => ['env' => 'JAZZCASH_SANDBOX_ENDPOINT'],
-                'live_endpoint' => ['env' => 'JAZZCASH_LIVE_ENDPOINT'],
+                'merchant_id' => ['env' => 'JAZZCASH_MERCHANT_ID', 'value' => env('JAZZCASH_MERCHANT_ID')],
+                'password' => ['env' => 'JAZZCASH_PASSWORD', 'value' => env('JAZZCASH_PASSWORD')],
+                'integrity_salt' => ['env' => 'JAZZCASH_INTEGRITY_SALT', 'value' => env('JAZZCASH_INTEGRITY_SALT')],
+                'sandbox_endpoint' => ['env' => 'JAZZCASH_SANDBOX_ENDPOINT', 'value' => env('JAZZCASH_SANDBOX_ENDPOINT')],
+                'live_endpoint' => ['env' => 'JAZZCASH_LIVE_ENDPOINT', 'value' => env('JAZZCASH_LIVE_ENDPOINT')],
             ],
         ],
         'easypaisa' => [
@@ -112,11 +112,11 @@ return [
             'enabled' => (bool) env('SAAS_ENABLE_EASYPAISA_GATEWAY', false),
             'config_keys' => ['merchant_id', 'api_key', 'api_secret', 'sandbox_endpoint', 'live_endpoint'],
             'env_credentials' => [
-                'merchant_id' => ['env' => 'EASYPAISA_STORE_ID'],
-                'api_key' => ['env' => 'EASYPAISA_API_KEY'],
-                'api_secret' => ['env' => 'EASYPAISA_HASH_KEY'],
-                'sandbox_endpoint' => ['env' => 'EASYPAISA_SANDBOX_ENDPOINT'],
-                'live_endpoint' => ['env' => 'EASYPAISA_LIVE_ENDPOINT'],
+                'merchant_id' => ['env' => 'EASYPAISA_STORE_ID', 'value' => env('EASYPAISA_STORE_ID')],
+                'api_key' => ['env' => 'EASYPAISA_API_KEY', 'value' => env('EASYPAISA_API_KEY')],
+                'api_secret' => ['env' => 'EASYPAISA_HASH_KEY', 'value' => env('EASYPAISA_HASH_KEY')],
+                'sandbox_endpoint' => ['env' => 'EASYPAISA_SANDBOX_ENDPOINT', 'value' => env('EASYPAISA_SANDBOX_ENDPOINT')],
+                'live_endpoint' => ['env' => 'EASYPAISA_LIVE_ENDPOINT', 'value' => env('EASYPAISA_LIVE_ENDPOINT')],
             ],
         ],
         'sadapay' => [
@@ -138,13 +138,13 @@ return [
             'adapter' => \App\Services\Payments\Gateways\RaastGateway::class,
             'supports_recurring' => false,
             'enabled' => (bool) env('SAAS_ENABLE_RAAST_GATEWAY', true),
-            'config_keys' => ['merchant_id', 'api_key', 'api_secret', 'sandbox_endpoint', 'live_endpoint'],
+            'config_keys' => ['merchant_id', 'api_key', 'api_secret', 'iban', 'alias', 'sandbox_endpoint', 'live_endpoint'],
             'env_credentials' => [
-                'merchant_id' => ['env' => 'ONELINK_MERCHANT_ID'],
-                'api_key' => ['env' => 'ONELINK_API_KEY'],
-                'api_secret' => ['env' => 'ONELINK_API_SECRET'],
-                'sandbox_endpoint' => ['env' => 'ONELINK_SANDBOX_ENDPOINT'],
-                'live_endpoint' => ['env' => 'ONELINK_LIVE_ENDPOINT'],
+                'merchant_id' => ['env' => 'ONELINK_MERCHANT_ID', 'value' => env('ONELINK_MERCHANT_ID')],
+                'api_key' => ['env' => 'ONELINK_API_KEY', 'value' => env('ONELINK_API_KEY')],
+                'api_secret' => ['env' => 'ONELINK_API_SECRET', 'value' => env('ONELINK_API_SECRET')],
+                'sandbox_endpoint' => ['env' => 'ONELINK_SANDBOX_ENDPOINT', 'value' => env('ONELINK_SANDBOX_ENDPOINT')],
+                'live_endpoint' => ['env' => 'ONELINK_LIVE_ENDPOINT', 'value' => env('ONELINK_LIVE_ENDPOINT')],
             ],
         ],
         'onelink_p2m' => [
@@ -154,11 +154,11 @@ return [
             'enabled' => (bool) env('SAAS_ENABLE_ONELINK_P2M_GATEWAY', true),
             'config_keys' => ['merchant_id', 'api_key', 'api_secret', 'sandbox_endpoint', 'live_endpoint'],
             'env_credentials' => [
-                'api_key' => ['env' => 'ONELINK_P2M_API_KEY'],
-                'api_secret' => ['env' => 'ONELINK_P2M_API_SECRET'],
-                'merchant_id' => ['env' => 'ONELINK_P2M_MERCHANT_ID'],
-                'sandbox_endpoint' => ['env' => 'ONELINK_P2M_SANDBOX_ENDPOINT'],
-                'live_endpoint' => ['env' => 'ONELINK_P2M_LIVE_ENDPOINT'],
+                'api_key' => ['env' => 'ONELINK_P2M_API_KEY', 'value' => env('ONELINK_P2M_API_KEY')],
+                'api_secret' => ['env' => 'ONELINK_P2M_API_SECRET', 'value' => env('ONELINK_P2M_API_SECRET')],
+                'merchant_id' => ['env' => 'ONELINK_P2M_MERCHANT_ID', 'value' => env('ONELINK_P2M_MERCHANT_ID')],
+                'sandbox_endpoint' => ['env' => 'ONELINK_P2M_SANDBOX_ENDPOINT', 'value' => env('ONELINK_P2M_SANDBOX_ENDPOINT')],
+                'live_endpoint' => ['env' => 'ONELINK_P2M_LIVE_ENDPOINT', 'value' => env('ONELINK_P2M_LIVE_ENDPOINT')],
             ],
         ],
         'bank_transfer' => [
@@ -196,6 +196,14 @@ return [
     |   2. an e-mail address listed here (seed convenience).
     */
     'platform_admin_emails' => array_filter(array_map('trim', explode(',', (string) env('SAAS_PLATFORM_ADMIN_EMAILS', 'admin@saas.local')))),
+
+    'platform_admin_password' => env('SAAS_PLATFORM_ADMIN_PASSWORD', 'password'),
+
+    'seed_admin' => [
+        'email' => env('SAAS_SEED_ADMIN_EMAIL', ''),
+        'username' => env('SAAS_SEED_ADMIN_USERNAME', ''),
+        'password' => env('SAAS_SEED_ADMIN_PASSWORD', ''),
+    ],
 
     /*
     | Seeded tenant roles -> permission codes.

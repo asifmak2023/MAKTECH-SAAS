@@ -4,37 +4,12 @@ namespace App\Services\Payments\Gateways;
 
 use App\Models\BillingOrder;
 use App\Models\Payment;
-use App\Models\PaymentGateway;
 use App\Services\Payments\AbstractPaymentGateway;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class OneLinkP2MGateway extends AbstractPaymentGateway
 {
-    /**
-     * Resolve 1LINK merchant credentials. Values saved from the admin console
-     * (encrypted in the `payment_gateways` table) take priority; the .env
-     * credentials are only the fallback.
-     */
-    public function configure(PaymentGateway $model): void
-    {
-        parent::configure($model);
-
-        foreach ((array) config("saas.payment_gateways.{$this->model->code}.env_credentials", []) as $key => $spec) {
-            if (! blank($this->config[$key] ?? null)) {
-                continue;
-            }
-
-            $envName = is_array($spec) ? ($spec['env'] ?? null) : null;
-            $envName = $envName ?: (is_string($spec) ? $spec : $key);
-            $value = env($envName);
-
-            if (! blank($value)) {
-                $this->config[$key] = $value;
-            }
-        }
-    }
-
     /**
      * The sandbox environment does not require live merchant credentials.
      */

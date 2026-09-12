@@ -17,6 +17,21 @@ abstract class AbstractPaymentGateway implements PaymentGatewayInterface
     {
         $this->model = $model;
         $this->config = $model->configArray();
+        $this->mergeEnvCredentials();
+    }
+
+    protected function mergeEnvCredentials(): void
+    {
+        foreach ((array) config("saas.payment_gateways.{$this->model->code}.env_credentials", []) as $key => $spec) {
+            if (! blank($this->config[$key] ?? null)) {
+                continue;
+            }
+
+            $value = is_array($spec) ? ($spec['value'] ?? null) : $spec;
+            if (! blank($value)) {
+                $this->config[$key] = $value;
+            }
+        }
     }
 
     public function code(): string

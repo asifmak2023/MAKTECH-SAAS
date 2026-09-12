@@ -3,26 +3,47 @@
 namespace App\Http\Middleware;
 
 use App\Models\Tenant;
+use App\Models\User;
 use App\Support\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
 
 class IdentifyTenant
 {
     public function handle(Request $request, Closure $next): Response
     {
+        TenantContext::forget();
+
         if ($request->is('api/auth/register')) {
-            TenantContext::forget();
+            return $next($request);
+        }
+
+        $claimed = $this->resolveTenant($request);
+        $request->attributes->set('claimed_tenant', $claimed);
+
+        $user = $this->userFromBearer($request);
+
+        if ($user) {
+            if ($user->isPlatformAdmin() || $user->tenant_id === null) {
+                TenantContext::forget();
+
+                return $next($request);
+            }
+
+            $userTenant = $user->tenant;
+            if ($userTenant) {
+                TenantContext::set($userTenant);
+                $request->attributes->set('tenant', $userTenant);
+            }
 
             return $next($request);
         }
 
-        $tenant = $this->resolveTenant($request);
-
-        if ($tenant) {
-            TenantContext::set($tenant);
-            $request->attributes->set('tenant', $tenant);
+        if ($claimed) {
+            TenantContext::set($claimed);
+            $request->attributes->set('tenant', $claimed);
         } else {
             TenantContext::forget();
         }
@@ -34,7 +55,11 @@ class IdentifyTenant
     {
         $headerSlug = $request->header('X-Tenant');
         if ($headerSlug) {
-            return Tenant::query()->where('slug', $headerSlug)->orWhere('domain', $headerSlug)->first();
+            return Tenant::query()
+                ->where(function ($query) use ($headerSlug) {
+                    $query->where('slug', $headerSlug)->orWhere('domain', $headerSlug);
+                })
+                ->first();
         }
 
         $host = $request->getHost();
@@ -54,5 +79,18 @@ class IdentifyTenant
         }
 
         return null;
+    }
+
+    protected function userFromBearer(Request $request): ?User
+    {
+        $plain = $request->bearerToken();
+        if (! $plain) {
+            return null;
+        }
+
+        $accessToken = PersonalAccessToken::findToken($plain);
+        $user = $accessToken?->tokenable;
+
+        return $user instanceof User ? $user : null;
     }
 }

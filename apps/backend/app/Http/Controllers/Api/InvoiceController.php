@@ -113,7 +113,7 @@ class InvoiceController extends Controller
         }
 
         $path = $this->pdf->absolutePath($invoice);
-        $webUrl = rtrim((string) env('WEB_APP_URL', config('app.url')), '/');
+        $webUrl = rtrim((string) config('saas.web.app_url', config('app.url')), '/');
         $approvalUrl = $webUrl.'/approve/'.$invoice->approval_token;
 
         if ($invoice->buyer_email) {

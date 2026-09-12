@@ -80,7 +80,7 @@ class GatewayAdminFeatureTest extends TestCase
         // marker without ever leaking the env value.
         $envHasKey = ! blank(getenv('RAST_API_KEY')) || ! blank($_ENV['RAST_API_KEY'] ?? null);
         $this->assertSame($envHasKey, $fields['api_key']['from_env']);
-        $this->assertSame('RAST_API_KEY', $fields['api_key']['env_name']);
+        $this->assertSame('ONELINK_API_KEY', $fields['api_key']['env_name']);
         $this->assertFalse($fields['api_key']['stored']);
     }
 
