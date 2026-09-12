@@ -133,7 +133,7 @@ export default function RegisterPage() {
           <button className="btn-primary w-full" disabled={loading}>
             {loading ? "Creating..." : "Create account"}
           </button>
-          <GoogleSignInButton onError={setError} />
+          <GoogleSignInButton onError={setError} label="Sign up with Google" />
           <p className="text-sm text-[#767676]">
             Already registered? <Link className="text-black underline underline-offset-4" href="/login">Sign in</Link>
           </p>

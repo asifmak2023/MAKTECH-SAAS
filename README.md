@@ -40,7 +40,7 @@ CACHE_STORE=database
 
 New sellers must verify email before using the workspace (`/verify-email`). Seeded and admin-created accounts are pre-verified. Set `SAAS_REQUIRE_EMAIL_VERIFICATION=false` only for local/dev. Configure `MAIL_*` so verification mail is delivered.
 
-Optional **Sign in with Google** (Login / Register show a Google button only when enabled):
+Optional **Sign in with Google** (Login / Register always show the Google button; the redirect needs credentials):
 
 ```
 GOOGLE_CLIENT_ID=

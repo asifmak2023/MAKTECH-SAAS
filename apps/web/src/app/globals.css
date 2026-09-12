@@ -522,23 +522,28 @@ a.btn-ghost:hover {
 .logo-badge {
   display: inline-grid;
   place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
   border-radius: 9999px !important;
+  background-color: transparent;
+}
+
+html.dark .logo-badge,
+html[data-palette="glacier"] .logo-badge {
   background-color: #ffffff;
 }
 
-.logo-badge-asifent {
+html[data-palette="asifent"] .logo-badge {
   background-color: #ffffff;
   box-shadow: 0 0 0 1px #0061a4;
 }
 
-.logo-badge-asifent.is-dark {
+html[data-palette="asifent"].dark .logo-badge {
   background-color: #1e2022;
   box-shadow: 0 0 0 1px #9ecaff;
 }
 
-.logo-badge-glacier {
-  border-radius: 9999px !important;
-  background-color: #ffffff;
+html[data-palette="glacier"] .logo-badge {
   box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.35);
 }
 

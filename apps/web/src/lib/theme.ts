@@ -59,7 +59,7 @@ export function isDarkDocument(): boolean {
 }
 
 export function useIsDark(): boolean {
-  const [dark, setDark] = useState(() => isDarkDocument());
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     const sync = () => setDark(isDarkDocument());
@@ -74,7 +74,7 @@ export function useIsDark(): boolean {
 }
 
 export function usePalette(): PaletteId {
-  const [palette, setPalette] = useState<PaletteId>(() => readPalette());
+  const [palette, setPalette] = useState<PaletteId>("fbr");
 
   useEffect(() => {
     setPalette(readPalette());

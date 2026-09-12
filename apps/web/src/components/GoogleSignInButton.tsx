@@ -1,31 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   onError?: (message: string) => void;
+  label?: string;
 };
 
-export default function GoogleSignInButton({ onError }: Props) {
-  const [ready, setReady] = useState(false);
+export default function GoogleSignInButton({ onError, label = "Sign in with Google" }: Props) {
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/auth/google/status", { headers: { Accept: "application/json" } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled) setReady(Boolean(data?.enabled));
-      })
-      .catch(() => {
-        if (!cancelled) setReady(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (!ready) return null;
 
   async function start() {
     setLoading(true);
@@ -33,7 +16,7 @@ export default function GoogleSignInButton({ onError }: Props) {
       const res = await fetch("/api/auth/google/redirect", {
         headers: { Accept: "application/json" },
       });
-      const data = res.ok ? await res.json() : null;
+      const data = res.ok ? await res.json() : await res.json().catch(() => null);
       if (!data?.url) {
         throw new Error(data?.message || "Google sign-in is unavailable.");
       }
@@ -46,7 +29,7 @@ export default function GoogleSignInButton({ onError }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.16em] text-[#b0b0b0]">
+      <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.16em] text-[#767676]">
         <span className="h-px flex-1 bg-[#e5e5e5]" />
         or continue with Google
         <span className="h-px flex-1 bg-[#e5e5e5]" />
@@ -55,7 +38,7 @@ export default function GoogleSignInButton({ onError }: Props) {
         type="button"
         onClick={start}
         disabled={loading}
-        aria-label="Continue with Google"
+        aria-label={label}
         className="btn-secondary flex w-full cursor-pointer items-center justify-center gap-3 disabled:cursor-wait"
       >
         <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
@@ -64,7 +47,7 @@ export default function GoogleSignInButton({ onError }: Props) {
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
         </svg>
-        {loading ? "Redirecting to Google..." : "Sign in with Google"}
+        {loading ? "Redirecting to Google..." : label}
       </button>
     </div>
   );

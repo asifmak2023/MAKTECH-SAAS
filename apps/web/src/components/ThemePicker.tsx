@@ -14,8 +14,8 @@ import {
 
 export default function ThemePicker() {
   const [open, setOpen] = useState(false);
-  const [palette, setPalette] = useState<PaletteId>(() => readPalette());
-  const [dark, setDark] = useState(() => isDarkDocument());
+  const [palette, setPalette] = useState<PaletteId>("fbr");
+  const [dark, setDark] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
