@@ -57,6 +57,30 @@ export default function PaletteMark({ id, size = 16 }: { id: PaletteId; size?: n
     );
   }
 
+  const marks: Record<string, { bg: string; fg: string }> = {
+    mehndi: { bg: "#FFDEA3", fg: "#7A5900" },
+    karachi: { bg: "#6FF7F6", fg: "#006A6A" },
+    rosewood: { bg: "#FFDADA", fg: "#9C4146" },
+    indigo: { bg: "#DEE0FF", fg: "#4355B9" },
+  };
+  const mark = marks[id];
+  if (mark) {
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 999,
+          backgroundColor: mark.bg,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View style={{ width: inner, height: inner, borderRadius: 999, backgroundColor: mark.fg }} />
+      </View>
+    );
+  }
+
   return (
     <View
       style={{

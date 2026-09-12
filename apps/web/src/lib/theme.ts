@@ -6,7 +6,7 @@ export const THEME_KEY = "pral_theme";
 export const PALETTE_KEY = "pral_palette";
 
 export type ThemeMode = "dark" | "light";
-export type PaletteId = "fbr" | "asifent" | "editorial" | "glacier";
+export type PaletteId = "fbr" | "asifent" | "editorial" | "glacier" | "mehndi" | "karachi" | "rosewood" | "indigo";
 
 export type PaletteMeta = {
   id: PaletteId;
@@ -21,6 +21,10 @@ export const PALETTES: PaletteMeta[] = [
   { id: "asifent", label: "Asifent", hint: "Material 3 blue", swatch: "#0061A4", modes: ["light", "dark"] },
   { id: "editorial", label: "Editorial", hint: "Material 3 financial", swatch: "#005FAF", modes: ["light"] },
   { id: "glacier", label: "Glacier", hint: "Material 3 frost", swatch: "#7DD3FC", modes: ["dark"] },
+  { id: "mehndi", label: "Mehndi", hint: "Material 3 gold", swatch: "#7A5900", modes: ["light", "dark"] },
+  { id: "karachi", label: "Karachi", hint: "Material 3 teal", swatch: "#006A6A", modes: ["light", "dark"] },
+  { id: "rosewood", label: "Rosewood", hint: "Material 3 rose", swatch: "#9C4146", modes: ["light", "dark"] },
+  { id: "indigo", label: "Indigo", hint: "Material 3 indigo", swatch: "#4355B9", modes: ["light", "dark"] },
 ];
 
 const PALETTE_IDS: PaletteId[] = PALETTES.map((p) => p.id);
@@ -35,6 +39,8 @@ export function paletteMeta(id: PaletteId): PaletteMeta {
 
 export function readTheme(): ThemeMode {
   if (typeof document === "undefined") return "light";
+  const mode = document.documentElement.getAttribute("data-mode");
+  if (mode === "dark" || mode === "light") return mode;
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
@@ -49,12 +55,11 @@ export function isDarkDocument(): boolean {
   const palette = readPalette();
   if (palette === "glacier") return true;
   if (palette === "editorial") return false;
-  if (palette === "asifent") return document.documentElement.getAttribute("data-mode") === "dark";
-  return document.documentElement.classList.contains("dark");
+  return readTheme() === "dark";
 }
 
 export function useIsDark(): boolean {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => isDarkDocument());
 
   useEffect(() => {
     const sync = () => setDark(isDarkDocument());
@@ -69,7 +74,7 @@ export function useIsDark(): boolean {
 }
 
 export function usePalette(): PaletteId {
-  const [palette, setPalette] = useState<PaletteId>("fbr");
+  const [palette, setPalette] = useState<PaletteId>(() => readPalette());
 
   useEffect(() => {
     setPalette(readPalette());
@@ -94,8 +99,10 @@ export function applyTheme(nextDark: boolean): void {
   const palette = readPalette();
   const meta = paletteMeta(palette);
   const dark = meta.modes.length === 1 ? meta.modes[0] === "dark" : nextDark;
-  document.documentElement.setAttribute("data-mode", dark ? "dark" : "light");
-  document.documentElement.classList.toggle("dark", palette === "fbr" && dark);
+  const root = document.documentElement;
+  root.setAttribute("data-mode", dark ? "dark" : "light");
+  root.classList.toggle("dark", dark);
+  root.style.colorScheme = dark ? "dark" : "light";
   persist(THEME_KEY, dark ? "dark" : "light");
 }
 
@@ -115,4 +122,16 @@ export function applyPalette(next: PaletteId): void {
     }
   })();
   applyTheme(stored === "dark");
+}
+
+export function ThemeBoot() {
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(PALETTE_KEY);
+      applyPalette(isPaletteId(stored) ? stored : readPalette());
+    } catch {
+      applyTheme(isDarkDocument());
+    }
+  }, []);
+  return null;
 }

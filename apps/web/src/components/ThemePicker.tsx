@@ -14,8 +14,8 @@ import {
 
 export default function ThemePicker() {
   const [open, setOpen] = useState(false);
-  const [palette, setPalette] = useState<PaletteId>("fbr");
-  const [dark, setDark] = useState(false);
+  const [palette, setPalette] = useState<PaletteId>(() => readPalette());
+  const [dark, setDark] = useState(() => isDarkDocument());
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function ThemePicker() {
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        className="theme-picker-trigger grid h-11 w-11 place-items-center text-[#262626] hover:bg-[#f3edf7]"
+        className="theme-picker-trigger grid h-11 w-11 place-items-center"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -67,11 +67,9 @@ export default function ThemePicker() {
         <div
           role="dialog"
           aria-label="Appearance"
-          className="theme-picker-menu absolute right-0 z-50 mt-2 w-[min(18.5rem,calc(100vw-1.5rem))] p-3"
+          className="theme-picker-menu absolute right-0 z-50 mt-2 max-h-[min(28rem,calc(100vh-5rem))] w-[min(18.5rem,calc(100vw-1.5rem))] overflow-y-auto p-3"
         >
-          <p className="mb-2 font-label text-[12px] font-medium tracking-[0.4px] text-[#767676]">
-            Appearance
-          </p>
+          <p className="eyebrow mb-2">Appearance</p>
           <div className="flex flex-col gap-1">
             {PALETTES.map((item) => {
               const active = item.id === palette;
@@ -85,7 +83,7 @@ export default function ThemePicker() {
                     setDark(isDarkDocument());
                   }}
                   className={`flex min-h-12 items-center gap-3 rounded-full px-3 text-left normal-case tracking-normal ${
-                    active ? "bg-[#e6e1e5] text-black" : "text-[#262626] hover:bg-[#f3edf7]"
+                    active ? "nav-chip-active" : "nav-chip"
                   }`}
                   aria-pressed={active}
                 >
@@ -94,7 +92,7 @@ export default function ThemePicker() {
                     <span className="block text-[13px] font-medium font-label">
                       {item.label}
                     </span>
-                    <span className="block text-[12px] font-normal normal-case tracking-normal text-[#767676]">
+                    <span className="block text-[12px] font-normal normal-case tracking-normal text-[color:var(--text-muted)]">
                       {item.hint}
                     </span>
                   </span>
@@ -107,7 +105,7 @@ export default function ThemePicker() {
               <button
                 type="button"
                 className={`min-h-11 flex-1 rounded-full px-3 text-[12px] font-medium tracking-[0.4px] font-label ${
-                  !dark ? "bg-black text-white" : "bg-[#f3edf7] text-[#262626]"
+                  !dark ? "bg-black text-white" : "nav-chip"
                 }`}
                 onClick={() => {
                   applyTheme(false);
@@ -120,7 +118,7 @@ export default function ThemePicker() {
               <button
                 type="button"
                 className={`min-h-11 flex-1 rounded-full px-3 text-[12px] font-medium tracking-[0.4px] font-label ${
-                  dark ? "bg-black text-white" : "bg-[#f3edf7] text-[#262626]"
+                  dark ? "bg-black text-white" : "nav-chip"
                 }`}
                 onClick={() => {
                   applyTheme(true);

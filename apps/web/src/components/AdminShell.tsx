@@ -102,7 +102,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               Log out
             </button>
             <button
-              className="grid h-11 w-11 place-items-center rounded-full hover:bg-[#f3edf7] lg:hidden"
+              className="nav-chip grid h-11 w-11 place-items-center lg:hidden"
               onClick={() => setOpen((v) => !v)}
               aria-label="Open menu"
               aria-expanded={open}

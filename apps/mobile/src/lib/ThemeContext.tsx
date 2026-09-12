@@ -41,22 +41,43 @@ const ThemeContext = createContext<ThemeContextValue>({
   palettes: PALETTES,
 });
 
+function initialPalette(): PaletteId {
+  if (typeof window === "undefined") return "fbr";
+  return readStoredPalette();
+}
+
+function initialTheme(): ThemeName {
+  if (typeof window === "undefined") return "light";
+  const palette = readStoredPalette();
+  return resolveMode(palette, readStoredTheme());
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeName>("light");
-  const [palette, setPaletteState] = useState<PaletteId>("fbr");
+  const [theme, setThemeState] = useState<ThemeName>(initialTheme);
+  const [palette, setPaletteState] = useState<PaletteId>(initialPalette);
 
   useEffect(() => {
     injectBrandFonts();
-    const storedPalette = readStoredPalette();
-    const storedTheme = resolveMode(storedPalette, readStoredTheme());
-    setPaletteState(storedPalette);
-    setThemeState(storedTheme);
-    applyActiveFonts(paletteMeta(storedPalette).fonts);
+    applyActiveFonts(paletteMeta(palette).fonts);
   }, []);
 
   useEffect(() => {
     applyActiveFonts(paletteMeta(palette).fonts);
   }, [palette]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const mode = resolveMode(palette, theme);
+    const next = colorsFor(palette, mode);
+    const root = document.documentElement;
+    root.style.backgroundColor = next.page;
+    root.style.colorScheme = mode;
+    root.classList.toggle("dark", mode === "dark");
+    if (document.body) {
+      document.body.style.backgroundColor = next.page;
+      document.body.style.color = next.foreground;
+    }
+  }, [theme, palette]);
 
   const setTheme = useCallback((next: ThemeName) => {
     setThemeState((prevPaletteTheme) => {

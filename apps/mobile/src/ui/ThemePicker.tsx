@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../lib/ThemeContext";
 import { fonts, paletteMeta } from "../lib/theme";
@@ -72,6 +72,7 @@ export default function ThemePicker() {
                 <IconClose color={colors.foreground} />
               </Pressable>
             </View>
+            <ScrollView style={{ maxHeight: 320 }} keyboardShouldPersistTaps="handled">
             {palettes.map((item) => {
               const active = item.id === palette;
               return (
@@ -108,6 +109,7 @@ export default function ThemePicker() {
                 </Pressable>
               );
             })}
+            </ScrollView>
             {canToggleMode ? (
               <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
                 <Pressable

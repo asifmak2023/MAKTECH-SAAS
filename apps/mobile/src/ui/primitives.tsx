@@ -150,14 +150,14 @@ export function Button({
   loading?: boolean;
   style?: ViewStyle;
 }) {
-  const { colors, dark } = useTheme();
+  const { colors } = useTheme();
   const busy = Boolean(disabled || loading);
   const bg =
     kind === "primary" ? colors.accent : kind === "danger" ? "transparent" : "transparent";
   const fg =
     kind === "primary" ? colors.onAccent : colors.foreground;
   const border =
-    kind === "primary" ? colors.accent : kind === "danger" ? (dark ? "#f5f5f5" : "#000000") : colors.stroke;
+    kind === "primary" ? colors.accent : kind === "danger" ? colors.foreground : colors.stroke;
 
   return (
     <Pressable

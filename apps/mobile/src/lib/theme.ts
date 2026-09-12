@@ -2,7 +2,7 @@ export const THEME_KEY = "pral_theme";
 export const PALETTE_KEY = "pral_palette";
 
 export type ThemeName = "light" | "dark";
-export type PaletteId = "fbr" | "asifent" | "editorial" | "glacier";
+export type PaletteId = "fbr" | "asifent" | "editorial" | "glacier" | "mehndi" | "karachi" | "rosewood" | "indigo";
 
 export type Colors = {
   background: string;
@@ -65,6 +65,38 @@ export const PALETTES: PaletteMeta[] = [
     hint: "Material 3 frost",
     swatch: "#7DD3FC",
     modes: ["dark"],
+    fonts: roboto,
+  },
+  {
+    id: "mehndi",
+    label: "Mehndi",
+    hint: "Material 3 gold",
+    swatch: "#7A5900",
+    modes: ["light", "dark"],
+    fonts: roboto,
+  },
+  {
+    id: "karachi",
+    label: "Karachi",
+    hint: "Material 3 teal",
+    swatch: "#006A6A",
+    modes: ["light", "dark"],
+    fonts: roboto,
+  },
+  {
+    id: "rosewood",
+    label: "Rosewood",
+    hint: "Material 3 rose",
+    swatch: "#9C4146",
+    modes: ["light", "dark"],
+    fonts: roboto,
+  },
+  {
+    id: "indigo",
+    label: "Indigo",
+    hint: "Material 3 indigo",
+    swatch: "#4355B9",
+    modes: ["light", "dark"],
     fonts: roboto,
   },
 ];
@@ -193,10 +225,166 @@ const glacierColors: Colors = {
   radiusBtn: 20,
 };
 
+const mehndiLight: Colors = {
+  background: "#FFFBFF",
+  foreground: "#1F1B16",
+  accent: "#7A5900",
+  accentHover: "#5C4200",
+  onAccent: "#FFFFFF",
+  accentSoft: "#FFDEA3",
+  surface: "#FFFBFF",
+  stroke: "#D0C5B4",
+  textMuted: "#504539",
+  textSecondary: "#1F1B16",
+  page: "#F4EDE4",
+  authPage: "#F4EDE4",
+  overlay: "rgba(31,27,22,0.45)",
+  hairline: "#D0C5B4",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const mehndiDark: Colors = {
+  background: "#1F1B16",
+  foreground: "#EAE1D9",
+  accent: "#FBBF24",
+  accentHover: "#FFD56A",
+  onAccent: "#3F2E00",
+  accentSoft: "rgba(251,191,36,0.18)",
+  surface: "#241F1A",
+  stroke: "#504539",
+  textMuted: "#D0C5B4",
+  textSecondary: "#EAE1D9",
+  page: "#1F1B16",
+  authPage: "#1F1B16",
+  overlay: "rgba(0,0,0,0.62)",
+  hairline: "#504539",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const karachiLight: Colors = {
+  background: "#FAFDFC",
+  foreground: "#191C1C",
+  accent: "#006A6A",
+  accentHover: "#004F50",
+  onAccent: "#FFFFFF",
+  accentSoft: "#6FF7F6",
+  surface: "#FAFDFC",
+  stroke: "#BEC9C8",
+  textMuted: "#3F4949",
+  textSecondary: "#191C1C",
+  page: "#ECEEEF",
+  authPage: "#ECEEEF",
+  overlay: "rgba(25,28,28,0.4)",
+  hairline: "#BEC9C8",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const karachiDark: Colors = {
+  background: "#191C1C",
+  foreground: "#E0E3E2",
+  accent: "#4CDADA",
+  accentHover: "#70F7F7",
+  onAccent: "#003738",
+  accentSoft: "rgba(76,218,218,0.18)",
+  surface: "#1D2020",
+  stroke: "#3F4949",
+  textMuted: "#BEC9C8",
+  textSecondary: "#E0E3E2",
+  page: "#191C1C",
+  authPage: "#191C1C",
+  overlay: "rgba(0,0,0,0.62)",
+  hairline: "#3F4949",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const rosewoodLight: Colors = {
+  background: "#FFFBFA",
+  foreground: "#201A1A",
+  accent: "#9C4146",
+  accentHover: "#7D2D33",
+  onAccent: "#FFFFFF",
+  accentSoft: "#FFDADA",
+  surface: "#FFFBFA",
+  stroke: "#D7C1C2",
+  textMuted: "#5D4445",
+  textSecondary: "#201A1A",
+  page: "#F4EDED",
+  authPage: "#F4EDED",
+  overlay: "rgba(32,26,26,0.45)",
+  hairline: "#D7C1C2",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const rosewoodDark: Colors = {
+  background: "#201A1A",
+  foreground: "#ECE0E0",
+  accent: "#FFB3B5",
+  accentHover: "#FFD0D1",
+  onAccent: "#5F131C",
+  accentSoft: "rgba(255,179,181,0.18)",
+  surface: "#251E1E",
+  stroke: "#5D4445",
+  textMuted: "#D7C1C2",
+  textSecondary: "#ECE0E0",
+  page: "#201A1A",
+  authPage: "#201A1A",
+  overlay: "rgba(0,0,0,0.62)",
+  hairline: "#5D4445",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const indigoLight: Colors = {
+  background: "#FEFBFF",
+  foreground: "#1B1B23",
+  accent: "#4355B9",
+  accentHover: "#2A3CA0",
+  onAccent: "#FFFFFF",
+  accentSoft: "#DEE0FF",
+  surface: "#FEFBFF",
+  stroke: "#C7C5D0",
+  textMuted: "#46464F",
+  textSecondary: "#1B1B23",
+  page: "#F2EFFA",
+  authPage: "#F2EFFA",
+  overlay: "rgba(27,27,35,0.45)",
+  hairline: "#C7C5D0",
+  radius: 12,
+  radiusBtn: 20,
+};
+
+const indigoDark: Colors = {
+  background: "#1B1B23",
+  foreground: "#E4E1EC",
+  accent: "#BAC3FF",
+  accentHover: "#DDE0FF",
+  onAccent: "#08218A",
+  accentSoft: "rgba(186,195,255,0.18)",
+  surface: "#1F1F27",
+  stroke: "#46464F",
+  textMuted: "#C7C5D0",
+  textSecondary: "#E4E1EC",
+  page: "#1B1B23",
+  authPage: "#1B1B23",
+  overlay: "rgba(0,0,0,0.62)",
+  hairline: "#46464F",
+  radius: 12,
+  radiusBtn: 20,
+};
+
 export function colorsFor(palette: PaletteId, mode: ThemeName): Colors {
   if (palette === "asifent") return mode === "dark" ? asifentDark : asifentLight;
   if (palette === "editorial") return editorialColors;
   if (palette === "glacier") return glacierColors;
+  if (palette === "mehndi") return mode === "dark" ? mehndiDark : mehndiLight;
+  if (palette === "karachi") return mode === "dark" ? karachiDark : karachiLight;
+  if (palette === "rosewood") return mode === "dark" ? rosewoodDark : rosewoodLight;
+  if (palette === "indigo") return mode === "dark" ? indigoDark : indigoLight;
   return mode === "dark" ? darkColors : lightColors;
 }
 

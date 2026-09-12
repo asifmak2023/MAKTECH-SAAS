@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import CreatorCredit from "@/components/CreatorCredit";
 import SupportWidget from "@/components/SupportWidget";
+import { ThemeBoot } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "FBR Digital Invoicing System",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-palette="fbr" data-mode="light">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -20,11 +21,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=localStorage.getItem("pral_palette")||"fbr";if(["fbr","asifent","editorial","glacier"].indexOf(p)<0)p="fbr";document.documentElement.setAttribute("data-palette",p);var t=localStorage.getItem("pral_theme");var dark=p==="glacier"||(p!=="editorial"&&t==="dark");if(p==="editorial")dark=false;document.documentElement.setAttribute("data-mode",dark?"dark":"light");if(p==="fbr"&&dark)document.documentElement.classList.add("dark");}catch(e){}})();`,
+            __html: `(function(){try{var allowed=["fbr","asifent","editorial","glacier","mehndi","karachi","rosewood","indigo"];var p=localStorage.getItem("pral_palette")||"fbr";if(allowed.indexOf(p)<0)p="fbr";document.documentElement.setAttribute("data-palette",p);var t=localStorage.getItem("pral_theme");var dark=p==="glacier"||(p!=="editorial"&&t==="dark");if(p==="editorial")dark=false;document.documentElement.setAttribute("data-mode",dark?"dark":"light");document.documentElement.classList.toggle("dark",dark);document.documentElement.style.colorScheme=dark?"dark":"light";}catch(e){}})();`,
           }}
         />
       </head>
       <body className="min-h-screen antialiased">
+        <ThemeBoot />
         {children}
         <SupportWidget />
         <CreatorCredit />
